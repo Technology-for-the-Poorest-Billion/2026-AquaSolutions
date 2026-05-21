@@ -17,3 +17,9 @@ Potential simulator for the algorithm (to be used pre-microcontroller build).
 
 ## Research
 Documents used for context, guidelines, and WHO framework. 
+
+## Data
+Datasets for training/testing of the TinyML classifier.
+
+## Meetings
+Meeting notes, including presentation feedback.
