@@ -15,3 +15,7 @@ __pycache__/
 # Secrets / local config
 .env
 .env.local
+
+# IDE / tooling
+.vscode/
+.claude/
