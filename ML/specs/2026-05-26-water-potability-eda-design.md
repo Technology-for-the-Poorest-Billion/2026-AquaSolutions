@@ -1,7 +1,7 @@
 # Water Potability EDA + Classifier — Design Spec
 
 **Date:** 2026-05-26
-**Status:** Draft, awaiting user review
+**Status:** Approved 2026-05-26
 **Scope:** Single notebook combining EDA and a binary classifier on `Data/water_potability (1).csv`. Not the TinyML deliverable.
 
 ## 1. Goal
