@@ -16,6 +16,11 @@ __pycache__/
 .env
 .env.local
 
+# Local SQLite databases (App/backend/)
+*.db
+*.db-journal
+App/backend/data/
+
 # IDE / tooling
 .vscode/
 .claude/

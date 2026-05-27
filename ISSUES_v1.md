@@ -1,4 +1,17 @@
-# ISSUES.md — Forecast of Potential Issues
+# ISSUES_v1.md — Archived (phase 1)
+
+> **Archived 2026-05-27.** This is the original risk register from the phase-1 attempt (on-device TinyML classifier trained on the four existing datasets). It is preserved for historical context.
+>
+> The phase-1 approach was abandoned after a grouped + temporal evaluation showed the three-sensor pathogen-track classifier was at its information ceiling (macro-F1 ≈ 0.32, indistinguishable from a 0.32 dummy). See `App/cholera_sensor_ml_approach.md` for the pivot rationale.
+>
+> - **Dataset-level issues** are now consolidated in [`issues_v2.md`](issues_v2.md).
+> - **Phase-2 risks** (application layer, SMS communications, linkage, governance) live in [`issues_v3.md`](issues_v3.md).
+>
+> Items A1, A4, A5, B1, B2, C3, C4, D1, D2 below are still load-bearing under the new framing and are carried forward into `issues_v3.md` in adapted form. The rest are specific to the on-device TinyML approach and no longer constrain the project.
+
+---
+
+# ISSUES.md — Forecast of Potential Issues (phase 1, archived)
 
 Issues are ordered roughly by severity. Each has the **risk**, **why it matters**, and a **mitigation**. The first three are project-defining and were surfaced directly by the Day-0 data audit.
 

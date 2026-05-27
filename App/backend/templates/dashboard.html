@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="refresh" content="5">
+    <title>Water-safety pipeline — dev dashboard</title>
+    <style>
+        :root {
+            --bg: #0f1115;
+            --panel: #181b22;
+            --text: #e6e7eb;
+            --muted: #8a92a3;
+            --accent: #5ec8a8;
+            --danger: #ff6b6b;
+            --border: #262a33;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                         "Helvetica Neue", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+        }
+        header {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+        }
+        header h1 { font-size: 18px; margin: 0; font-weight: 600; }
+        header .meta { color: var(--muted); font-size: 12px; }
+        .disclaimer {
+            background: #2d1f15;
+            color: #f0c674;
+            font-size: 12px;
+            padding: 8px 24px;
+            border-bottom: 1px solid var(--border);
+        }
+        main {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            padding: 24px;
+        }
+        @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+        section {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+        }
+        section h2 {
+            margin: 0 0 12px 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th, td {
+            text-align: left;
+            padding: 8px 6px;
+            border-bottom: 1px solid var(--border);
+        }
+        th { color: var(--muted); font-weight: 500; }
+        td.numeric { font-variant-numeric: tabular-nums; }
+        .label-pill {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .label-unsafe { background: rgba(255, 107, 107, 0.18); color: var(--danger); }
+        .label-clear  { background: rgba(94, 200, 168, 0.15); color: var(--accent); }
+        .empty { color: var(--muted); padding: 16px; text-align: center; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Water-safety pipeline — dev dashboard</h1>
+        <div class="meta">Generated {{ generated_at }} UTC · auto-refresh 5s</div>
+    </header>
+    <div class="disclaimer">
+        Faecal-contamination risk + community illness signal. NOT a cholera detector.
+    </div>
+
+    <main>
+        <section>
+            <h2>Recent sensor readings ({{ readings|length }})</h2>
+            {% if readings %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Station</th>
+                        <th>Recorded</th>
+                        <th>pH</th>
+                        <th>Turb (NTU)</th>
+                        <th>Temp (°C)</th>
+                        <th>Rain (mm)</th>
+                        <th>Label</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in readings %}
+                    <tr>
+                        <td>#{{ r['station_id'] }} {{ r['station_name'] }}</td>
+                        <td>{{ r['recorded_at'][:19] }}</td>
+                        <td class="numeric">{{ '%.2f'|format(r['ph']) if r['ph'] is not none else '—' }}</td>
+                        <td class="numeric">{{ '%.1f'|format(r['turbidity_ntu']) if r['turbidity_ntu'] is not none else '—' }}</td>
+                        <td class="numeric">{{ '%.1f'|format(r['temperature_c']) if r['temperature_c'] is not none else '—' }}</td>
+                        <td class="numeric">{{ '%.1f'|format(r['rainfall_mm']) if r['rainfall_mm'] is not none else '—' }}</td>
+                        <td>
+                            {% if r['label'] == 'unsafe' %}
+                                <span class="label-pill label-unsafe">unsafe</span>
+                            {% else %}
+                                <span class="label-pill label-clear">clear</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty">No readings yet. Run the sensor simulator: <code>python scripts/simulate_sensor.py</code></div>
+            {% endif %}
+        </section>
+
+        <section>
+            <h2>Recent illness reports ({{ reports|length }})</h2>
+            {% if reports %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Received</th>
+                        <th>Station</th>
+                        <th>Reporter</th>
+                        <th>Message</th>
+                        <th>Labelled</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rep in reports %}
+                    <tr>
+                        <td>{{ rep['received_at'][:19] }}</td>
+                        <td>
+                            {% if rep['station_id'] %}
+                                #{{ rep['station_id'] }} {{ rep['station_name'] or '—' }}
+                            {% else %}
+                                <span style="color: var(--danger)">unparsed</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ rep['reporter_phone'] or '—' }}</td>
+                        <td>{{ rep['raw_message'][:80] }}</td>
+                        <td class="numeric">{{ rep['readings_labelled'] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty">No illness reports yet. Text the Twilio number to generate one (see <code>App/DEMO.md</code>).</div>
+            {% endif %}
+        </section>
+    </main>
+</body>
+</html>
