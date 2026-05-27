@@ -86,13 +86,26 @@ def sms_webhook():
     reply = MessagingResponse()
 
     with connection() as conn:
+        station = None
+        if station_id is not None:
+            station = conn.execute(
+                "SELECT name FROM stations WHERE station_id = ?",
+                (station_id,),
+            ).fetchone()
+
+        # Record the report regardless of whether the station resolved.
+        # Persist station_id only when it actually exists, so the FK holds
+        # and unparsed / unknown-station messages remain available for
+        # human review via the dashboard's "unparsed" badge.
+        resolved_station_id = station_id if station is not None else None
         cursor = conn.execute(
             """
             INSERT INTO illness_reports
                 (station_id, reporter_phone, raw_message, parser_version)
             VALUES (?, ?, ?, ?)
             """,
-            (station_id, reporter_phone, raw_message, STATION_PARSER_VERSION),
+            (resolved_station_id, reporter_phone, raw_message,
+             STATION_PARSER_VERSION),
         )
         report_id = cursor.lastrowid
 
@@ -104,9 +117,6 @@ def sms_webhook():
             )
             return str(reply)
 
-        station = conn.execute(
-            "SELECT name FROM stations WHERE station_id = ?", (station_id,)
-        ).fetchone()
         if station is None:
             reply.message(
                 f"Station {station_id} is not in our system. Please check "
