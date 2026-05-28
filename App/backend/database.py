@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS stations (
     name           TEXT NOT NULL,
     latitude       REAL,
     longitude      REAL,
+    is_closed      INTEGER NOT NULL DEFAULT 0,
     created_at     TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -56,7 +57,9 @@ CREATE TABLE IF NOT EXISTS illness_reports (
     submitter         TEXT,
     case_count        INTEGER,
     onset_date        TEXT,
-    symptoms          TEXT
+    symptoms          TEXT,
+    risk_tier         TEXT CHECK (risk_tier IN ('low','medium','high','severe')),
+    dialog_state      TEXT CHECK (dialog_state IN ('awaiting_case_count','awaiting_symptoms','awaiting_onset','complete','abandoned'))
 );
 
 CREATE INDEX IF NOT EXISTS idx_reports_station_time
@@ -74,6 +77,24 @@ CREATE TABLE IF NOT EXISTS reading_labels (
 
 CREATE INDEX IF NOT EXISTS idx_labels_reading
     ON reading_labels(reading_id);
+
+CREATE TABLE IF NOT EXISTS interventions (
+    intervention_id    INTEGER PRIMARY KEY AUTOINCREMENT,
+    station_id         INTEGER NOT NULL REFERENCES stations(station_id),
+    action_type        TEXT    NOT NULL
+        CHECK (action_type IN (
+            'close_borehole', 'reopen_borehole',
+            'dispatch_sample_team', 'dispatch_medical_team')),
+    triggered_by       TEXT    NOT NULL,
+    triggered_at       TEXT    NOT NULL DEFAULT (datetime('now')),
+    related_report_id  INTEGER REFERENCES illness_reports(report_id),
+    notes              TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_interventions_station_time
+    ON interventions(station_id, triggered_at);
+CREATE INDEX IF NOT EXISTS idx_interventions_report
+    ON interventions(related_report_id);
 """
 
 
@@ -116,24 +137,31 @@ def _migrate(conn: sqlite3.Connection) -> None:
     columns must be added via ALTER. We guard each with PRAGMA so the
     function is safe to run repeatedly on any DB state.
     """
-    existing = {
+    existing_reports = {
         row["name"]
         for row in conn.execute("PRAGMA table_info(illness_reports)").fetchall()
     }
-
-    added_columns = [
+    added_reports_columns = [
         ("report_source", "TEXT NOT NULL DEFAULT 'sms'"),
         ("submitter",     "TEXT"),
         ("case_count",    "INTEGER"),
         ("onset_date",    "TEXT"),
         ("symptoms",      "TEXT"),
+        ("risk_tier",     "TEXT CHECK (risk_tier IN ('low','medium','high','severe'))"),
+        ("dialog_state",  "TEXT CHECK (dialog_state IN ('awaiting_case_count','awaiting_symptoms','awaiting_onset','complete','abandoned'))"),
     ]
-
-    for col_name, col_type in added_columns:
-        if col_name not in existing:
+    for col_name, col_type in added_reports_columns:
+        if col_name not in existing_reports:
             conn.execute(
                 f"ALTER TABLE illness_reports ADD COLUMN {col_name} {col_type}"
             )
+
+    existing_stations = {
+        row["name"]
+        for row in conn.execute("PRAGMA table_info(stations)").fetchall()
+    }
+    if "is_closed" not in existing_stations:
+        conn.execute("ALTER TABLE stations ADD COLUMN is_closed INTEGER NOT NULL DEFAULT 0")
 
 
 def init_db() -> None:

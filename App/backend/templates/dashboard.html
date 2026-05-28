@@ -77,7 +77,18 @@
         }
         .label-unsafe { background: rgba(255, 107, 107, 0.18); color: var(--danger); }
         .label-clear  { background: rgba(94, 200, 168, 0.15); color: var(--accent); }
+        .label-low    { background: rgba(94, 200, 168, 0.18); color: var(--accent); }
+        .label-medium { background: rgba(240, 198, 116, 0.20); color: #f0c674; }
+        .label-high   { background: rgba(255, 165, 90, 0.20); color: #ffa55a; }
+        .label-severe { background: rgba(255, 107, 107, 0.22); color: var(--danger); }
         .empty { color: var(--muted); padding: 16px; text-align: center; }
+        .btn-action {
+            padding: 4px 8px; font-size: 11px; font-weight: 600;
+            background: var(--input-bg, #11141a); color: var(--text);
+            border: 1px solid var(--border); border-radius: 4px;
+            cursor: pointer; margin-right: 4px;
+        }
+        .btn-action:hover { background: var(--accent); color: #0f1115; }
     </style>
 </head>
 <body>
@@ -108,12 +119,15 @@
                         <th>Temp (°C)</th>
                         <th>Rain (mm)</th>
                         <th>Status</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for s in stations %}
-                    <tr>
-                        <td>#{{ s['station_id'] }} {{ s['name'] }}</td>
+                    <tr {% if s['is_closed'] %}style="opacity: 0.7;"{% endif %}>
+                        <td>
+                            {% if s['is_closed'] %}🔒 {% endif %}#{{ s['station_id'] }} {{ s['name'] }}
+                        </td>
                         <td>{{ s['recorded_at'][:19] if s['recorded_at'] else 'no readings yet' }}</td>
                         <td class="numeric">{{ '%.2f'|format(s['ph']) if s['ph'] is not none else '—' }}</td>
                         <td class="numeric">{{ '%.1f'|format(s['turbidity_ntu']) if s['turbidity_ntu'] is not none else '—' }}</td>
@@ -126,6 +140,35 @@
                                 <span class="label-pill label-clear">clear</span>
                             {% endif %}
                         </td>
+                        <td style="white-space: nowrap;">
+                            {% if s['is_closed'] %}
+                                <form method="POST" action="{{ url_for('post_action') }}" style="display: inline;"
+                                      onsubmit="return confirm('Reopen station {{ s['station_id'] }}?');">
+                                    <input type="hidden" name="action_type" value="reopen_borehole">
+                                    <input type="hidden" name="station_id" value="{{ s['station_id'] }}">
+                                    <button type="submit" class="btn-action">Reopen</button>
+                                </form>
+                            {% else %}
+                                <form method="POST" action="{{ url_for('post_action') }}" style="display: inline;"
+                                      onsubmit="return confirm('Close station {{ s['station_id'] }}?');">
+                                    <input type="hidden" name="action_type" value="close_borehole">
+                                    <input type="hidden" name="station_id" value="{{ s['station_id'] }}">
+                                    <button type="submit" class="btn-action">Close</button>
+                                </form>
+                            {% endif %}
+                            <form method="POST" action="{{ url_for('post_action') }}" style="display: inline;"
+                                  onsubmit="return confirm('Dispatch sample team to station {{ s['station_id'] }}?');">
+                                <input type="hidden" name="action_type" value="dispatch_sample_team">
+                                <input type="hidden" name="station_id" value="{{ s['station_id'] }}">
+                                <button type="submit" class="btn-action">Sample</button>
+                            </form>
+                            <form method="POST" action="{{ url_for('post_action') }}" style="display: inline;"
+                                  onsubmit="return confirm('Dispatch medical team to station {{ s['station_id'] }}?');">
+                                <input type="hidden" name="action_type" value="dispatch_medical_team">
+                                <input type="hidden" name="station_id" value="{{ s['station_id'] }}">
+                                <button type="submit" class="btn-action">Medical</button>
+                            </form>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -134,38 +177,49 @@
 
         <section>
             <h2>Recent illness reports ({{ reports|length }})</h2>
-            {% if reports %}
             <table>
                 <thead>
                     <tr>
                         <th>Received</th>
                         <th>Station</th>
-                        <th>Reporter</th>
-                        <th>Message</th>
+                        <th>Source</th>
+                        <th>Risk tier</th>
                         <th>Labelled</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for rep in reports %}
-                    <tr>
-                        <td>{{ rep['received_at'][:19] }}</td>
-                        <td>
-                            {% if rep['station_id'] %}
-                                #{{ rep['station_id'] }} {{ rep['station_name'] or '—' }}
-                            {% else %}
-                                <span style="color: var(--danger)">unparsed</span>
-                            {% endif %}
-                        </td>
-                        <td>{{ rep['reporter_phone'] or '—' }}</td>
-                        <td>{{ rep['raw_message'][:80] }}</td>
-                        <td class="numeric">{{ rep['readings_labelled'] }}</td>
-                    </tr>
-                    {% endfor %}
+                    {% if reports %}
+                        {% for rep in reports %}
+                        <tr style="cursor: pointer;" onclick="window.location='/dashboard/reports/{{ rep['report_id'] }}'">
+                            <td>{{ rep['received_at'][:19] }}</td>
+                            <td>
+                                {% if rep['station_id'] %}
+                                    #{{ rep['station_id'] }} {{ rep['station_name'] or '—' }}
+                                {% else %}
+                                    <span style="color: var(--danger)">unparsed</span>
+                                {% endif %}
+                            </td>
+                            <td style="font-size: 11px; color: var(--muted);">{{ rep['report_source'] }}</td>
+                            <td>
+                                {% set tb = rep['tier_block'] %}
+                                {% if tb['tier_source'] == 'reporter' %}
+                                    <span class="label-pill label-{{ tb['tier'] }}">{{ tb['tier']|upper }}</span>
+                                {% elif tb['tier_source'] == 'estimated' %}
+                                    <span class="label-pill label-{{ tb['tier'] }}" style="opacity: 0.65;">{{ tb['tier']|upper }}</span>
+                                {% else %}
+                                    <span style="font-size: 11px; color: var(--muted);">{{ tb['tier_pending_text'].split(' — ')[0] }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="numeric">{{ rep['readings_labelled'] }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="empty">No illness reports yet. Text the Twilio number to generate one (see <code>App/DEMO.md</code>).</td>
+                        </tr>
+                    {% endif %}
                 </tbody>
             </table>
-            {% else %}
-            <div class="empty">No illness reports yet. Text the Twilio number to generate one (see <code>App/DEMO.md</code>).</div>
-            {% endif %}
         </section>
     </main>
 </body>
