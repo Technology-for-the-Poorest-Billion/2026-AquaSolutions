@@ -31,6 +31,8 @@ from flask import (
 from twilio.request_validator import RequestValidator
 from twilio.twiml.messaging_response import MessagingResponse
 
+from sqlalchemy import text
+
 from database import connection, init_db
 from labels import label_readings_for_report
 from sensor_ingest import sensor_bp
@@ -269,8 +271,8 @@ def logout():
 def medical_report_form():
     with connection() as conn:
         stations = conn.execute(
-            "SELECT station_id, name FROM stations ORDER BY station_id"
-        ).fetchall()
+            text("SELECT station_id, name FROM stations ORDER BY station_id")
+        ).mappings().all()
     return render_template(
         "medical_report.html",
         stations=stations,
@@ -293,8 +295,8 @@ def medical_report_submit():
     def render(success=None, error=None):
         with connection() as conn:
             stations = conn.execute(
-                "SELECT station_id, name FROM stations ORDER BY station_id"
-            ).fetchall()
+                text("SELECT station_id, name FROM stations ORDER BY station_id")
+            ).mappings().all()
         return render_template(
             "medical_report.html",
             stations=stations,
@@ -315,9 +317,6 @@ def medical_report_submit():
     except ValueError:
         return render(error="Case count must be a positive integer.")
 
-    # Anchor the labelling window at the end of the onset date when
-    # provided (a partial implementation of the exposure-anchored rule
-    # in labels.py option 1). Falls back to now.
     report_time = datetime.now(timezone.utc)
     if onset_date_raw:
         try:
@@ -332,7 +331,6 @@ def medical_report_submit():
         return render(error="Invalid risk tier value.")
     risk_tier_value = risk_tier_raw or None
 
-    # Validate the selected symptoms against the canonical list.
     valid_keys = {key for key, _label in SYMPTOMS}
     symptoms_selected = [s for s in symptoms_selected if s in valid_keys]
 
@@ -343,39 +341,42 @@ def medical_report_submit():
     )
 
     with connection() as conn:
-        station = conn.execute(
-            "SELECT name FROM stations WHERE station_id = ?", (station_id,)
-        ).fetchone()
-        if station is None:
-            return render(error=f"Station {station_id} is not in the system.")
+        with conn.begin():
+            station = conn.execute(
+                text("SELECT name FROM stations WHERE station_id = :sid"),
+                {"sid": station_id},
+            ).mappings().first()
+            if station is None:
+                return render(error=f"Station {station_id} is not in the system.")
 
-        cursor = conn.execute(
-            """
-            INSERT INTO illness_reports
-                (station_id, reporter_phone, raw_message, parser_version,
-                 report_source, submitter, case_count, onset_date, symptoms,
-                 risk_tier)
-            VALUES (?, NULL, ?, ?, 'medical_portal', ?, ?, ?, ?, ?)
-            """,
-            (
-                station_id,
-                raw_message,
-                STATION_PARSER_VERSION,
-                session.get("username"),
-                case_count,
-                onset_date_raw or None,
-                json.dumps(symptoms_selected),
-                risk_tier_value,
-            ),
-        )
-        report_id = cursor.lastrowid
+            report_id = conn.execute(
+                text(
+                    "INSERT INTO illness_reports "
+                    "(station_id, reporter_phone, raw_message, parser_version, "
+                    " report_source, submitter, case_count, onset_date, symptoms, "
+                    " risk_tier) "
+                    "VALUES (:sid, NULL, :msg, :ver, 'medical_portal', :sub, "
+                    " :cc, :od, :sym, :rt) "
+                    "RETURNING report_id"
+                ),
+                {
+                    "sid": station_id,
+                    "msg": raw_message,
+                    "ver": STATION_PARSER_VERSION,
+                    "sub": session.get("username"),
+                    "cc": case_count,
+                    "od": onset_date_raw or None,
+                    "sym": json.dumps(symptoms_selected),
+                    "rt": risk_tier_value,
+                },
+            ).scalar_one()
 
-        labelled = label_readings_for_report(
-            conn,
-            report_id=report_id,
-            station_id=station_id,
-            report_time=report_time,
-        )
+            labelled = label_readings_for_report(
+                conn,
+                report_id=report_id,
+                station_id=station_id,
+                report_time=report_time,
+            )
 
     success = (
         f"Report received for {station['name']} (station {station_id}). "
@@ -389,33 +390,30 @@ SMS_WINDOW_MINUTES = 30
 
 
 def _find_open_conversation(conn, phone: str):
-    """Return the most recent non-terminal report from this phone within window, or None.
-
-    SQLite's DEFAULT (datetime('now')) stores timestamps as 'YYYY-MM-DD HH:MM:SS'
-    (space-separated, UTC, no timezone designator). We compare with the same
-    format to avoid ASCII-order mismatches from Python's isoformat 'T'/'+00:00'.
-    """
     if not phone:
         return None
     cutoff_dt = datetime.now(timezone.utc) - timedelta(minutes=SMS_WINDOW_MINUTES)
-    # Match SQLite's datetime('now') format: 'YYYY-MM-DD HH:MM:SS'
     cutoff = cutoff_dt.strftime("%Y-%m-%d %H:%M:%S")
     return conn.execute(
-        """
-        SELECT * FROM illness_reports
-        WHERE reporter_phone = ?
-          AND received_at >= ?
-          AND dialog_state IN ('awaiting_case_count','awaiting_symptoms','awaiting_onset')
-        ORDER BY report_id DESC LIMIT 1
-        """,
-        (phone, cutoff),
-    ).fetchone()
+        text("""
+            SELECT * FROM illness_reports
+            WHERE reporter_phone = :phone
+              AND received_at >= :cutoff
+              AND dialog_state IN
+                  ('awaiting_case_count','awaiting_symptoms','awaiting_onset')
+            ORDER BY report_id DESC LIMIT 1
+        """),
+        {"phone": phone, "cutoff": cutoff},
+    ).mappings().first()
 
 
 def _mark_abandoned(conn, report_id):
     conn.execute(
-        "UPDATE illness_reports SET dialog_state = 'abandoned' WHERE report_id = ?",
-        (report_id,),
+        text(
+            "UPDATE illness_reports SET dialog_state = 'abandoned' "
+            "WHERE report_id = :rid"
+        ),
+        {"rid": report_id},
     )
 
 
@@ -432,154 +430,166 @@ def sms_webhook():
     reply = MessagingResponse()
 
     is_stop = re.search(r"\bstop\b", raw_message, re.IGNORECASE) is not None
-    # Lenient parser: any bare number — used when there's no open conversation.
     station_id = _parse_station_id(raw_message)
-    # Strict parser: requires "station N" keyword — used for mid-conversation switches.
     explicit_station_id = _parse_explicit_station_id(raw_message)
 
     with connection() as conn:
-        open_conv = _find_open_conversation(conn, reporter_phone)
+        with conn.begin():
+            open_conv = _find_open_conversation(conn, reporter_phone)
 
-        # --- STOP keyword ---------------------------------------------------
-        if is_stop:
+            if is_stop:
+                if open_conv is None:
+                    reply.message("No active conversation to opt out of. Thank you.")
+                    return str(reply)
+                _mark_abandoned(conn, open_conv["report_id"])
+                reply.message("Opted out. We will no longer reply. Thank you.")
+                return str(reply)
+
+            if (explicit_station_id is not None
+                    and open_conv is not None
+                    and explicit_station_id != open_conv["station_id"]):
+                _mark_abandoned(conn, open_conv["report_id"])
+                open_conv = None
+                station_id = explicit_station_id
+
             if open_conv is None:
-                reply.message("No active conversation to opt out of. Thank you.")
+                if station_id is None:
+                    conn.execute(
+                        text(
+                            "INSERT INTO illness_reports "
+                            "(station_id, reporter_phone, raw_message, parser_version, "
+                            " report_source, dialog_state) "
+                            "VALUES (NULL, :phone, :msg, :ver, 'sms', NULL)"
+                        ),
+                        {
+                            "phone": reporter_phone,
+                            "msg": raw_message,
+                            "ver": STATION_PARSER_VERSION,
+                        },
+                    )
+                    reply.message(
+                        "We received your message but could not identify a station "
+                        "number. Reply with the station number (e.g. '4'). Thank you."
+                    )
+                    return str(reply)
+
+                station = conn.execute(
+                    text("SELECT station_id, name FROM stations WHERE station_id = :sid"),
+                    {"sid": station_id},
+                ).mappings().first()
+                if station is None:
+                    conn.execute(
+                        text(
+                            "INSERT INTO illness_reports "
+                            "(station_id, reporter_phone, raw_message, parser_version, "
+                            " report_source, dialog_state) "
+                            "VALUES (NULL, :phone, :msg, :ver, 'sms', NULL)"
+                        ),
+                        {
+                            "phone": reporter_phone,
+                            "msg": raw_message,
+                            "ver": STATION_PARSER_VERSION,
+                        },
+                    )
+                    reply.message(
+                        f"Station {station_id} is not in our system. Please check "
+                        "the number and try again. Thank you."
+                    )
+                    return str(reply)
+
+                report_id = conn.execute(
+                    text(
+                        "INSERT INTO illness_reports "
+                        "(station_id, reporter_phone, raw_message, parser_version, "
+                        " report_source, dialog_state) "
+                        "VALUES (:sid, :phone, :msg, :ver, 'sms', 'awaiting_case_count') "
+                        "RETURNING report_id"
+                    ),
+                    {
+                        "sid": station_id,
+                        "phone": reporter_phone,
+                        "msg": raw_message,
+                        "ver": STATION_PARSER_VERSION,
+                    },
+                ).scalar_one()
+                labelled = label_readings_for_report(
+                    conn, report_id=report_id, station_id=station_id, report_time=now,
+                )
+                reply.message(
+                    f"Report received for {station['name']} (station {station_id}). "
+                    f"{labelled} reading(s) flagged. How many people are sick? "
+                    "Reply with a number."
+                )
                 return str(reply)
-            _mark_abandoned(conn, open_conv["report_id"])
-            reply.message("Opted out. We will no longer reply. Thank you.")
-            return str(reply)
 
-        # --- new station number while in conversation: abandon + restart ----
-        # Require explicit "station N" phrasing to avoid treating dialog replies
-        # (bare numbers like case counts) as station switches.
-        if (explicit_station_id is not None
-                and open_conv is not None
-                and explicit_station_id != open_conv["station_id"]):
-            _mark_abandoned(conn, open_conv["report_id"])
-            open_conv = None
-            # Use the explicit station id for the new conversation.
-            station_id = explicit_station_id
+            report_id = open_conv["report_id"]
+            state = open_conv["dialog_state"]
 
-        # --- no conversation: start one or store unparsed ------------------
-        if open_conv is None:
-            if station_id is None:
-                # unparsed; same behaviour as before — record + ask for station
+            if state == "awaiting_case_count":
+                n = parse_case_count(raw_message)
+                if n is None:
+                    reply.message(
+                        "I didn't understand. How many people are sick? Reply with a number."
+                    )
+                    return str(reply)
                 conn.execute(
-                    """
-                    INSERT INTO illness_reports
-                        (station_id, reporter_phone, raw_message, parser_version,
-                         report_source, dialog_state)
-                    VALUES (NULL, ?, ?, ?, 'sms', NULL)
-                    """,
-                    (reporter_phone, raw_message, STATION_PARSER_VERSION),
+                    text(
+                        "UPDATE illness_reports "
+                        "SET case_count = :n, dialog_state = 'awaiting_symptoms' "
+                        "WHERE report_id = :rid"
+                    ),
+                    {"n": n, "rid": report_id},
                 )
                 reply.message(
-                    "We received your message but could not identify a station "
-                    "number. Reply with the station number (e.g. '4'). Thank you."
-                )
-                return str(reply)
-
-            station = conn.execute(
-                "SELECT station_id, name FROM stations WHERE station_id = ?",
-                (station_id,),
-            ).fetchone()
-            if station is None:
-                conn.execute(
-                    """
-                    INSERT INTO illness_reports
-                        (station_id, reporter_phone, raw_message, parser_version,
-                         report_source, dialog_state)
-                    VALUES (NULL, ?, ?, ?, 'sms', NULL)
-                    """,
-                    (reporter_phone, raw_message, STATION_PARSER_VERSION),
-                )
-                reply.message(
-                    f"Station {station_id} is not in our system. Please check "
-                    "the number and try again. Thank you."
-                )
-                return str(reply)
-
-            cursor = conn.execute(
-                """
-                INSERT INTO illness_reports
-                    (station_id, reporter_phone, raw_message, parser_version,
-                     report_source, dialog_state)
-                VALUES (?, ?, ?, ?, 'sms', 'awaiting_case_count')
-                """,
-                (station_id, reporter_phone, raw_message, STATION_PARSER_VERSION),
-            )
-            report_id = cursor.lastrowid
-            labelled = label_readings_for_report(
-                conn, report_id=report_id, station_id=station_id, report_time=now,
-            )
-            reply.message(
-                f"Report received for {station['name']} (station {station_id}). "
-                f"{labelled} reading(s) flagged. How many people are sick? "
-                "Reply with a number."
-            )
-            return str(reply)
-
-        # --- continue an in-progress conversation --------------------------
-        report_id = open_conv["report_id"]
-        state = open_conv["dialog_state"]
-
-        if state == "awaiting_case_count":
-            n = parse_case_count(raw_message)
-            if n is None:
-                reply.message(
-                    "I didn't understand. How many people are sick? Reply with a number."
-                )
-                return str(reply)
-            conn.execute(
-                "UPDATE illness_reports SET case_count = ?, dialog_state = 'awaiting_symptoms' "
-                "WHERE report_id = ?",
-                (n, report_id),
-            )
-            reply.message(
-                f"Noted, {n} cases. Which symptoms? Reply with numbers, e.g. '1,3'. "
-                "1=diarrhoea 2=vomiting 3=fever 4=dehydration."
-            )
-            return str(reply)
-
-        if state == "awaiting_symptoms":
-            syms = parse_symptoms(raw_message)
-            if syms is None:
-                reply.message(
-                    "I didn't understand. Reply with numbers, e.g. '1,3'. "
+                    f"Noted, {n} cases. Which symptoms? Reply with numbers, e.g. '1,3'. "
                     "1=diarrhoea 2=vomiting 3=fever 4=dehydration."
                 )
                 return str(reply)
-            conn.execute(
-                "UPDATE illness_reports SET symptoms = ?, dialog_state = 'awaiting_onset' "
-                "WHERE report_id = ?",
-                (json.dumps(syms), report_id),
-            )
-            reply.message(
-                f"Noted: {', '.join(syms)}. When did symptoms start? "
-                "Reply 'today', 'yesterday', or DD/MM."
-            )
-            return str(reply)
 
-        if state == "awaiting_onset":
-            onset = parse_onset(raw_message)
-            if onset is None:
+            if state == "awaiting_symptoms":
+                syms = parse_symptoms(raw_message)
+                if syms is None:
+                    reply.message(
+                        "I didn't understand. Reply with numbers, e.g. '1,3'. "
+                        "1=diarrhoea 2=vomiting 3=fever 4=dehydration."
+                    )
+                    return str(reply)
+                conn.execute(
+                    text(
+                        "UPDATE illness_reports "
+                        "SET symptoms = :s, dialog_state = 'awaiting_onset' "
+                        "WHERE report_id = :rid"
+                    ),
+                    {"s": json.dumps(syms), "rid": report_id},
+                )
                 reply.message(
-                    "I didn't understand. Reply 'today', 'yesterday', or DD/MM."
+                    f"Noted: {', '.join(syms)}. When did symptoms start? "
+                    "Reply 'today', 'yesterday', or DD/MM."
                 )
                 return str(reply)
-            conn.execute(
-                "UPDATE illness_reports SET onset_date = ?, dialog_state = 'complete' "
-                "WHERE report_id = ?",
-                (onset.isoformat(), report_id),
-            )
+
+            if state == "awaiting_onset":
+                onset = parse_onset(raw_message)
+                if onset is None:
+                    reply.message(
+                        "I didn't understand. Reply 'today', 'yesterday', or DD/MM."
+                    )
+                    return str(reply)
+                conn.execute(
+                    text(
+                        "UPDATE illness_reports "
+                        "SET onset_date = :od, dialog_state = 'complete' "
+                        "WHERE report_id = :rid"
+                    ),
+                    {"od": onset.isoformat(), "rid": report_id},
+                )
+                reply.message("Report complete. Stay safe. Reply STOP to opt out.")
+                return str(reply)
+
             reply.message(
-                "Report complete. Stay safe. Reply STOP to opt out."
+                "Unexpected state. Reply STOP to opt out, or text a station number to start over."
             )
             return str(reply)
-
-        # Defensive — should not reach here for an open conversation.
-        reply.message("Unexpected state. Reply STOP to opt out, or text a station number to start over.")
-        return str(reply)
 
 
 STATION_STATUS_WINDOW_DAYS = 7
@@ -593,57 +603,51 @@ def dashboard():
     ).isoformat()
 
     with connection() as conn:
-        # One row per station: latest reading + a station-level status pill.
-        # A station is `unsafe` if any illness report at that station landed
-        # in the trailing STATION_STATUS_WINDOW_DAYS window — this is a
-        # rollup, not a per-reading label, so newly-arriving readings do
-        # not flip the pill back to `clear`.
         stations = conn.execute(
-            """
-            WITH latest AS (
-                SELECT station_id, MAX(recorded_at) AS latest_at
-                FROM sensor_readings
-                GROUP BY station_id
-            )
-            SELECT s.station_id,
-                   s.name,
-                   s.is_closed,
-                   r.recorded_at,
-                   r.ph,
-                   r.turbidity_ntu,
-                   r.temperature_c,
-                   r.rainfall_mm,
-                   EXISTS (
-                       SELECT 1 FROM illness_reports ir
-                       WHERE ir.station_id = s.station_id
-                         AND ir.received_at >= ?
-                   ) AS is_unsafe
-            FROM stations s
-            LEFT JOIN latest l USING (station_id)
-            LEFT JOIN sensor_readings r
-                ON r.station_id = s.station_id
-               AND r.recorded_at = l.latest_at
-            ORDER BY s.station_id
-            """,
-            (status_cutoff,),
-        ).fetchall()
+            text("""
+                WITH latest AS (
+                    SELECT station_id, MAX(recorded_at) AS latest_at
+                    FROM sensor_readings
+                    GROUP BY station_id
+                )
+                SELECT s.station_id,
+                       s.name,
+                       s.is_closed,
+                       r.recorded_at,
+                       r.ph,
+                       r.turbidity_ntu,
+                       r.temperature_c,
+                       r.rainfall_mm,
+                       EXISTS (
+                           SELECT 1 FROM illness_reports ir
+                           WHERE ir.station_id = s.station_id
+                             AND ir.received_at >= :cutoff
+                       ) AS is_unsafe
+                FROM stations s
+                LEFT JOIN latest l ON l.station_id = s.station_id
+                LEFT JOIN sensor_readings r
+                    ON r.station_id = s.station_id
+                   AND r.recorded_at = l.latest_at
+                ORDER BY s.station_id
+            """),
+            {"cutoff": status_cutoff},
+        ).mappings().all()
 
         reports = conn.execute(
-            """
-            SELECT ir.report_id, ir.station_id, s.name AS station_name,
-                   ir.reporter_phone, ir.raw_message, ir.received_at,
-                   ir.risk_tier, ir.report_source,
-                   ir.case_count, ir.symptoms, ir.onset_date,
-                   (SELECT COUNT(*) FROM reading_labels
-                     WHERE report_id = ir.report_id) AS readings_labelled
-            FROM illness_reports ir
-            LEFT JOIN stations s USING (station_id)
-            ORDER BY ir.received_at DESC
-            LIMIT 50
-            """
-        ).fetchall()
+            text("""
+                SELECT ir.report_id, ir.station_id, s.name AS station_name,
+                       ir.reporter_phone, ir.raw_message, ir.received_at,
+                       ir.risk_tier, ir.report_source,
+                       ir.case_count, ir.symptoms, ir.onset_date,
+                       (SELECT COUNT(*) FROM reading_labels
+                         WHERE report_id = ir.report_id) AS readings_labelled
+                FROM illness_reports ir
+                LEFT JOIN stations s ON s.station_id = ir.station_id
+                ORDER BY ir.received_at DESC
+                LIMIT 50
+            """),
+        ).mappings().all()
 
-        # Compute the tier display for each report at render time.
         reports_with_tier = [
             {**dict(rep), "tier_block": _resolve_tier(dict(rep))}
             for rep in reports
@@ -682,29 +686,43 @@ def post_action():
             return ("invalid related_report_id", 400)
 
     with connection() as conn:
-        station = conn.execute(
-            "SELECT is_closed FROM stations WHERE station_id = ?", (station_id,)
-        ).fetchone()
-        if station is None:
-            return (f"unknown station_id {station_id}", 400)
+        with conn.begin():
+            station = conn.execute(
+                text("SELECT is_closed FROM stations WHERE station_id = :sid"),
+                {"sid": station_id},
+            ).mappings().first()
+            if station is None:
+                return (f"unknown station_id {station_id}", 400)
 
-        if action_type == "close_borehole" and station["is_closed"]:
-            return (f"station {station_id} is already closed", 400)
-        if action_type == "reopen_borehole" and not station["is_closed"]:
-            return (f"station {station_id} is already open", 400)
+            if action_type == "close_borehole" and station["is_closed"]:
+                return (f"station {station_id} is already closed", 400)
+            if action_type == "reopen_borehole" and not station["is_closed"]:
+                return (f"station {station_id} is already open", 400)
 
-        conn.execute(
-            """
-            INSERT INTO interventions
-                (station_id, action_type, triggered_by, related_report_id, notes)
-            VALUES (?, ?, ?, ?, ?)
-            """,
-            (station_id, action_type, session["username"], related_id, notes),
-        )
-        if action_type == "close_borehole":
-            conn.execute("UPDATE stations SET is_closed = 1 WHERE station_id = ?", (station_id,))
-        elif action_type == "reopen_borehole":
-            conn.execute("UPDATE stations SET is_closed = 0 WHERE station_id = ?", (station_id,))
+            conn.execute(
+                text(
+                    "INSERT INTO interventions "
+                    "(station_id, action_type, triggered_by, related_report_id, notes) "
+                    "VALUES (:sid, :at, :tb, :rid, :notes)"
+                ),
+                {
+                    "sid": station_id,
+                    "at": action_type,
+                    "tb": session["username"],
+                    "rid": related_id,
+                    "notes": notes,
+                },
+            )
+            if action_type == "close_borehole":
+                conn.execute(
+                    text("UPDATE stations SET is_closed = 1 WHERE station_id = :sid"),
+                    {"sid": station_id},
+                )
+            elif action_type == "reopen_borehole":
+                conn.execute(
+                    text("UPDATE stations SET is_closed = 0 WHERE station_id = :sid"),
+                    {"sid": station_id},
+                )
 
     referrer = request.referrer or ""
     if referrer.startswith("/") or referrer.startswith(request.host_url):
@@ -725,36 +743,36 @@ def dashboard_report_detail(report_id: int):
 
     with connection() as conn:
         row = conn.execute(
-            """
-            SELECT ir.*, s.name AS station_name
-            FROM illness_reports ir
-            LEFT JOIN stations s USING (station_id)
-            WHERE ir.report_id = ?
-            """,
-            (report_id,),
-        ).fetchone()
+            text("""
+                SELECT ir.*, s.name AS station_name
+                FROM illness_reports ir
+                LEFT JOIN stations s ON s.station_id = ir.station_id
+                WHERE ir.report_id = :rid
+            """),
+            {"rid": report_id},
+        ).mappings().first()
         if row is None:
             abort(404)
         labelled_readings = conn.execute(
-            """
-            SELECT rl.reading_id, rl.rule_description,
-                   sr.recorded_at, sr.ph, sr.turbidity_ntu, sr.temperature_c
-            FROM reading_labels rl
-            JOIN sensor_readings sr USING (reading_id)
-            WHERE rl.report_id = ?
-            ORDER BY sr.recorded_at DESC
-            """,
-            (report_id,),
-        ).fetchall()
-        interventions = conn.execute(
-            """
-            SELECT intervention_id, action_type, triggered_by, triggered_at, notes
-            FROM interventions
-            WHERE related_report_id = ?
-            ORDER BY triggered_at ASC
-            """,
-            (report_id,),
-        ).fetchall()
+            text("""
+                SELECT rl.reading_id, rl.rule_description,
+                       sr.recorded_at, sr.ph, sr.turbidity_ntu, sr.temperature_c
+                FROM reading_labels rl
+                JOIN sensor_readings sr ON sr.reading_id = rl.reading_id
+                WHERE rl.report_id = :rid
+                ORDER BY sr.recorded_at DESC
+            """),
+            {"rid": report_id},
+        ).mappings().all()
+        interventions_rows = conn.execute(
+            text("""
+                SELECT intervention_id, action_type, triggered_by, triggered_at, notes
+                FROM interventions
+                WHERE related_report_id = :rid
+                ORDER BY triggered_at ASC
+            """),
+            {"rid": report_id},
+        ).mappings().all()
 
     tier_block = _resolve_tier(dict(row))
     try:
@@ -768,7 +786,7 @@ def dashboard_report_detail(report_id: int):
         report=row,
         symptoms_display=symptoms_display,
         labelled_readings=labelled_readings,
-        interventions=interventions,
+        interventions=interventions_rows,
         **tier_block,
     )
 
@@ -778,28 +796,28 @@ def dashboard_report_detail(report_id: int):
 def medical_history():
     with connection() as conn:
         report_rows = conn.execute(
-            """
-            SELECT ir.*, s.name AS station_name
-            FROM illness_reports ir
-            LEFT JOIN stations s USING (station_id)
-            WHERE ir.report_source = 'medical_portal'
-            ORDER BY ir.received_at DESC
-            LIMIT 50
-            """,
-        ).fetchall()
+            text("""
+                SELECT ir.*, s.name AS station_name
+                FROM illness_reports ir
+                LEFT JOIN stations s ON s.station_id = ir.station_id
+                WHERE ir.report_source = 'medical_portal'
+                ORDER BY ir.received_at DESC
+                LIMIT 50
+            """),
+        ).mappings().all()
         stations = conn.execute(
-            """
-            SELECT s.station_id, s.name, s.latitude, s.longitude,
-                   (SELECT COUNT(*) FROM illness_reports
-                      WHERE station_id = s.station_id
-                        AND report_source = 'medical_portal') AS report_count,
-                   (SELECT MAX(received_at) FROM illness_reports
-                      WHERE station_id = s.station_id
-                        AND report_source = 'medical_portal') AS last_report
-            FROM stations s
-            ORDER BY s.station_id
-            """,
-        ).fetchall()
+            text("""
+                SELECT s.station_id, s.name, s.latitude, s.longitude,
+                       (SELECT COUNT(*) FROM illness_reports
+                          WHERE station_id = s.station_id
+                            AND report_source = 'medical_portal') AS report_count,
+                       (SELECT MAX(received_at) FROM illness_reports
+                          WHERE station_id = s.station_id
+                            AND report_source = 'medical_portal') AS last_report
+                FROM stations s
+                ORDER BY s.station_id
+            """),
+        ).mappings().all()
 
     reports_view = []
     for rep in report_rows:
@@ -827,14 +845,14 @@ def medical_history():
 def medical_report_detail(report_id: int):
     with connection() as conn:
         row = conn.execute(
-            """
-            SELECT ir.*, s.name AS station_name
-            FROM illness_reports ir
-            LEFT JOIN stations s USING (station_id)
-            WHERE ir.report_id = ?
-            """,
-            (report_id,),
-        ).fetchone()
+            text("""
+                SELECT ir.*, s.name AS station_name
+                FROM illness_reports ir
+                LEFT JOIN stations s ON s.station_id = ir.station_id
+                WHERE ir.report_id = :rid
+            """),
+            {"rid": report_id},
+        ).mappings().first()
         if row is None:
             abort(404)
     tier_block = _resolve_tier(dict(row))

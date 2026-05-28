@@ -167,3 +167,11 @@ These were specified in `App/cholera_sensor_ml_approach.md` §6 and are reproduc
 ### F4. Stakeholder expectation drift between deadlines
 - **Risk:** Between 2026-06-01 (interim) and 2026-06-11 (submission), supervisors may push the system back toward the old "deploy a classifier in Zimbabwe" framing.
 - **Mitigation:** The pivot rationale (`App/cholera_sensor_ml_approach.md`) is the rebuttal document. Use it.
+
+---
+
+## Resolved items
+
+- Ephemeral Railway filesystem wiping the demo DB on every redeploy.
+  RESOLVED 2026-05-28 by migrating to Railway Postgres. See plan
+  docs/superpowers/plans/2026-05-28-sqlite-to-postgres-migration.md.
