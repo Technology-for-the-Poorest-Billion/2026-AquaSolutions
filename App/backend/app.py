@@ -556,6 +556,41 @@ def dashboard_report_detail(report_id: int):
     )
 
 
+@app.get("/medical/history")
+@role_required("medical")
+def medical_history():
+    return "history coming"  # stub — replaced in C.4
+
+
+@app.get("/medical/reports/<int:report_id>")
+@role_required("medical")
+def medical_report_detail(report_id: int):
+    with connection() as conn:
+        row = conn.execute(
+            """
+            SELECT ir.*, s.name AS station_name
+            FROM illness_reports ir
+            LEFT JOIN stations s USING (station_id)
+            WHERE ir.report_id = ?
+            """,
+            (report_id,),
+        ).fetchone()
+        if row is None:
+            abort(404)
+    tier_block = _resolve_tier(dict(row))
+    try:
+        symptoms_list = json.loads(row["symptoms"] or "[]")
+    except (json.JSONDecodeError, TypeError):
+        symptoms_list = []
+    symptoms_display = ", ".join(symptoms_list) if symptoms_list else "—"
+    return render_template(
+        "medical_report_detail.html",
+        report=row,
+        symptoms_display=symptoms_display,
+        **tier_block,
+    )
+
+
 if __name__ == "__main__":
     host = os.environ.get("FLASK_HOST", "0.0.0.0")
     port = int(os.environ.get("FLASK_PORT", "5000"))
