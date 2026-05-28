@@ -77,6 +77,13 @@ SYMPTOMS = [
     ("dehydration", "Dehydration"),
 ]
 
+ACTION_TYPES = {
+    "close_borehole",
+    "reopen_borehole",
+    "dispatch_sample_team",
+    "dispatch_medical_team",
+}
+
 
 def _authenticate(username: str, password: str) -> dict | None:
     user = DEMO_USERS.get(username)
@@ -503,6 +510,60 @@ def dashboard():
         status_window_days=STATION_STATUS_WINDOW_DAYS,
         generated_at=datetime.now(timezone.utc).isoformat(timespec="seconds"),
     )
+
+
+@app.post("/actions")
+@role_required("government")
+def post_action():
+    action_type = (request.form.get("action_type", "") or "").strip()
+    station_raw = (request.form.get("station_id", "") or "").strip()
+    related_raw = (request.form.get("related_report_id", "") or "").strip()
+    notes = (request.form.get("notes", "") or "").strip()[:500] or None
+
+    if action_type not in ACTION_TYPES:
+        return ("invalid action_type", 400)
+
+    try:
+        station_id = int(station_raw)
+    except (TypeError, ValueError):
+        return ("invalid station_id", 400)
+
+    related_id = None
+    if related_raw:
+        try:
+            related_id = int(related_raw)
+        except (TypeError, ValueError):
+            return ("invalid related_report_id", 400)
+
+    with connection() as conn:
+        station = conn.execute(
+            "SELECT is_closed FROM stations WHERE station_id = ?", (station_id,)
+        ).fetchone()
+        if station is None:
+            return (f"unknown station_id {station_id}", 400)
+
+        if action_type == "close_borehole" and station["is_closed"]:
+            return (f"station {station_id} is already closed", 400)
+        if action_type == "reopen_borehole" and not station["is_closed"]:
+            return (f"station {station_id} is already open", 400)
+
+        conn.execute(
+            """
+            INSERT INTO interventions
+                (station_id, action_type, triggered_by, related_report_id, notes)
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            (station_id, action_type, session["username"], related_id, notes),
+        )
+        if action_type == "close_borehole":
+            conn.execute("UPDATE stations SET is_closed = 1 WHERE station_id = ?", (station_id,))
+        elif action_type == "reopen_borehole":
+            conn.execute("UPDATE stations SET is_closed = 0 WHERE station_id = ?", (station_id,))
+
+    referrer = request.referrer or ""
+    if referrer.startswith("/") or referrer.startswith(request.host_url):
+        return redirect(referrer)
+    return redirect(url_for("dashboard"))
 
 
 @app.get("/dashboard/reports/<int:report_id>")
