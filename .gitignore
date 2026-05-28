@@ -21,6 +21,10 @@ __pycache__/
 *.db-journal
 App/backend/data/
 
+# Runtime / log files — never commit; on a Railway deploy these can contain
+# request headers and form fields (e.g. DEVICE_SECRET, Twilio From numbers)
+*.log
+
 # IDE / tooling
 .vscode/
 .claude/
