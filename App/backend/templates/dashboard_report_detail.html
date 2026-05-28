@@ -127,6 +127,55 @@
     {% endif %}
 </section>
 
+
+<section>
+    <h2>Actions</h2>
+    <form method="POST" action="{{ url_for('post_action') }}" style="display: inline;"
+          onsubmit="return confirm('Close station {{ report['station_id'] }}?');">
+        <input type="hidden" name="action_type" value="close_borehole">
+        <input type="hidden" name="station_id" value="{{ report['station_id'] }}">
+        <input type="hidden" name="related_report_id" value="{{ report['report_id'] }}">
+        <button type="submit">Close borehole</button>
+    </form>
+    <form method="POST" action="{{ url_for('post_action') }}" style="display: inline;"
+          onsubmit="return confirm('Dispatch sample team?');">
+        <input type="hidden" name="action_type" value="dispatch_sample_team">
+        <input type="hidden" name="station_id" value="{{ report['station_id'] }}">
+        <input type="hidden" name="related_report_id" value="{{ report['report_id'] }}">
+        <button type="submit">Send sample team</button>
+    </form>
+    <form method="POST" action="{{ url_for('post_action') }}" style="display: inline;"
+          onsubmit="return confirm('Dispatch medical team?');">
+        <input type="hidden" name="action_type" value="dispatch_medical_team">
+        <input type="hidden" name="station_id" value="{{ report['station_id'] }}">
+        <input type="hidden" name="related_report_id" value="{{ report['report_id'] }}">
+        <button type="submit">Send medical team</button>
+    </form>
+</section>
+
+<section>
+    <h2>Interventions linked to this report ({{ interventions|length }})</h2>
+    {% if interventions %}
+    <table>
+        <thead><tr>
+            <th>When</th><th>Action</th><th>Triggered by</th><th>Notes</th>
+        </tr></thead>
+        <tbody>
+            {% for iv in interventions %}
+            <tr>
+                <td>{{ iv['triggered_at'][:19] }}</td>
+                <td><code>{{ iv['action_type'] }}</code></td>
+                <td>{{ iv['triggered_by'] }}</td>
+                <td>{{ iv['notes'] or '—' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="color: var(--muted); font-size: 13px;">No interventions yet.</p>
+    {% endif %}
+</section>
+
 </main>
 </body>
 </html>

@@ -601,6 +601,15 @@ def dashboard_report_detail(report_id: int):
             """,
             (report_id,),
         ).fetchall()
+        interventions = conn.execute(
+            """
+            SELECT intervention_id, action_type, triggered_by, triggered_at, notes
+            FROM interventions
+            WHERE related_report_id = ?
+            ORDER BY triggered_at ASC
+            """,
+            (report_id,),
+        ).fetchall()
 
     tier_block = _resolve_tier(dict(row))
     try:
@@ -614,6 +623,7 @@ def dashboard_report_detail(report_id: int):
         report=row,
         symptoms_display=symptoms_display,
         labelled_readings=labelled_readings,
+        interventions=interventions,
         **tier_block,
     )
 
