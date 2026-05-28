@@ -56,7 +56,8 @@ CREATE TABLE IF NOT EXISTS illness_reports (
     submitter         TEXT,
     case_count        INTEGER,
     onset_date        TEXT,
-    symptoms          TEXT
+    symptoms          TEXT,
+    risk_tier         TEXT CHECK (risk_tier IN ('low','medium','high','severe'))
 );
 
 CREATE INDEX IF NOT EXISTS idx_reports_station_time
@@ -127,6 +128,7 @@ def _migrate(conn: sqlite3.Connection) -> None:
         ("case_count",    "INTEGER"),
         ("onset_date",    "TEXT"),
         ("symptoms",      "TEXT"),
+        ("risk_tier",     "TEXT CHECK (risk_tier IN ('low','medium','high','severe'))"),
     ]
 
     for col_name, col_type in added_columns:
