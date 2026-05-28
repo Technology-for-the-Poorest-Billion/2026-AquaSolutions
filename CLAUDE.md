@@ -65,6 +65,12 @@ These rules come from `App/cholera_sensor_ml_approach.md` §6 and `Research/Note
 - The `/ingest` sensor endpoint authenticates with a shared `DEVICE_SECRET` header. Treat the secret as production-equivalent: never commit it, rotate if exposed.
 - Required output state on any future inference: **abstain / "send sample to lab"** when input is out of training range. No silent extrapolation. The user-facing app must also surface this state honestly (see `App/Ideation.md`).
 - Federated learning + differential privacy is the structural answer to cross-border patient-data governance (see `App/cholera_sensor_ml_approach.md` §4). Don't design the pipeline as if all raw data will live in one place.
+- The Railway deploy uses Postgres (provisioned as a Railway service). Local
+  dev and the pytest suite use SQLite via the engine module's DATABASE_URL
+  fallback. All DB code goes through SQLAlchemy Core text() with named
+  parameters so the same SQL runs on both backends. Do not reintroduce raw
+  sqlite3 calls in request-path code; feature_engineering.py is the only
+  remaining sqlite3-only consumer and is offline-only.
 
 ## Site framing
 
