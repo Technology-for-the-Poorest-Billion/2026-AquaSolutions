@@ -27,8 +27,20 @@
             padding: 16px 24px;
             border-bottom: 1px solid var(--border);
             display: flex;
-            align-items: baseline;
+            align-items: center;
             justify-content: space-between;
+            gap: 16px;
+        }
+        header .brand-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+        header .brand-row img.logo {
+            height: 36px;
+            width: auto;
+            flex: 0 0 auto;
         }
         header h1 { font-size: 18px; margin: 0; font-weight: 600; }
         header .meta { color: var(--muted); font-size: 12px; }
@@ -143,10 +155,13 @@
 </head>
 <body>
     <header>
-        <h1 style="font-size: 18px; margin: 0;">
-            <a href="{{ url_for('medical_report_form') }}" style="color: var(--accent); text-decoration: none; margin-right: 12px;">File a report</a>
-            <a href="{{ url_for('medical_history') }}" style="color: var(--accent); text-decoration: none; margin-right: 12px;">History</a>
-        </h1>
+        <div class="brand-row">
+            <img src="{{ url_for('static', filename='aqua_solutions_logo.png') }}" alt="Aqua Solutions logo" class="logo">
+            <h1 style="font-size: 18px; margin: 0;">
+                <a href="{{ url_for('medical_report_form') }}" style="color: var(--accent); text-decoration: none; margin-right: 12px;">File a report</a>
+                <a href="{{ url_for('medical_history') }}" style="color: var(--accent); text-decoration: none; margin-right: 12px;">History</a>
+            </h1>
+        </div>
         <div class="meta">
             Signed in as {{ session['display_name'] }} ({{ session['role'] }})
             <a href="{{ url_for('logout') }}">Sign out</a>

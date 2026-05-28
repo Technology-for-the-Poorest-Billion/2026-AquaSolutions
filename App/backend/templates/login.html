@@ -39,6 +39,13 @@
             font-size: 13px;
             line-height: 1.5;
         }
+        .brand img.logo {
+            display: block;
+            width: 100%;
+            max-width: 220px;
+            height: auto;
+            margin: 0 auto 16px auto;
+        }
         .brand h1 {
             color: var(--text);
             font-size: 18px;
@@ -106,6 +113,7 @@
 <body>
     <main>
         <div class="brand">
+            <img src="{{ url_for('static', filename='aqua_solutions_logo.png') }}" alt="Aqua Solutions logo" class="logo">
             <h1>Water-safety pipeline</h1>
             <div>Faecal-contamination risk + community illness signal.<br>NOT a cholera detector.</div>
         </div>
