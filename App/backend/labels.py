@@ -47,8 +47,10 @@ is structured so the rule can be swapped without touching ``app.py``.
 
 from __future__ import annotations
 
-import sqlite3
 from datetime import datetime, timedelta
+
+from sqlalchemy import text
+from sqlalchemy.engine import Connection
 
 DEFAULT_WINDOW_DAYS = 7
 DEFAULT_LABEL = "unsafe"
@@ -56,7 +58,7 @@ RULE_VERSION = "trailing_7d_v1"
 
 
 def label_readings_for_report(
-    conn: sqlite3.Connection,
+    conn: Connection,
     report_id: int,
     station_id: int,
     report_time: datetime,
@@ -64,37 +66,24 @@ def label_readings_for_report(
 ) -> int:
     """Label the trailing window of readings at ``station_id`` as unsafe.
 
-    Returns the number of readings newly labelled. Idempotent: re-running
-    with the same ``(reading_id, report_id)`` pair is a no-op due to the
-    UNIQUE constraint in ``reading_labels``.
-
-    Parameters
-    ----------
-    conn
-        Open SQLite connection. The caller owns the transaction.
-    report_id
-        Primary key of the inserted row in ``illness_reports``.
-    station_id
-        Station the report refers to.
-    report_time
-        Timestamp anchoring the labelling window. Default rule treats
-        this as the right edge of the window (window covers
-        ``[report_time - window_days, report_time]``).
-    window_days
-        Width of the trailing window in days.
+    Returns the number of readings newly labelled. Idempotent via the
+    UNIQUE(reading_id, report_id) constraint on reading_labels.
     """
     window_start = report_time - timedelta(days=window_days)
 
     target_readings = conn.execute(
-        """
-        SELECT reading_id
-        FROM sensor_readings
-        WHERE station_id = ?
-          AND recorded_at >= ?
-          AND recorded_at <= ?
-        """,
-        (station_id, window_start.isoformat(), report_time.isoformat()),
-    ).fetchall()
+        text(
+            "SELECT reading_id FROM sensor_readings "
+            "WHERE station_id = :sid "
+            "  AND recorded_at >= :ws "
+            "  AND recorded_at <= :rt"
+        ),
+        {
+            "sid": station_id,
+            "ws": window_start.isoformat(),
+            "rt": report_time.isoformat(),
+        },
+    ).all()
 
     if not target_readings:
         return 0
@@ -106,15 +95,21 @@ def label_readings_for_report(
 
     inserted = 0
     for row in target_readings:
-        cursor = conn.execute(
-            """
-            INSERT OR IGNORE INTO reading_labels
-                (reading_id, report_id, label, rule_description)
-            VALUES (?, ?, ?, ?)
-            """,
-            (row["reading_id"], report_id, DEFAULT_LABEL, rule_description),
+        result = conn.execute(
+            text(
+                "INSERT INTO reading_labels "
+                "(reading_id, report_id, label, rule_description) "
+                "VALUES (:rid, :rep, :label, :rule) "
+                "ON CONFLICT (reading_id, report_id) DO NOTHING"
+            ),
+            {
+                "rid": row.reading_id,
+                "rep": report_id,
+                "label": DEFAULT_LABEL,
+                "rule": rule_description,
+            },
         )
-        inserted += cursor.rowcount
+        inserted += result.rowcount
 
     return inserted
 
