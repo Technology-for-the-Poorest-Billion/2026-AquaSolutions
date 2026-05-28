@@ -7,7 +7,6 @@ app reads DATABASE_PATH from os.environ at connection time
 
 from __future__ import annotations
 
-import importlib
 import os
 import sys
 import tempfile
