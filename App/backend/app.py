@@ -271,8 +271,8 @@ def logout():
 def medical_report_form():
     with connection() as conn:
         stations = conn.execute(
-            "SELECT station_id, name FROM stations ORDER BY station_id"
-        ).fetchall()
+            text("SELECT station_id, name FROM stations ORDER BY station_id")
+        ).mappings().all()
     return render_template(
         "medical_report.html",
         stations=stations,
@@ -295,8 +295,8 @@ def medical_report_submit():
     def render(success=None, error=None):
         with connection() as conn:
             stations = conn.execute(
-                "SELECT station_id, name FROM stations ORDER BY station_id"
-            ).fetchall()
+                text("SELECT station_id, name FROM stations ORDER BY station_id")
+            ).mappings().all()
         return render_template(
             "medical_report.html",
             stations=stations,
@@ -317,9 +317,6 @@ def medical_report_submit():
     except ValueError:
         return render(error="Case count must be a positive integer.")
 
-    # Anchor the labelling window at the end of the onset date when
-    # provided (a partial implementation of the exposure-anchored rule
-    # in labels.py option 1). Falls back to now.
     report_time = datetime.now(timezone.utc)
     if onset_date_raw:
         try:
@@ -334,7 +331,6 @@ def medical_report_submit():
         return render(error="Invalid risk tier value.")
     risk_tier_value = risk_tier_raw or None
 
-    # Validate the selected symptoms against the canonical list.
     valid_keys = {key for key, _label in SYMPTOMS}
     symptoms_selected = [s for s in symptoms_selected if s in valid_keys]
 
@@ -345,39 +341,42 @@ def medical_report_submit():
     )
 
     with connection() as conn:
-        station = conn.execute(
-            "SELECT name FROM stations WHERE station_id = ?", (station_id,)
-        ).fetchone()
-        if station is None:
-            return render(error=f"Station {station_id} is not in the system.")
+        with conn.begin():
+            station = conn.execute(
+                text("SELECT name FROM stations WHERE station_id = :sid"),
+                {"sid": station_id},
+            ).mappings().first()
+            if station is None:
+                return render(error=f"Station {station_id} is not in the system.")
 
-        cursor = conn.execute(
-            """
-            INSERT INTO illness_reports
-                (station_id, reporter_phone, raw_message, parser_version,
-                 report_source, submitter, case_count, onset_date, symptoms,
-                 risk_tier)
-            VALUES (?, NULL, ?, ?, 'medical_portal', ?, ?, ?, ?, ?)
-            """,
-            (
-                station_id,
-                raw_message,
-                STATION_PARSER_VERSION,
-                session.get("username"),
-                case_count,
-                onset_date_raw or None,
-                json.dumps(symptoms_selected),
-                risk_tier_value,
-            ),
-        )
-        report_id = cursor.lastrowid
+            report_id = conn.execute(
+                text(
+                    "INSERT INTO illness_reports "
+                    "(station_id, reporter_phone, raw_message, parser_version, "
+                    " report_source, submitter, case_count, onset_date, symptoms, "
+                    " risk_tier) "
+                    "VALUES (:sid, NULL, :msg, :ver, 'medical_portal', :sub, "
+                    " :cc, :od, :sym, :rt) "
+                    "RETURNING report_id"
+                ),
+                {
+                    "sid": station_id,
+                    "msg": raw_message,
+                    "ver": STATION_PARSER_VERSION,
+                    "sub": session.get("username"),
+                    "cc": case_count,
+                    "od": onset_date_raw or None,
+                    "sym": json.dumps(symptoms_selected),
+                    "rt": risk_tier_value,
+                },
+            ).scalar_one()
 
-        labelled = label_readings_for_report(
-            conn,
-            report_id=report_id,
-            station_id=station_id,
-            report_time=report_time,
-        )
+            labelled = label_readings_for_report(
+                conn,
+                report_id=report_id,
+                station_id=station_id,
+                report_time=report_time,
+            )
 
     success = (
         f"Report received for {station['name']} (station {station_id}). "
@@ -774,28 +773,28 @@ def dashboard_report_detail(report_id: int):
 def medical_history():
     with connection() as conn:
         report_rows = conn.execute(
-            """
-            SELECT ir.*, s.name AS station_name
-            FROM illness_reports ir
-            LEFT JOIN stations s USING (station_id)
-            WHERE ir.report_source = 'medical_portal'
-            ORDER BY ir.received_at DESC
-            LIMIT 50
-            """,
-        ).fetchall()
+            text("""
+                SELECT ir.*, s.name AS station_name
+                FROM illness_reports ir
+                LEFT JOIN stations s ON s.station_id = ir.station_id
+                WHERE ir.report_source = 'medical_portal'
+                ORDER BY ir.received_at DESC
+                LIMIT 50
+            """),
+        ).mappings().all()
         stations = conn.execute(
-            """
-            SELECT s.station_id, s.name, s.latitude, s.longitude,
-                   (SELECT COUNT(*) FROM illness_reports
-                      WHERE station_id = s.station_id
-                        AND report_source = 'medical_portal') AS report_count,
-                   (SELECT MAX(received_at) FROM illness_reports
-                      WHERE station_id = s.station_id
-                        AND report_source = 'medical_portal') AS last_report
-            FROM stations s
-            ORDER BY s.station_id
-            """,
-        ).fetchall()
+            text("""
+                SELECT s.station_id, s.name, s.latitude, s.longitude,
+                       (SELECT COUNT(*) FROM illness_reports
+                          WHERE station_id = s.station_id
+                            AND report_source = 'medical_portal') AS report_count,
+                       (SELECT MAX(received_at) FROM illness_reports
+                          WHERE station_id = s.station_id
+                            AND report_source = 'medical_portal') AS last_report
+                FROM stations s
+                ORDER BY s.station_id
+            """),
+        ).mappings().all()
 
     reports_view = []
     for rep in report_rows:
@@ -823,14 +822,14 @@ def medical_history():
 def medical_report_detail(report_id: int):
     with connection() as conn:
         row = conn.execute(
-            """
-            SELECT ir.*, s.name AS station_name
-            FROM illness_reports ir
-            LEFT JOIN stations s USING (station_id)
-            WHERE ir.report_id = ?
-            """,
-            (report_id,),
-        ).fetchone()
+            text("""
+                SELECT ir.*, s.name AS station_name
+                FROM illness_reports ir
+                LEFT JOIN stations s ON s.station_id = ir.station_id
+                WHERE ir.report_id = :rid
+            """),
+            {"rid": report_id},
+        ).mappings().first()
         if row is None:
             abort(404)
     tier_block = _resolve_tier(dict(row))
