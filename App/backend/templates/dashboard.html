@@ -82,6 +82,13 @@
         .label-high   { background: rgba(255, 165, 90, 0.20); color: #ffa55a; }
         .label-severe { background: rgba(255, 107, 107, 0.22); color: var(--danger); }
         .empty { color: var(--muted); padding: 16px; text-align: center; }
+        .btn-action {
+            padding: 4px 8px; font-size: 11px; font-weight: 600;
+            background: var(--input-bg, #11141a); color: var(--text);
+            border: 1px solid var(--border); border-radius: 4px;
+            cursor: pointer; margin-right: 4px;
+        }
+        .btn-action:hover { background: var(--accent); color: #0f1115; }
     </style>
 </head>
 <body>
@@ -112,12 +119,15 @@
                         <th>Temp (°C)</th>
                         <th>Rain (mm)</th>
                         <th>Status</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for s in stations %}
-                    <tr>
-                        <td>#{{ s['station_id'] }} {{ s['name'] }}</td>
+                    <tr {% if s['is_closed'] %}style="opacity: 0.7;"{% endif %}>
+                        <td>
+                            {% if s['is_closed'] %}🔒 {% endif %}#{{ s['station_id'] }} {{ s['name'] }}
+                        </td>
                         <td>{{ s['recorded_at'][:19] if s['recorded_at'] else 'no readings yet' }}</td>
                         <td class="numeric">{{ '%.2f'|format(s['ph']) if s['ph'] is not none else '—' }}</td>
                         <td class="numeric">{{ '%.1f'|format(s['turbidity_ntu']) if s['turbidity_ntu'] is not none else '—' }}</td>
@@ -129,6 +139,35 @@
                             {% else %}
                                 <span class="label-pill label-clear">clear</span>
                             {% endif %}
+                        </td>
+                        <td style="white-space: nowrap;">
+                            {% if s['is_closed'] %}
+                                <form method="POST" action="{{ url_for('post_action') }}" style="display: inline;"
+                                      onsubmit="return confirm('Reopen station {{ s['station_id'] }}?');">
+                                    <input type="hidden" name="action_type" value="reopen_borehole">
+                                    <input type="hidden" name="station_id" value="{{ s['station_id'] }}">
+                                    <button type="submit" class="btn-action">Reopen</button>
+                                </form>
+                            {% else %}
+                                <form method="POST" action="{{ url_for('post_action') }}" style="display: inline;"
+                                      onsubmit="return confirm('Close station {{ s['station_id'] }}?');">
+                                    <input type="hidden" name="action_type" value="close_borehole">
+                                    <input type="hidden" name="station_id" value="{{ s['station_id'] }}">
+                                    <button type="submit" class="btn-action">Close</button>
+                                </form>
+                            {% endif %}
+                            <form method="POST" action="{{ url_for('post_action') }}" style="display: inline;"
+                                  onsubmit="return confirm('Dispatch sample team to station {{ s['station_id'] }}?');">
+                                <input type="hidden" name="action_type" value="dispatch_sample_team">
+                                <input type="hidden" name="station_id" value="{{ s['station_id'] }}">
+                                <button type="submit" class="btn-action">Sample</button>
+                            </form>
+                            <form method="POST" action="{{ url_for('post_action') }}" style="display: inline;"
+                                  onsubmit="return confirm('Dispatch medical team to station {{ s['station_id'] }}?');">
+                                <input type="hidden" name="action_type" value="dispatch_medical_team">
+                                <input type="hidden" name="station_id" value="{{ s['station_id'] }}">
+                                <button type="submit" class="btn-action">Medical</button>
+                            </form>
                         </td>
                     </tr>
                     {% endfor %}

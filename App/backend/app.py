@@ -462,6 +462,7 @@ def dashboard():
             )
             SELECT s.station_id,
                    s.name,
+                   s.is_closed,
                    r.recorded_at,
                    r.ph,
                    r.turbidity_ntu,
