@@ -31,6 +31,8 @@ from flask import (
 from twilio.request_validator import RequestValidator
 from twilio.twiml.messaging_response import MessagingResponse
 
+from sqlalchemy import text
+
 from database import connection, init_db
 from labels import label_readings_for_report
 from sensor_ingest import sensor_bp
@@ -593,57 +595,51 @@ def dashboard():
     ).isoformat()
 
     with connection() as conn:
-        # One row per station: latest reading + a station-level status pill.
-        # A station is `unsafe` if any illness report at that station landed
-        # in the trailing STATION_STATUS_WINDOW_DAYS window — this is a
-        # rollup, not a per-reading label, so newly-arriving readings do
-        # not flip the pill back to `clear`.
         stations = conn.execute(
-            """
-            WITH latest AS (
-                SELECT station_id, MAX(recorded_at) AS latest_at
-                FROM sensor_readings
-                GROUP BY station_id
-            )
-            SELECT s.station_id,
-                   s.name,
-                   s.is_closed,
-                   r.recorded_at,
-                   r.ph,
-                   r.turbidity_ntu,
-                   r.temperature_c,
-                   r.rainfall_mm,
-                   EXISTS (
-                       SELECT 1 FROM illness_reports ir
-                       WHERE ir.station_id = s.station_id
-                         AND ir.received_at >= ?
-                   ) AS is_unsafe
-            FROM stations s
-            LEFT JOIN latest l USING (station_id)
-            LEFT JOIN sensor_readings r
-                ON r.station_id = s.station_id
-               AND r.recorded_at = l.latest_at
-            ORDER BY s.station_id
-            """,
-            (status_cutoff,),
-        ).fetchall()
+            text("""
+                WITH latest AS (
+                    SELECT station_id, MAX(recorded_at) AS latest_at
+                    FROM sensor_readings
+                    GROUP BY station_id
+                )
+                SELECT s.station_id,
+                       s.name,
+                       s.is_closed,
+                       r.recorded_at,
+                       r.ph,
+                       r.turbidity_ntu,
+                       r.temperature_c,
+                       r.rainfall_mm,
+                       EXISTS (
+                           SELECT 1 FROM illness_reports ir
+                           WHERE ir.station_id = s.station_id
+                             AND ir.received_at >= :cutoff
+                       ) AS is_unsafe
+                FROM stations s
+                LEFT JOIN latest l ON l.station_id = s.station_id
+                LEFT JOIN sensor_readings r
+                    ON r.station_id = s.station_id
+                   AND r.recorded_at = l.latest_at
+                ORDER BY s.station_id
+            """),
+            {"cutoff": status_cutoff},
+        ).mappings().all()
 
         reports = conn.execute(
-            """
-            SELECT ir.report_id, ir.station_id, s.name AS station_name,
-                   ir.reporter_phone, ir.raw_message, ir.received_at,
-                   ir.risk_tier, ir.report_source,
-                   ir.case_count, ir.symptoms, ir.onset_date,
-                   (SELECT COUNT(*) FROM reading_labels
-                     WHERE report_id = ir.report_id) AS readings_labelled
-            FROM illness_reports ir
-            LEFT JOIN stations s USING (station_id)
-            ORDER BY ir.received_at DESC
-            LIMIT 50
-            """
-        ).fetchall()
+            text("""
+                SELECT ir.report_id, ir.station_id, s.name AS station_name,
+                       ir.reporter_phone, ir.raw_message, ir.received_at,
+                       ir.risk_tier, ir.report_source,
+                       ir.case_count, ir.symptoms, ir.onset_date,
+                       (SELECT COUNT(*) FROM reading_labels
+                         WHERE report_id = ir.report_id) AS readings_labelled
+                FROM illness_reports ir
+                LEFT JOIN stations s ON s.station_id = ir.station_id
+                ORDER BY ir.received_at DESC
+                LIMIT 50
+            """),
+        ).mappings().all()
 
-        # Compute the tier display for each report at render time.
         reports_with_tier = [
             {**dict(rep), "tier_block": _resolve_tier(dict(rep))}
             for rep in reports
