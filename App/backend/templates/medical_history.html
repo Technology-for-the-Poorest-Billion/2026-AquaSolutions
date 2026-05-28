@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>History — medical portal</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossorigin=""/>
+    <style>
+        :root {
+            --bg: #0f1115; --panel: #181b22; --text: #e6e7eb;
+            --muted: #8a92a3; --accent: #5ec8a8; --danger: #ff6b6b;
+            --warn: #f0c674; --border: #262a33;
+        }
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+               background: var(--bg); color: var(--text); }
+        header { padding: 16px 24px; border-bottom: 1px solid var(--border);
+                 display: flex; align-items: baseline; justify-content: space-between; }
+        header a { color: var(--accent); text-decoration: none; margin-right: 12px; }
+        .disclaimer { background: #2d1f15; color: var(--warn); font-size: 12px;
+                      padding: 8px 24px; border-bottom: 1px solid var(--border); }
+        main { max-width: 1100px; margin: 0 auto; padding: 24px; }
+        #map { height: 300px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 24px; }
+        section { background: var(--panel); border: 1px solid var(--border);
+                  border-radius: 8px; padding: 16px; }
+        section h2 { margin: 0 0 12px 0; font-size: 14px; font-weight: 600;
+                     color: var(--muted); text-transform: uppercase;
+                     letter-spacing: 0.05em; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--border); }
+        th { color: var(--muted); font-weight: 500; }
+        tr.row-link { cursor: pointer; }
+        tr.row-link:hover { background: rgba(255,255,255,0.03); }
+        .pill { display: inline-block; padding: 2px 8px; border-radius: 10px;
+                font-size: 11px; font-weight: 600; }
+        .tier-low { background: rgba(94, 200, 168, 0.18); color: var(--accent); }
+        .tier-medium { background: rgba(240, 198, 116, 0.20); color: #f0c674; }
+        .tier-high { background: rgba(255, 165, 90, 0.20); color: #ffa55a; }
+        .tier-severe { background: rgba(255, 107, 107, 0.22); color: var(--danger); }
+        .tier-muted { opacity: 0.65; }
+    </style>
+</head>
+<body>
+<header>
+    <h1 style="font-size: 18px; margin: 0;">
+        <a href="{{ url_for('medical_report_form') }}">File a report</a>
+        <a href="{{ url_for('medical_history') }}">History</a>
+    </h1>
+    <div style="color: var(--muted); font-size: 12px;">
+        Signed in as {{ session['display_name'] }}
+        · <a href="{{ url_for('logout') }}">Sign out</a>
+    </div>
+</header>
+<div class="disclaimer">
+    Faecal-contamination risk + community illness signal. NOT a cholera detector.
+</div>
+<main>
+    <div id="map"></div>
+    <section>
+        <h2>Reports filed via medical portal ({{ reports|length }})</h2>
+        {% if reports %}
+        <table>
+            <thead><tr>
+                <th>Submitted</th><th>Submitter</th><th>Station</th>
+                <th>Cases</th><th>Symptoms</th><th>Risk tier</th><th>Onset</th>
+            </tr></thead>
+            <tbody>
+                {% for rep in reports %}
+                <tr class="row-link" onclick="window.location='/medical/reports/{{ rep['report_id'] }}'">
+                    <td>{{ rep['received_at'][:19] }}</td>
+                    <td>{{ rep['submitter'] }}</td>
+                    <td>#{{ rep['station_id'] }} {{ rep['station_name'] }}</td>
+                    <td>{{ rep['case_count'] or '—' }}</td>
+                    <td>{{ rep['symptoms_display'] }}</td>
+                    <td>
+                        {% if rep['tier_source'] == 'reporter' %}
+                            <span class="pill tier-{{ rep['tier'] }}">{{ rep['tier']|upper }}</span>
+                        {% elif rep['tier_source'] == 'estimated' %}
+                            <span class="pill tier-{{ rep['tier'] }} tier-muted">{{ rep['tier']|upper }}</span>
+                        {% else %}
+                            <span style="color: var(--muted); font-size: 11px;">—</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ rep['onset_date'] or '—' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p style="color: var(--muted);">No medical-portal reports yet. File one via "File a report" above.</p>
+        {% endif %}
+    </section>
+</main>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""></script>
+<script>
+    const HARARE = [-17.8292, 31.0522];
+    const map = L.map('map').setView(HARARE, 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 18,
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    const stations = {{ stations_json|safe }};
+    stations.forEach(s => {
+        const radius = 6 + Math.min(s.report_count, 10) * 2;
+        const color = s.report_count > 0 ? '#5ec8a8' : '#6a7383';
+        L.circleMarker([s.latitude, s.longitude], {
+            radius: radius,
+            fillColor: color,
+            color: color,
+            fillOpacity: s.report_count > 0 ? 0.6 : 0.25,
+            weight: 1,
+        }).addTo(map).bindPopup(
+            `<strong>${s.name}</strong><br>` +
+            `${s.report_count} medical-portal report(s)` +
+            (s.last_report ? `<br>Last: ${s.last_report.slice(0, 19)}` : '')
+        );
+    });
+</script>
+</body>
+</html>

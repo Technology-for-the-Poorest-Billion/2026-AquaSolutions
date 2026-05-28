@@ -559,7 +559,50 @@ def dashboard_report_detail(report_id: int):
 @app.get("/medical/history")
 @role_required("medical")
 def medical_history():
-    return "history coming"  # stub — replaced in C.4
+    with connection() as conn:
+        report_rows = conn.execute(
+            """
+            SELECT ir.*, s.name AS station_name
+            FROM illness_reports ir
+            LEFT JOIN stations s USING (station_id)
+            WHERE ir.report_source = 'medical_portal'
+            ORDER BY ir.received_at DESC
+            LIMIT 50
+            """,
+        ).fetchall()
+        stations = conn.execute(
+            """
+            SELECT s.station_id, s.name, s.latitude, s.longitude,
+                   (SELECT COUNT(*) FROM illness_reports
+                      WHERE station_id = s.station_id
+                        AND report_source = 'medical_portal') AS report_count,
+                   (SELECT MAX(received_at) FROM illness_reports
+                      WHERE station_id = s.station_id
+                        AND report_source = 'medical_portal') AS last_report
+            FROM stations s
+            ORDER BY s.station_id
+            """,
+        ).fetchall()
+
+    reports_view = []
+    for rep in report_rows:
+        tier_block = _resolve_tier(dict(rep))
+        try:
+            symptoms_list = json.loads(rep["symptoms"] or "[]")
+        except (json.JSONDecodeError, TypeError):
+            symptoms_list = []
+        reports_view.append({
+            **dict(rep),
+            **tier_block,
+            "symptoms_display": ", ".join(symptoms_list) if symptoms_list else "—",
+        })
+
+    stations_json = json.dumps([dict(s) for s in stations])
+    return render_template(
+        "medical_history.html",
+        reports=reports_view,
+        stations_json=stations_json,
+    )
 
 
 @app.get("/medical/reports/<int:report_id>")
