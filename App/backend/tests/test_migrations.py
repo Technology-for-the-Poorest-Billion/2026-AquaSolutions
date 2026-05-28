@@ -28,6 +28,30 @@ def test_interventions_table_exists_and_constrains_action(app):
             pass
 
 
+def test_illness_reports_has_dialog_state_column(app):
+    from database import connection
+    import sqlite3
+    with connection() as c:
+        cols = {r["name"] for r in c.execute("PRAGMA table_info(illness_reports)").fetchall()}
+        assert "dialog_state" in cols
+
+        valid = ["awaiting_case_count", "awaiting_symptoms", "awaiting_onset",
+                 "complete", "abandoned"]
+        for s in valid:
+            c.execute(
+                "INSERT INTO illness_reports (raw_message, parser_version, dialog_state) "
+                "VALUES (?, 'v', ?)", ("t", s)
+            )
+        try:
+            c.execute(
+                "INSERT INTO illness_reports (raw_message, parser_version, dialog_state) "
+                "VALUES ('t', 'v', 'bogus')"
+            )
+            assert False, "CHECK should reject bogus state"
+        except sqlite3.IntegrityError:
+            pass
+
+
 def test_illness_reports_has_risk_tier_column(app):
     """risk_tier must exist on illness_reports; NULL allowed; CHECK enforced."""
     from database import connection

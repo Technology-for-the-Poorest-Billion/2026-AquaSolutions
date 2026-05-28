@@ -58,7 +58,8 @@ CREATE TABLE IF NOT EXISTS illness_reports (
     case_count        INTEGER,
     onset_date        TEXT,
     symptoms          TEXT,
-    risk_tier         TEXT CHECK (risk_tier IN ('low','medium','high','severe'))
+    risk_tier         TEXT CHECK (risk_tier IN ('low','medium','high','severe')),
+    dialog_state      TEXT CHECK (dialog_state IN ('awaiting_case_count','awaiting_symptoms','awaiting_onset','complete','abandoned'))
 );
 
 CREATE INDEX IF NOT EXISTS idx_reports_station_time
@@ -147,6 +148,7 @@ def _migrate(conn: sqlite3.Connection) -> None:
         ("onset_date",    "TEXT"),
         ("symptoms",      "TEXT"),
         ("risk_tier",     "TEXT CHECK (risk_tier IN ('low','medium','high','severe'))"),
+        ("dialog_state",  "TEXT CHECK (dialog_state IN ('awaiting_case_count','awaiting_symptoms','awaiting_onset','complete','abandoned'))"),
     ]
     for col_name, col_type in added_reports_columns:
         if col_name not in existing_reports:
