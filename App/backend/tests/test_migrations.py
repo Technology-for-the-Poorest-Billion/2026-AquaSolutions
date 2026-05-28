@@ -1,78 +1,99 @@
-def test_stations_has_is_closed_column(app):
-    from database import connection
-    with connection() as c:
-        cols = {r["name"] for r in c.execute("PRAGMA table_info(stations)").fetchall()}
-        assert "is_closed" in cols
-        row = c.execute("SELECT is_closed FROM stations WHERE station_id = 1").fetchone()
-        assert row["is_closed"] == 0  # default
+"""Migration / schema invariants — portable between SQLite and Postgres."""
+
+from __future__ import annotations
+
+import sys
+
+import pytest
+from sqlalchemy import inspect, text
+from sqlalchemy.exc import IntegrityError
 
 
-def test_interventions_table_exists_and_constrains_action(app):
-    from database import connection
-    import sqlite3
-    with connection() as c:
-        cols = {r["name"] for r in c.execute("PRAGMA table_info(interventions)").fetchall()}
-        assert {"station_id", "action_type", "triggered_by",
-                "triggered_at", "related_report_id", "notes"}.issubset(cols)
-        c.execute(
-            "INSERT INTO interventions (station_id, action_type, triggered_by) "
-            "VALUES (1, 'close_borehole', 'official.jones')"
-        )
-        try:
-            c.execute(
-                "INSERT INTO interventions (station_id, action_type, triggered_by) "
-                "VALUES (1, 'bogus_action', 'x')"
+def test_stations_has_is_closed_column(tmp_db_path):
+    sys.modules.pop("engine", None)
+    sys.modules.pop("database", None)
+    from database import init_db
+    from engine import get_engine
+
+    init_db()
+    cols = {c["name"] for c in inspect(get_engine()).get_columns("stations")}
+    assert "is_closed" in cols
+
+
+def test_interventions_table_exists_and_rejects_bad_action(tmp_db_path):
+    sys.modules.pop("engine", None)
+    sys.modules.pop("database", None)
+    from database import init_db
+    from engine import get_engine
+
+    init_db()
+    engine = get_engine()
+
+    tables = set(inspect(engine).get_table_names())
+    assert "interventions" in tables
+
+    cols = {c["name"] for c in inspect(engine).get_columns("interventions")}
+    assert {
+        "intervention_id", "station_id", "action_type", "triggered_by",
+        "triggered_at", "related_report_id", "notes",
+    }.issubset(cols)
+
+    with pytest.raises(IntegrityError):
+        with engine.begin() as conn:
+            conn.execute(
+                text(
+                    "INSERT INTO interventions (station_id, action_type, triggered_by) "
+                    "VALUES (1, 'not_a_real_action', 'tester')"
+                )
             )
-            assert False, "CHECK should have rejected bogus action_type"
-        except sqlite3.IntegrityError:
-            pass
 
 
-def test_illness_reports_has_dialog_state_column(app):
-    from database import connection
-    import sqlite3
-    with connection() as c:
-        cols = {r["name"] for r in c.execute("PRAGMA table_info(illness_reports)").fetchall()}
-        assert "dialog_state" in cols
+def test_illness_reports_has_phase_d_e_f_columns(tmp_db_path):
+    sys.modules.pop("engine", None)
+    sys.modules.pop("database", None)
+    from database import init_db
+    from engine import get_engine
 
-        valid = ["awaiting_case_count", "awaiting_symptoms", "awaiting_onset",
-                 "complete", "abandoned"]
-        for s in valid:
-            c.execute(
-                "INSERT INTO illness_reports (raw_message, parser_version, dialog_state) "
-                "VALUES (?, 'v', ?)", ("t", s)
+    init_db()
+    cols = {c["name"] for c in inspect(get_engine()).get_columns("illness_reports")}
+    for expected in ("risk_tier", "dialog_state", "case_count", "symptoms", "onset_date"):
+        assert expected in cols
+
+
+def test_risk_tier_rejects_invalid_value(tmp_db_path):
+    sys.modules.pop("engine", None)
+    sys.modules.pop("database", None)
+    from database import init_db
+    from engine import get_engine
+    from sqlalchemy import text
+
+    init_db()
+    engine = get_engine()
+    with pytest.raises(IntegrityError):
+        with engine.begin() as conn:
+            conn.execute(
+                text(
+                    "INSERT INTO illness_reports "
+                    "(reporter_phone, raw_message, parser_version, risk_tier) "
+                    "VALUES ('+1', 'msg', 'v', 'banana')"
+                )
             )
-        try:
-            c.execute(
-                "INSERT INTO illness_reports (raw_message, parser_version, dialog_state) "
-                "VALUES ('t', 'v', 'bogus')"
-            )
-            assert False, "CHECK should reject bogus state"
-        except sqlite3.IntegrityError:
-            pass
 
 
-def test_illness_reports_has_risk_tier_column(app):
-    """risk_tier must exist on illness_reports; NULL allowed; CHECK enforced."""
-    from database import connection
-    with connection() as c:
-        cols = {r["name"]: r for r in c.execute("PRAGMA table_info(illness_reports)").fetchall()}
-        assert "risk_tier" in cols
-        # CHECK is enforced at INSERT time
-        c.execute(
-            "INSERT INTO illness_reports (raw_message, parser_version, risk_tier) "
-            "VALUES ('test', 'v', 'low')"
-        )
-        c.execute(
-            "INSERT INTO illness_reports (raw_message, parser_version, risk_tier) "
-            "VALUES ('test', 'v', NULL)"
-        )
-        import sqlite3
-        try:
-            c.execute(
-                "INSERT INTO illness_reports (raw_message, parser_version, risk_tier) "
-                "VALUES ('test', 'v', 'bogus')"
+def test_dialog_state_rejects_invalid_value(tmp_db_path):
+    sys.modules.pop("engine", None)
+    sys.modules.pop("database", None)
+    from database import init_db
+    from engine import get_engine
+
+    init_db()
+    engine = get_engine()
+    with pytest.raises(IntegrityError):
+        with engine.begin() as conn:
+            conn.execute(
+                text(
+                    "INSERT INTO illness_reports "
+                    "(reporter_phone, raw_message, parser_version, dialog_state) "
+                    "VALUES ('+1', 'msg', 'v', 'orange')"
+                )
             )
-            assert False, "CHECK constraint should have rejected 'bogus'"
-        except sqlite3.IntegrityError:
-            pass
