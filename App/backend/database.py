@@ -1,101 +1,118 @@
-"""SQLite schema and connection helpers for the Gen-1 water-safety backend."""
+"""Schema definition + init for the Gen-1 water-safety backend.
+
+Schema is declared as SQLAlchemy MetaData/Table objects so the same code
+emits SQLite DDL locally and Postgres DDL on Railway. init_db() is
+idempotent: it creates any missing tables, adds any newly-added columns
+on existing tables, and seeds the 10 stations row by row with
+ON CONFLICT DO NOTHING.
+"""
 
 from __future__ import annotations
 
-import os
-import sqlite3
 from contextlib import contextmanager
-from pathlib import Path
 from typing import Iterator
 
-BACKEND_DIR = Path(__file__).resolve().parent
+from sqlalchemy import (
+    CheckConstraint, Column, Float, ForeignKey, Index, Integer, MetaData,
+    Table, Text, UniqueConstraint, func, inspect, text,
+)
+from sqlalchemy.engine import Connection
+
+from engine import get_engine
 
 
-def _resolve_db_path() -> Path:
-    raw = os.environ.get("DATABASE_PATH", "data/water_safety.db")
-    p = Path(raw)
-    if not p.is_absolute():
-        p = BACKEND_DIR / p
-    p.parent.mkdir(parents=True, exist_ok=True)
-    return p
+metadata = MetaData()
 
 
-SCHEMA = """
-CREATE TABLE IF NOT EXISTS stations (
-    station_id     INTEGER PRIMARY KEY,
-    name           TEXT NOT NULL,
-    latitude       REAL,
-    longitude      REAL,
-    is_closed      INTEGER NOT NULL DEFAULT 0,
-    created_at     TEXT NOT NULL DEFAULT (datetime('now'))
-);
+stations = Table(
+    "stations", metadata,
+    Column("station_id", Integer, primary_key=True, autoincrement=False),
+    Column("name", Text, nullable=False),
+    Column("latitude", Float),
+    Column("longitude", Float),
+    Column("is_closed", Integer, nullable=False, server_default=text("0")),
+    Column("created_at", Text, nullable=False, server_default=func.current_timestamp()),
+)
 
-CREATE TABLE IF NOT EXISTS sensor_readings (
-    reading_id        INTEGER PRIMARY KEY AUTOINCREMENT,
-    station_id        INTEGER NOT NULL REFERENCES stations(station_id),
-    recorded_at       TEXT    NOT NULL,
-    ph                REAL,
-    turbidity_ntu     REAL,
-    temperature_c     REAL,
-    rainfall_mm       REAL,
-    provenance        TEXT    NOT NULL DEFAULT 'unknown',
-    received_at       TEXT    NOT NULL DEFAULT (datetime('now'))
-);
 
-CREATE INDEX IF NOT EXISTS idx_readings_station_time
-    ON sensor_readings(station_id, recorded_at);
+sensor_readings = Table(
+    "sensor_readings", metadata,
+    Column("reading_id", Integer, primary_key=True, autoincrement=True),
+    Column("station_id", Integer, ForeignKey("stations.station_id"), nullable=False),
+    Column("recorded_at", Text, nullable=False),
+    Column("ph", Float),
+    Column("turbidity_ntu", Float),
+    Column("temperature_c", Float),
+    Column("rainfall_mm", Float),
+    Column("provenance", Text, nullable=False, server_default=text("'unknown'")),
+    Column("received_at", Text, nullable=False, server_default=func.current_timestamp()),
+    Index("idx_readings_station_time", "station_id", "recorded_at"),
+)
 
-CREATE TABLE IF NOT EXISTS illness_reports (
-    report_id         INTEGER PRIMARY KEY AUTOINCREMENT,
-    station_id        INTEGER REFERENCES stations(station_id),
-    reporter_phone    TEXT,
-    raw_message       TEXT    NOT NULL,
-    parser_version    TEXT    NOT NULL,
-    received_at       TEXT    NOT NULL DEFAULT (datetime('now')),
-    report_source     TEXT    NOT NULL DEFAULT 'sms'
-        CHECK (report_source IN ('sms', 'medical_portal')),
-    submitter         TEXT,
-    case_count        INTEGER,
-    onset_date        TEXT,
-    symptoms          TEXT,
-    risk_tier         TEXT CHECK (risk_tier IN ('low','medium','high','severe')),
-    dialog_state      TEXT CHECK (dialog_state IN ('awaiting_case_count','awaiting_symptoms','awaiting_onset','complete','abandoned'))
-);
 
-CREATE INDEX IF NOT EXISTS idx_reports_station_time
-    ON illness_reports(station_id, received_at);
+illness_reports = Table(
+    "illness_reports", metadata,
+    Column("report_id", Integer, primary_key=True, autoincrement=True),
+    Column("station_id", Integer, ForeignKey("stations.station_id")),
+    Column("reporter_phone", Text),
+    Column("raw_message", Text, nullable=False),
+    Column("parser_version", Text, nullable=False),
+    Column("received_at", Text, nullable=False, server_default=func.current_timestamp()),
+    Column("report_source", Text, nullable=False, server_default=text("'sms'")),
+    Column("submitter", Text),
+    Column("case_count", Integer),
+    Column("onset_date", Text),
+    Column("symptoms", Text),
+    Column("risk_tier", Text),
+    Column("dialog_state", Text),
+    CheckConstraint(
+        "report_source IN ('sms', 'medical_portal')",
+        name="ck_illness_reports_source",
+    ),
+    CheckConstraint(
+        "risk_tier IS NULL OR risk_tier IN ('low','medium','high','severe')",
+        name="ck_illness_reports_risk_tier",
+    ),
+    CheckConstraint(
+        "dialog_state IS NULL OR dialog_state IN "
+        "('awaiting_case_count','awaiting_symptoms','awaiting_onset','complete','abandoned')",
+        name="ck_illness_reports_dialog_state",
+    ),
+    Index("idx_reports_station_time", "station_id", "received_at"),
+)
 
-CREATE TABLE IF NOT EXISTS reading_labels (
-    label_id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    reading_id        INTEGER NOT NULL REFERENCES sensor_readings(reading_id),
-    report_id         INTEGER NOT NULL REFERENCES illness_reports(report_id),
-    label             TEXT    NOT NULL CHECK (label IN ('unsafe', 'suspect')),
-    rule_description  TEXT    NOT NULL,
-    labelled_at       TEXT    NOT NULL DEFAULT (datetime('now')),
-    UNIQUE(reading_id, report_id)
-);
 
-CREATE INDEX IF NOT EXISTS idx_labels_reading
-    ON reading_labels(reading_id);
+reading_labels = Table(
+    "reading_labels", metadata,
+    Column("label_id", Integer, primary_key=True, autoincrement=True),
+    Column("reading_id", Integer, ForeignKey("sensor_readings.reading_id"), nullable=False),
+    Column("report_id", Integer, ForeignKey("illness_reports.report_id"), nullable=False),
+    Column("label", Text, nullable=False),
+    Column("rule_description", Text, nullable=False),
+    Column("labelled_at", Text, nullable=False, server_default=func.current_timestamp()),
+    CheckConstraint("label IN ('unsafe', 'suspect')", name="ck_reading_labels_label"),
+    UniqueConstraint("reading_id", "report_id", name="uq_reading_labels_reading_report"),
+    Index("idx_labels_reading", "reading_id"),
+)
 
-CREATE TABLE IF NOT EXISTS interventions (
-    intervention_id    INTEGER PRIMARY KEY AUTOINCREMENT,
-    station_id         INTEGER NOT NULL REFERENCES stations(station_id),
-    action_type        TEXT    NOT NULL
-        CHECK (action_type IN (
-            'close_borehole', 'reopen_borehole',
-            'dispatch_sample_team', 'dispatch_medical_team')),
-    triggered_by       TEXT    NOT NULL,
-    triggered_at       TEXT    NOT NULL DEFAULT (datetime('now')),
-    related_report_id  INTEGER REFERENCES illness_reports(report_id),
-    notes              TEXT
-);
 
-CREATE INDEX IF NOT EXISTS idx_interventions_station_time
-    ON interventions(station_id, triggered_at);
-CREATE INDEX IF NOT EXISTS idx_interventions_report
-    ON interventions(related_report_id);
-"""
+interventions = Table(
+    "interventions", metadata,
+    Column("intervention_id", Integer, primary_key=True, autoincrement=True),
+    Column("station_id", Integer, ForeignKey("stations.station_id"), nullable=False),
+    Column("action_type", Text, nullable=False),
+    Column("triggered_by", Text, nullable=False),
+    Column("triggered_at", Text, nullable=False, server_default=func.current_timestamp()),
+    Column("related_report_id", Integer, ForeignKey("illness_reports.report_id")),
+    Column("notes", Text),
+    CheckConstraint(
+        "action_type IN ('close_borehole', 'reopen_borehole', "
+        "'dispatch_sample_team', 'dispatch_medical_team')",
+        name="ck_interventions_action_type",
+    ),
+    Index("idx_interventions_station_time", "station_id", "triggered_at"),
+    Index("idx_interventions_report", "related_report_id"),
+)
 
 
 SEED_STATIONS = [
@@ -112,75 +129,70 @@ SEED_STATIONS = [
 ]
 
 
-def get_connection() -> sqlite3.Connection:
-    """Open a new SQLite connection with sensible defaults."""
-    conn = sqlite3.connect(_resolve_db_path(), isolation_level=None)
-    conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA foreign_keys = ON;")
-    conn.execute("PRAGMA journal_mode = WAL;")
-    return conn
+# Columns that may be missing from an existing illness_reports table on an
+# older deploy. Re-applied idempotently in _migrate.
+_REPORT_BACKFILL_COLUMNS = [
+    ("report_source", "TEXT NOT NULL DEFAULT 'sms'"),
+    ("submitter",     "TEXT"),
+    ("case_count",    "INTEGER"),
+    ("onset_date",    "TEXT"),
+    ("symptoms",      "TEXT"),
+    ("risk_tier",     "TEXT"),
+    ("dialog_state",  "TEXT"),
+]
 
 
 @contextmanager
-def connection() -> Iterator[sqlite3.Connection]:
-    conn = get_connection()
+def connection() -> Iterator[Connection]:
+    """Yield a SQLAlchemy connection. Callers wrap writes in conn.begin()."""
+    conn = get_engine().connect()
     try:
         yield conn
     finally:
         conn.close()
 
 
-def _migrate(conn: sqlite3.Connection) -> None:
+def _migrate(conn: Connection) -> None:
     """Add columns introduced after the original schema, idempotently.
 
-    SQLite's CREATE TABLE IF NOT EXISTS skips existing tables, so new
-    columns must be added via ALTER. We guard each with PRAGMA so the
-    function is safe to run repeatedly on any DB state.
+    Uses SQLAlchemy's inspect() so it works on both SQLite (PRAGMA-backed
+    introspection) and Postgres (information_schema-backed).
     """
-    existing_reports = {
-        row["name"]
-        for row in conn.execute("PRAGMA table_info(illness_reports)").fetchall()
-    }
-    added_reports_columns = [
-        ("report_source", "TEXT NOT NULL DEFAULT 'sms'"),
-        ("submitter",     "TEXT"),
-        ("case_count",    "INTEGER"),
-        ("onset_date",    "TEXT"),
-        ("symptoms",      "TEXT"),
-        ("risk_tier",     "TEXT CHECK (risk_tier IN ('low','medium','high','severe'))"),
-        ("dialog_state",  "TEXT CHECK (dialog_state IN ('awaiting_case_count','awaiting_symptoms','awaiting_onset','complete','abandoned'))"),
-    ]
-    for col_name, col_type in added_reports_columns:
-        if col_name not in existing_reports:
-            conn.execute(
+    insp = inspect(conn)
+    existing_report_cols = {c["name"] for c in insp.get_columns("illness_reports")}
+    for col_name, col_type in _REPORT_BACKFILL_COLUMNS:
+        if col_name not in existing_report_cols:
+            conn.execute(text(
                 f"ALTER TABLE illness_reports ADD COLUMN {col_name} {col_type}"
-            )
+            ))
 
-    existing_stations = {
-        row["name"]
-        for row in conn.execute("PRAGMA table_info(stations)").fetchall()
-    }
-    if "is_closed" not in existing_stations:
-        conn.execute("ALTER TABLE stations ADD COLUMN is_closed INTEGER NOT NULL DEFAULT 0")
+    existing_station_cols = {c["name"] for c in insp.get_columns("stations")}
+    if "is_closed" not in existing_station_cols:
+        conn.execute(text(
+            "ALTER TABLE stations ADD COLUMN is_closed INTEGER NOT NULL DEFAULT 0"
+        ))
 
 
 def init_db() -> None:
-    """Create tables, run migrations, and (idempotently) seed stations.
+    """Create all tables, run any needed column-level migrations, and seed stations.
 
-    INSERT OR IGNORE so existing rows are preserved when new stations
-    are added to SEED_STATIONS between runs.
+    Safe to call repeatedly. Designed to run on every Flask startup.
     """
-    with connection() as conn:
-        conn.executescript(SCHEMA)
+    engine = get_engine()
+    metadata.create_all(engine)
+    with engine.begin() as conn:
         _migrate(conn)
-        conn.executemany(
-            "INSERT OR IGNORE INTO stations "
-            "(station_id, name, latitude, longitude) "
-            "VALUES (?, ?, ?, ?)",
-            SEED_STATIONS,
-        )
+        for sid, name, lat, lon in SEED_STATIONS:
+            conn.execute(
+                text(
+                    "INSERT INTO stations (station_id, name, latitude, longitude) "
+                    "VALUES (:sid, :name, :lat, :lon) "
+                    "ON CONFLICT (station_id) DO NOTHING"
+                ),
+                {"sid": sid, "name": name, "lat": lat, "lon": lon},
+            )
 
 
 if __name__ == "__main__":
     init_db()
-    print(f"Initialised database at {_resolve_db_path()}")
+    print(f"Initialised database at {get_engine().url}")
