@@ -1,8 +1,10 @@
 """SQLAlchemy engine factory.
 
 A single module-level singleton engine is built lazily on first call to
-get_engine(). The DB URL is read from DATABASE_URL — Railway sets this
-to a postgresql+psycopg://… string; local dev and tests use sqlite:///.
+get_engine(). The DB URL is read from DATABASE_URL — Railway emits this
+without a driver prefix (postgresql:// or the short postgres://), and
+we rewrite either form to postgresql+psycopg:// so SQLAlchemy 2.x routes
+through psycopg 3. Local dev and tests use sqlite:///.
 
 If DATABASE_URL is unset, falls back to a SQLite file at
 App/backend/data/water_safety.db so existing local workflows keep working.
@@ -12,23 +14,26 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Optional
 
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 
 BACKEND_DIR = Path(__file__).resolve().parent
 
-_engine: Optional[Engine] = None
+_engine: Engine | None = None
 
 
 def _resolve_url() -> str:
     url = os.environ.get("DATABASE_URL", "").strip()
     if url:
-        # Railway historically supplies postgresql://; SQLAlchemy 2.x prefers the
-        # explicit driver prefix postgresql+psycopg:// for psycopg 3.
+        # SQLAlchemy 2.x dropped support for the bare postgres:// form and
+        # prefers an explicit driver prefix. Rewrite both common shapes to
+        # postgresql+psycopg:// so psycopg 3 is used regardless of which
+        # variant Railway (or a Heroku-lineage provider) emits.
         if url.startswith("postgresql://"):
             url = "postgresql+psycopg://" + url[len("postgresql://"):]
+        elif url.startswith("postgres://"):
+            url = "postgresql+psycopg://" + url[len("postgres://"):]
         return url
 
     # Fallback: local SQLite file.
@@ -40,7 +45,7 @@ def _resolve_url() -> str:
 def get_engine() -> Engine:
     global _engine
     if _engine is None:
-        _engine = create_engine(_resolve_url(), future=True)
+        _engine = create_engine(_resolve_url())
     return _engine
 
 

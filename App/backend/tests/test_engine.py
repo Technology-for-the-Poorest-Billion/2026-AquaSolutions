@@ -27,7 +27,6 @@ def test_engine_defaults_to_sqlite_data_path(monkeypatch, tmp_path):
     """With no DATABASE_URL set, get_engine() falls back to data/water_safety.db relative to backend dir."""
     sys.modules.pop("engine", None)
     monkeypatch.delenv("DATABASE_URL", raising=False)
-    monkeypatch.delenv("DATABASE_PATH", raising=False)
 
     from engine import get_engine
 
@@ -35,3 +34,33 @@ def test_engine_defaults_to_sqlite_data_path(monkeypatch, tmp_path):
     # SQLite engines expose their URL with .url; the path should end in water_safety.db
     assert str(engine.url).endswith("water_safety.db")
     assert engine.url.drivername.startswith("sqlite")
+
+
+def test_engine_rewrites_postgresql_url_for_psycopg(monkeypatch):
+    """Bare postgresql:// URLs are rewritten to postgresql+psycopg:// so SQLAlchemy 2.x routes through psycopg 3."""
+    sys.modules.pop("engine", None)
+    monkeypatch.setenv("DATABASE_URL", "postgresql://user:pw@host:5432/db")
+    from engine import get_engine
+
+    engine = get_engine()
+    try:
+        assert engine.url.drivername == "postgresql+psycopg"
+        assert engine.url.host == "host"
+        assert engine.url.database == "db"
+    finally:
+        engine.dispose()
+
+
+def test_engine_rewrites_short_postgres_url_for_psycopg(monkeypatch):
+    """The short postgres:// form (Heroku/older Railway) is also rewritten."""
+    sys.modules.pop("engine", None)
+    monkeypatch.setenv("DATABASE_URL", "postgres://user:pw@host:5432/db")
+    from engine import get_engine
+
+    engine = get_engine()
+    try:
+        assert engine.url.drivername == "postgresql+psycopg"
+        assert engine.url.host == "host"
+        assert engine.url.database == "db"
+    finally:
+        engine.dispose()
