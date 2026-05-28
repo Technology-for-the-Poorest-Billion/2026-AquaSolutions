@@ -72,10 +72,16 @@ CREATE INDEX IF NOT EXISTS idx_labels_reading
 
 
 SEED_STATIONS = [
-    (1, "Borehole A — village centre",   -17.829, 31.052),
-    (2, "Borehole B — clinic",           -17.831, 31.057),
-    (3, "Borehole C — school",           -17.828, 31.049),
-    (4, "Borehole D — market",           -17.833, 31.054),
+    (1,  "Borehole A — village centre",   -17.829, 31.052),
+    (2,  "Borehole B — clinic",           -17.831, 31.057),
+    (3,  "Borehole C — school",           -17.828, 31.049),
+    (4,  "Borehole D — market",           -17.833, 31.054),
+    (5,  "Borehole E — north well",       -17.820, 31.060),
+    (6,  "Borehole F — east settlement",  -17.836, 31.069),
+    (7,  "Borehole G — south farm",       -17.847, 31.055),
+    (8,  "Borehole H — west outpost",     -17.838, 31.041),
+    (9,  "Borehole I — river crossing",   -17.826, 31.073),
+    (10, "Borehole J — bus station",      -17.842, 31.062),
 ]
 
 
@@ -98,16 +104,19 @@ def connection() -> Iterator[sqlite3.Connection]:
 
 
 def init_db() -> None:
-    """Create tables and seed stations if the DB is fresh."""
+    """Create tables and (idempotently) seed stations.
+
+    INSERT OR IGNORE so existing rows are preserved when new stations
+    are added to SEED_STATIONS between runs.
+    """
     with connection() as conn:
         conn.executescript(SCHEMA)
-        existing = conn.execute("SELECT COUNT(*) FROM stations").fetchone()[0]
-        if existing == 0:
-            conn.executemany(
-                "INSERT INTO stations (station_id, name, latitude, longitude) "
-                "VALUES (?, ?, ?, ?)",
-                SEED_STATIONS,
-            )
+        conn.executemany(
+            "INSERT OR IGNORE INTO stations "
+            "(station_id, name, latitude, longitude) "
+            "VALUES (?, ?, ?, ?)",
+            SEED_STATIONS,
+        )
 
 
 if __name__ == "__main__":

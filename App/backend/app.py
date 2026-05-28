@@ -136,25 +136,48 @@ def sms_webhook():
     return str(reply)
 
 
+STATION_STATUS_WINDOW_DAYS = 7
+
+
 @app.get("/dashboard")
 def dashboard():
-    cutoff = (datetime.now(timezone.utc) - timedelta(days=2)).isoformat()
+    status_cutoff = (
+        datetime.now(timezone.utc) - timedelta(days=STATION_STATUS_WINDOW_DAYS)
+    ).isoformat()
 
     with connection() as conn:
-        readings = conn.execute(
+        # One row per station: latest reading + a station-level status pill.
+        # A station is `unsafe` if any illness report at that station landed
+        # in the trailing STATION_STATUS_WINDOW_DAYS window — this is a
+        # rollup, not a per-reading label, so newly-arriving readings do
+        # not flip the pill back to `clear`.
+        stations = conn.execute(
             """
-            SELECT r.reading_id, r.station_id, s.name AS station_name,
-                   r.recorded_at, r.ph, r.turbidity_ntu, r.temperature_c,
+            WITH latest AS (
+                SELECT station_id, MAX(recorded_at) AS latest_at
+                FROM sensor_readings
+                GROUP BY station_id
+            )
+            SELECT s.station_id,
+                   s.name,
+                   r.recorded_at,
+                   r.ph,
+                   r.turbidity_ntu,
+                   r.temperature_c,
                    r.rainfall_mm,
-                   (SELECT label FROM reading_labels
-                     WHERE reading_id = r.reading_id LIMIT 1) AS label
-            FROM sensor_readings r
-            JOIN stations s USING (station_id)
-            WHERE r.received_at >= ?
-            ORDER BY r.recorded_at DESC
-            LIMIT 50
+                   EXISTS (
+                       SELECT 1 FROM illness_reports ir
+                       WHERE ir.station_id = s.station_id
+                         AND ir.received_at >= ?
+                   ) AS is_unsafe
+            FROM stations s
+            LEFT JOIN latest l USING (station_id)
+            LEFT JOIN sensor_readings r
+                ON r.station_id = s.station_id
+               AND r.recorded_at = l.latest_at
+            ORDER BY s.station_id
             """,
-            (cutoff,),
+            (status_cutoff,),
         ).fetchall()
 
         reports = conn.execute(
@@ -172,8 +195,9 @@ def dashboard():
 
     return render_template(
         "dashboard.html",
-        readings=readings,
+        stations=stations,
         reports=reports,
+        status_window_days=STATION_STATUS_WINDOW_DAYS,
         generated_at=datetime.now(timezone.utc).isoformat(timespec="seconds"),
     )
 

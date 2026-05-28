@@ -67,7 +67,7 @@ def main() -> int:
                         help="Base URL of the Flask app (default localhost:5000)")
     parser.add_argument("--secret", default=os.environ.get("DEVICE_SECRET", ""),
                         help="Shared secret matching DEVICE_SECRET in .env")
-    parser.add_argument("--stations", default="1,2,3,4",
+    parser.add_argument("--stations", default="1,2,3,4,5,6,7,8,9,10",
                         help="Comma-separated station IDs to simulate")
     parser.add_argument("--interval", type=float, default=5.0,
                         help="Seconds between rounds of POSTs")
