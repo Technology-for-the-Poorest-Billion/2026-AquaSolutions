@@ -479,6 +479,8 @@ def dashboard():
             """
             SELECT ir.report_id, ir.station_id, s.name AS station_name,
                    ir.reporter_phone, ir.raw_message, ir.received_at,
+                   ir.risk_tier, ir.report_source,
+                   ir.case_count, ir.symptoms, ir.onset_date,
                    (SELECT COUNT(*) FROM reading_labels
                      WHERE report_id = ir.report_id) AS readings_labelled
             FROM illness_reports ir
@@ -488,10 +490,16 @@ def dashboard():
             """
         ).fetchall()
 
+        # Compute the tier display for each report at render time.
+        reports_with_tier = [
+            {**dict(rep), "tier_block": _resolve_tier(dict(rep))}
+            for rep in reports
+        ]
+
     return render_template(
         "dashboard.html",
         stations=stations,
-        reports=reports,
+        reports=reports_with_tier,
         status_window_days=STATION_STATUS_WINDOW_DAYS,
         generated_at=datetime.now(timezone.utc).isoformat(timespec="seconds"),
     )
