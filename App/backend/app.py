@@ -686,29 +686,43 @@ def post_action():
             return ("invalid related_report_id", 400)
 
     with connection() as conn:
-        station = conn.execute(
-            "SELECT is_closed FROM stations WHERE station_id = ?", (station_id,)
-        ).fetchone()
-        if station is None:
-            return (f"unknown station_id {station_id}", 400)
+        with conn.begin():
+            station = conn.execute(
+                text("SELECT is_closed FROM stations WHERE station_id = :sid"),
+                {"sid": station_id},
+            ).mappings().first()
+            if station is None:
+                return (f"unknown station_id {station_id}", 400)
 
-        if action_type == "close_borehole" and station["is_closed"]:
-            return (f"station {station_id} is already closed", 400)
-        if action_type == "reopen_borehole" and not station["is_closed"]:
-            return (f"station {station_id} is already open", 400)
+            if action_type == "close_borehole" and station["is_closed"]:
+                return (f"station {station_id} is already closed", 400)
+            if action_type == "reopen_borehole" and not station["is_closed"]:
+                return (f"station {station_id} is already open", 400)
 
-        conn.execute(
-            """
-            INSERT INTO interventions
-                (station_id, action_type, triggered_by, related_report_id, notes)
-            VALUES (?, ?, ?, ?, ?)
-            """,
-            (station_id, action_type, session["username"], related_id, notes),
-        )
-        if action_type == "close_borehole":
-            conn.execute("UPDATE stations SET is_closed = 1 WHERE station_id = ?", (station_id,))
-        elif action_type == "reopen_borehole":
-            conn.execute("UPDATE stations SET is_closed = 0 WHERE station_id = ?", (station_id,))
+            conn.execute(
+                text(
+                    "INSERT INTO interventions "
+                    "(station_id, action_type, triggered_by, related_report_id, notes) "
+                    "VALUES (:sid, :at, :tb, :rid, :notes)"
+                ),
+                {
+                    "sid": station_id,
+                    "at": action_type,
+                    "tb": session["username"],
+                    "rid": related_id,
+                    "notes": notes,
+                },
+            )
+            if action_type == "close_borehole":
+                conn.execute(
+                    text("UPDATE stations SET is_closed = 1 WHERE station_id = :sid"),
+                    {"sid": station_id},
+                )
+            elif action_type == "reopen_borehole":
+                conn.execute(
+                    text("UPDATE stations SET is_closed = 0 WHERE station_id = :sid"),
+                    {"sid": station_id},
+                )
 
     referrer = request.referrer or ""
     if referrer.startswith("/") or referrer.startswith(request.host_url):
@@ -729,36 +743,36 @@ def dashboard_report_detail(report_id: int):
 
     with connection() as conn:
         row = conn.execute(
-            """
-            SELECT ir.*, s.name AS station_name
-            FROM illness_reports ir
-            LEFT JOIN stations s USING (station_id)
-            WHERE ir.report_id = ?
-            """,
-            (report_id,),
-        ).fetchone()
+            text("""
+                SELECT ir.*, s.name AS station_name
+                FROM illness_reports ir
+                LEFT JOIN stations s ON s.station_id = ir.station_id
+                WHERE ir.report_id = :rid
+            """),
+            {"rid": report_id},
+        ).mappings().first()
         if row is None:
             abort(404)
         labelled_readings = conn.execute(
-            """
-            SELECT rl.reading_id, rl.rule_description,
-                   sr.recorded_at, sr.ph, sr.turbidity_ntu, sr.temperature_c
-            FROM reading_labels rl
-            JOIN sensor_readings sr USING (reading_id)
-            WHERE rl.report_id = ?
-            ORDER BY sr.recorded_at DESC
-            """,
-            (report_id,),
-        ).fetchall()
-        interventions = conn.execute(
-            """
-            SELECT intervention_id, action_type, triggered_by, triggered_at, notes
-            FROM interventions
-            WHERE related_report_id = ?
-            ORDER BY triggered_at ASC
-            """,
-            (report_id,),
-        ).fetchall()
+            text("""
+                SELECT rl.reading_id, rl.rule_description,
+                       sr.recorded_at, sr.ph, sr.turbidity_ntu, sr.temperature_c
+                FROM reading_labels rl
+                JOIN sensor_readings sr ON sr.reading_id = rl.reading_id
+                WHERE rl.report_id = :rid
+                ORDER BY sr.recorded_at DESC
+            """),
+            {"rid": report_id},
+        ).mappings().all()
+        interventions_rows = conn.execute(
+            text("""
+                SELECT intervention_id, action_type, triggered_by, triggered_at, notes
+                FROM interventions
+                WHERE related_report_id = :rid
+                ORDER BY triggered_at ASC
+            """),
+            {"rid": report_id},
+        ).mappings().all()
 
     tier_block = _resolve_tier(dict(row))
     try:
@@ -772,7 +786,7 @@ def dashboard_report_detail(report_id: int):
         report=row,
         symptoms_display=symptoms_display,
         labelled_readings=labelled_readings,
-        interventions=interventions,
+        interventions=interventions_rows,
         **tier_block,
     )
 
