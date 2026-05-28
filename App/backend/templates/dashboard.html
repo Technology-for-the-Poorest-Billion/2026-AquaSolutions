@@ -82,8 +82,14 @@
 </head>
 <body>
     <header>
-        <h1>Water-safety pipeline — dev dashboard</h1>
-        <div class="meta">Generated {{ generated_at }} UTC · auto-refresh 5s</div>
+        <h1>Water-safety pipeline — government dashboard</h1>
+        <div class="meta">
+            Generated {{ generated_at }} UTC · auto-refresh 5s
+            {% if session.get('username') %}
+                · Signed in as {{ session['display_name'] }}
+                · <a href="{{ url_for('logout') }}" style="color: #5ec8a8; text-decoration: none;">Sign out</a>
+            {% endif %}
+        </div>
     </header>
     <div class="disclaimer">
         Faecal-contamination risk + community illness signal. NOT a cholera detector.

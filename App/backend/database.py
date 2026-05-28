@@ -50,7 +50,13 @@ CREATE TABLE IF NOT EXISTS illness_reports (
     reporter_phone    TEXT,
     raw_message       TEXT    NOT NULL,
     parser_version    TEXT    NOT NULL,
-    received_at       TEXT    NOT NULL DEFAULT (datetime('now'))
+    received_at       TEXT    NOT NULL DEFAULT (datetime('now')),
+    report_source     TEXT    NOT NULL DEFAULT 'sms'
+        CHECK (report_source IN ('sms', 'medical_portal')),
+    submitter         TEXT,
+    case_count        INTEGER,
+    onset_date        TEXT,
+    symptoms          TEXT
 );
 
 CREATE INDEX IF NOT EXISTS idx_reports_station_time
@@ -103,14 +109,42 @@ def connection() -> Iterator[sqlite3.Connection]:
         conn.close()
 
 
+def _migrate(conn: sqlite3.Connection) -> None:
+    """Add columns introduced after the original schema, idempotently.
+
+    SQLite's CREATE TABLE IF NOT EXISTS skips existing tables, so new
+    columns must be added via ALTER. We guard each with PRAGMA so the
+    function is safe to run repeatedly on any DB state.
+    """
+    existing = {
+        row["name"]
+        for row in conn.execute("PRAGMA table_info(illness_reports)").fetchall()
+    }
+
+    added_columns = [
+        ("report_source", "TEXT NOT NULL DEFAULT 'sms'"),
+        ("submitter",     "TEXT"),
+        ("case_count",    "INTEGER"),
+        ("onset_date",    "TEXT"),
+        ("symptoms",      "TEXT"),
+    ]
+
+    for col_name, col_type in added_columns:
+        if col_name not in existing:
+            conn.execute(
+                f"ALTER TABLE illness_reports ADD COLUMN {col_name} {col_type}"
+            )
+
+
 def init_db() -> None:
-    """Create tables and (idempotently) seed stations.
+    """Create tables, run migrations, and (idempotently) seed stations.
 
     INSERT OR IGNORE so existing rows are preserved when new stations
     are added to SEED_STATIONS between runs.
     """
     with connection() as conn:
         conn.executescript(SCHEMA)
+        _migrate(conn)
         conn.executemany(
             "INSERT OR IGNORE INTO stations "
             "(station_id, name, latitude, longitude) "
