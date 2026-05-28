@@ -53,7 +53,7 @@ Do this in the Railway dashboard for the existing `GM2_Aqua_Solutions` project. 
    - `Listening at: http://0.0.0.0:$PORT`
 
    If `schema OK` does not appear, the deploy is broken. Read the error, fix locally, push again — do not skip this check.
-4. **Smoke-test the live URL.** `curl -s https://gm2aquasolutions-production.up.railway.app/health` should return `{"status": "ok", ...}`. Sign in as the government user; the dashboard should show 10 stations with "no readings yet" and "no illness reports yet" — that's correct, Postgres is empty.
+4. **Smoke-test the live URL.** `curl -s https://gm2aquasolutions-production-aff9.up.railway.app/health` should return `{"status": "ok", ...}`. Sign in as the government user; the dashboard should show 10 stations with "no readings yet" and "no illness reports yet" — that's correct, Postgres is empty.
 5. **Push a few readings and send a test SMS.**
 
    ```bash
@@ -77,7 +77,7 @@ These came out of execution and aren't in the plan. If anyone re-touches the mig
 
 4. **`metadata.create_all(conn)` accepts a Connection, not just an Engine.** `init_db()` passes the open connection so `create_all` + `_migrate` + seed all run in one transaction; a Postgres failure mid-init rolls back cleanly.
 
-5. **The simulator script defaults to the Railway URL.** `App/scripts/simulate_sensor.py` has `--url` defaulting to `https://gm2aquasolutions-production.up.railway.app`. Anyone running it unflagged writes to production. Local testing needs `--url http://localhost:5000`.
+5. **The simulator script defaults to the Railway URL.** `App/scripts/simulate_sensor.py` has `--url` defaulting to `https://gm2aquasolutions-production-aff9.up.railway.app`. Anyone running it unflagged writes to production. Local testing needs `--url http://localhost:5000`.
 
 ---
 
@@ -94,5 +94,5 @@ These came out of execution and aren't in the plan. If anyone re-touches the mig
 - **Python:** `/Users/tristanmartin/Desktop/GM2/GM2_Aqua_Solutions/.venv/bin/python` is Python 3.13.12 with SQLite 3.53.1 (well above the 3.35+ needed for `RETURNING` and 3.24+ for `ON CONFLICT`).
 - **Backend deps:** Flask 3.0.3, twilio 9.3.7, gunicorn 23.0.0, python-dotenv 1.0.1, SQLAlchemy 2.0.36, psycopg[binary] 3.2.3, pytest 8.3.3. All in `App/backend/requirements.txt`.
 - **Running tests:** From `App/backend/`, `../../.venv/bin/python -m pytest -v` → 99 passed (or use the absolute path to the venv's pytest).
-- **Railway production URL:** `https://gm2aquasolutions-production.up.railway.app`. Tristan controls the Railway dashboard; Aidan/ao565 only need GitHub push access to trigger deploys (Railway watches the repo, not who pushes). For Railway dashboard access — required to do Task 13 — they need an invite from the Railway project's Members tab.
+- **Railway production URL:** `https://gm2aquasolutions-production-aff9.up.railway.app`. Tristan controls the Railway dashboard; Aidan/ao565 only need GitHub push access to trigger deploys (Railway watches the repo, not who pushes). For Railway dashboard access — required to do Task 13 — they need an invite from the Railway project's Members tab.
 - **Background context:** the repo's `CLAUDE.md` has the project's framing, style guidelines (minimal comments, no defensive validation for impossible scenarios, YAGNI), and the non-negotiable "this is not a cholera detector" rule.

@@ -1783,7 +1783,7 @@ If `schema OK` does not appear, the deploy is broken — read the error, fix loc
 
 After deploy succeeds:
 ```bash
-curl -s https://gm2aquasolutions-production.up.railway.app/health
+curl -s https://gm2aquasolutions-production-aff9.up.railway.app/health
 ```
 Expected: `{"status": "ok", "timestamp": "..."}`.
 

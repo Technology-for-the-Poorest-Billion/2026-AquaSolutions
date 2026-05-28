@@ -85,7 +85,7 @@ python simulate_sensor.py --secret "$DEVICE_SECRET" --interval 3
 
 > For a live Railway ingest target, run:
 > ```bash
-> python simulate_sensor.py --url https://gm2aquasolutions-production.up.railway.app --secret "$DEVICE_SECRET" --interval 3
+> python simulate_sensor.py --url https://gm2aquasolutions-production-aff9.up.railway.app --secret "$DEVICE_SECRET" --interval 3
 > ```
 
 Open the dashboard: <http://localhost:5000/dashboard>. You should see rows arriving every 3 seconds across the four seeded stations.

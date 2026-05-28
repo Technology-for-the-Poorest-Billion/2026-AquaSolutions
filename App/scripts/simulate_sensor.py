@@ -3,7 +3,7 @@
 Usage
 -----
     python App/scripts/simulate_sensor.py
-    python App/scripts/simulate_sensor.py --url https://gm2aquasolutions-production.up.railway.app \
+    python App/scripts/simulate_sensor.py --url https://gm2aquasolutions-production-aff9.up.railway.app \
         --secret my-device-secret --stations 1,2,3,4 --interval 5
 
 The script POSTs one randomised-but-plausible reading per station per
@@ -63,7 +63,7 @@ def _post(url: str, secret: str, payload: dict) -> tuple[int, str]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--url", default="https://gm2aquasolutions-production.up.railway.app",
+    parser.add_argument("--url", default="https://gm2aquasolutions-production-aff9.up.railway.app",
                         help="Base URL of the Flask app (default Railway production)")
     parser.add_argument("--secret", default=os.environ.get("DEVICE_SECRET", ""),
                         help="Shared secret matching DEVICE_SECRET in .env")
