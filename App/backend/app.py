@@ -21,12 +21,12 @@ import json
 import os
 import re
 import secrets
-from datetime import datetime, timedelta, timezone
+from datetime import date as date_cls, datetime, timedelta, timezone
 from functools import wraps
 
 from dotenv import load_dotenv
 from flask import (
-    Flask, redirect, render_template, request, session, url_for,
+    Flask, abort, redirect, render_template, request, session, url_for,
 )
 from twilio.request_validator import RequestValidator
 from twilio.twiml.messaging_response import MessagingResponse
@@ -122,6 +122,63 @@ def _parse_station_id(message: str) -> int | None:
     if match is None:
         return None
     return int(match.group(1))
+
+
+def _resolve_tier(report) -> dict:
+    """Decide which tier to render and how. See spec §5 'Where the output is displayed'.
+
+    Caller must pass a dict (use dict(row) for sqlite3.Row inputs)
+    so .get() is available for the optional dialog_state field.
+    """
+    from estimator import estimate_risk_tier
+    if report["risk_tier"] is not None:
+        return {
+            "tier_source": "reporter",
+            "tier": report["risk_tier"],
+            "tier_rationale": "",
+            "tier_pending_text": "",
+        }
+    # No reporter tier — decide whether to estimate or show pending/incomplete.
+    if report["report_source"] == "medical_portal":
+        run_estimator = True
+    else:  # sms
+        run_estimator = (report.get("dialog_state") == "complete")
+
+    if run_estimator:
+        try:
+            symptoms = json.loads(report["symptoms"] or "[]")
+        except (json.JSONDecodeError, TypeError):
+            symptoms = []
+        onset = None
+        if report["onset_date"]:
+            try:
+                onset = date_cls.fromisoformat(report["onset_date"])
+            except ValueError:
+                onset = None
+        tier, rationale = estimate_risk_tier(
+            symptoms=symptoms,
+            onset_date=onset,
+            case_count=report["case_count"] or 1,
+        )
+        return {
+            "tier_source": "estimated",
+            "tier": tier,
+            "tier_rationale": rationale,
+            "tier_pending_text": "",
+        }
+
+    # SMS, not complete
+    state = report.get("dialog_state")
+    if state in ("awaiting_case_count", "awaiting_symptoms", "awaiting_onset"):
+        pending = "pending — awaiting reporter follow-up"
+    else:
+        pending = "incomplete — no structured data available"
+    return {
+        "tier_source": "pending",
+        "tier": None,
+        "tier_rationale": "",
+        "tier_pending_text": pending,
+    }
 
 
 def _verify_twilio_signature(req) -> bool:
@@ -437,6 +494,57 @@ def dashboard():
         reports=reports,
         status_window_days=STATION_STATUS_WINDOW_DAYS,
         generated_at=datetime.now(timezone.utc).isoformat(timespec="seconds"),
+    )
+
+
+@app.get("/dashboard/reports/<int:report_id>")
+def dashboard_report_detail(report_id: int):
+    if "username" not in session:
+        return redirect(url_for("login", next=request.path))
+    if session.get("role") != "government":
+        return (
+            "This page is for government officials. "
+            f"Medical staff can view this report at /medical/reports/{report_id}",
+            403,
+        )
+
+    with connection() as conn:
+        row = conn.execute(
+            """
+            SELECT ir.*, s.name AS station_name
+            FROM illness_reports ir
+            LEFT JOIN stations s USING (station_id)
+            WHERE ir.report_id = ?
+            """,
+            (report_id,),
+        ).fetchone()
+        if row is None:
+            abort(404)
+        labelled_readings = conn.execute(
+            """
+            SELECT rl.reading_id, rl.rule_description,
+                   sr.recorded_at, sr.ph, sr.turbidity_ntu, sr.temperature_c
+            FROM reading_labels rl
+            JOIN sensor_readings sr USING (reading_id)
+            WHERE rl.report_id = ?
+            ORDER BY sr.recorded_at DESC
+            """,
+            (report_id,),
+        ).fetchall()
+
+    tier_block = _resolve_tier(dict(row))
+    try:
+        symptoms_list = json.loads(row["symptoms"] or "[]")
+    except (json.JSONDecodeError, TypeError):
+        symptoms_list = []
+    symptoms_display = ", ".join(symptoms_list) if symptoms_list else "—"
+
+    return render_template(
+        "dashboard_report_detail.html",
+        report=row,
+        symptoms_display=symptoms_display,
+        labelled_readings=labelled_readings,
+        **tier_block,
     )
 
 
