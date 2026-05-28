@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta http-equiv="refresh" content="5">
+    <meta http-equiv="refresh" content="30">
     <title>Water-safety pipeline — dev dashboard</title>
     <style>
         :root {
@@ -95,7 +95,7 @@
     <header>
         <h1>Water-safety pipeline — government dashboard</h1>
         <div class="meta">
-            Generated {{ generated_at }} UTC · auto-refresh 5s
+            Generated {{ generated_at }} UTC · auto-refresh 30s
             {% if session.get('username') %}
                 · Signed in as {{ session['display_name'] }}
                 · <a href="{{ url_for('logout') }}" style="color: #5ec8a8; text-decoration: none;">Sign out</a>
