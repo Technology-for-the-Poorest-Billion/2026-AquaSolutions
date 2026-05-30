@@ -2,15 +2,19 @@
 
 Spec: docs/superpowers/specs/2026-05-30-i18n-design.md.
 
-Owns the allow-list, the locale-selector callback (DB-first precedence
-per spec §6), the POST /lang route, and the unverified_locale() helper.
-Views in app.py just use flask_babel.gettext (imported as _) and never
-look at the locale themselves.
+Owns the LANGUAGES allow-list, Babel registration, and the locale-selector
+stub. Views in app.py just use flask_babel.gettext (imported as _) and
+never look at the locale themselves.
+
+Not yet implemented (land in later tasks per the plan):
+- DB-first locale precedence in select_locale() — Task 4
+- POST /lang route + cookie/DB upsert — Task 5
+- unverified_locale() helper for the machine-translation banner — Task 15
 """
 
 from __future__ import annotations
 
-from flask import Flask, request
+from flask import Flask
 from flask_babel import Babel
 
 LANGUAGES: dict[str, str] = {
