@@ -115,6 +115,13 @@ interventions = Table(
 )
 
 
+user_preferences = Table(
+    "user_preferences", metadata,
+    Column("username", Text, primary_key=True),
+    Column("language", Text),
+)
+
+
 SEED_STATIONS = [
     (1,  "Borehole A — village centre",   -17.829, 31.052),
     (2,  "Borehole B — clinic",           -17.831, 31.057),
