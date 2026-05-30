@@ -36,12 +36,14 @@ from sqlalchemy import text
 from database import connection, init_db
 from labels import label_readings_for_report
 from sensor_ingest import sensor_bp
+from language import init_babel
 
 load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY") or secrets.token_hex(32)
 app.register_blueprint(sensor_bp)
+init_babel(app)
 init_db()
 
 
