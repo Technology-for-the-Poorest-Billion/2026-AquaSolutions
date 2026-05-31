@@ -28,3 +28,4 @@ App/backend/data/
 # IDE / tooling
 .vscode/
 .claude/
+.superpowers/
