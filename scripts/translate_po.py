@@ -1,14 +1,18 @@
 """Generate machine-translated draft entries for a .po catalog.
 
 Reads a .po file, runs every untranslated msgid through Google Translate
-(via the unofficial googletrans library), writes the translation back
+(via the free translate_a/single endpoint), writes the translation back
 as msgstr, and marks every translated entry as #, fuzzy so it's flagged
 for native-speaker review.
 
 Usage:
     python scripts/translate_po.py translations/sn/LC_MESSAGES/messages.po --lang sn
 
-The googletrans dependency lives in App/backend/requirements-dev.txt and
+    # Use Zulu as a proxy for Ndebele (Google does not support nd directly):
+    python scripts/translate_po.py translations/nd/LC_MESSAGES/messages.po \\
+        --lang nd --translate-as zu
+
+The requests dependency lives in App/backend/requirements-dev.txt and
 is never installed on Railway. This script is offline-only.
 """
 
@@ -46,9 +50,31 @@ def parse_msgids(text: str) -> list[Entry]:
 
 
 def _translate_one(text: str, dest: str) -> str:
-    """Real Google-Translate call. Replaced by a stub in tests."""
-    from googletrans import Translator  # imported lazily so tests can monkeypatch
-    return Translator().translate(text, dest=dest).text
+    """Call Google's free translate_a/single endpoint via requests.
+
+    No API key needed. Used to be wrapped in googletrans but that package
+    is broken on Python 3.13 (its httpx 0.13.3 dependency imports the
+    removed cgi module). Calling the endpoint directly avoids the
+    transitive dependency entirely.
+    """
+    import requests  # imported lazily so tests can monkeypatch
+
+    response = requests.get(
+        "https://translate.googleapis.com/translate_a/single",
+        params={
+            "client": "gtx",
+            "sl": "auto",  # auto-detect source
+            "tl": dest,
+            "dt": "t",  # request translation
+            "q": text,
+        },
+        timeout=15,
+    )
+    response.raise_for_status()
+    data = response.json()
+    # Response shape: [[[translated, original, ...], ...], ...]
+    # Concatenate all translation chunks.
+    return "".join(chunk[0] for chunk in data[0] if chunk[0] is not None)
 
 
 def translate_catalog(po_path: Path, lang: str) -> None:
@@ -90,10 +116,21 @@ def translate_catalog(po_path: Path, lang: str) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("po_path", type=Path)
-    parser.add_argument("--lang", required=True, help="Target language code (e.g. sn, nd).")
+    parser.add_argument("--lang", required=True, help="Target language code for the .po catalog (e.g. sn, nd).")
+    parser.add_argument(
+        "--translate-as",
+        default=None,
+        help="Override the language code sent to Google Translate. "
+             "Useful when the target language isn't supported by Google "
+             "(e.g. --lang nd --translate-as zu uses Zulu as a proxy for Ndebele).",
+    )
     args = parser.parse_args()
-    translate_catalog(args.po_path, args.lang)
-    print(f"Translated {args.po_path} to {args.lang} (entries flagged #, fuzzy).")
+    translate_lang = args.translate_as or args.lang
+    translate_catalog(args.po_path, lang=translate_lang)
+    print(
+        f"Translated {args.po_path} (Google source lang: {translate_lang}, "
+        f"catalog language: {args.lang}) — entries flagged #, fuzzy."
+    )
 
 
 if __name__ == "__main__":
