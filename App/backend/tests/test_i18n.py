@@ -224,6 +224,47 @@ def test_banner_does_not_render_for_english(med_session):
     assert b'class="unverified-banner"' not in resp.data
 
 
+def test_login_adopts_anonymous_cookie_into_user_preferences(client):
+    """A language chosen on /login (anonymous, cookie only) carries over
+    to the user's saved preference once they sign in, so DB-first
+    precedence reflects it on the next request."""
+    # Anonymous: set picker to Shona on the login page.
+    client.set_cookie("aqua_lang", "sn")
+    # Confirm no DB row exists yet.
+    with _db_connection() as conn:
+        rows = conn.execute(sql_text("SELECT * FROM user_preferences")).fetchall()
+    assert rows == []
+    # Sign in.
+    resp = client.post(
+        "/login",
+        data={"username": "dr.smith", "password": "med-pw"},
+    )
+    assert resp.status_code in (302, 303)
+    # user_preferences now has the Shona pref keyed on the signed-in user.
+    with _db_connection() as conn:
+        rows = conn.execute(
+            sql_text("SELECT username, language FROM user_preferences")
+        ).fetchall()
+    assert rows == [("dr.smith", "sn")]
+    # Hitting a signed-in page picks up sn from the DB even if we now
+    # remove the cookie — DB-first precedence is in effect.
+    client.delete_cookie("aqua_lang")
+    resp = client.get("/medical/report")
+    assert resp.headers.get("X-Active-Locale") == "sn"
+
+
+def test_login_without_cookie_leaves_user_preferences_alone(client):
+    """No cookie at sign-in time → no implicit DB write."""
+    resp = client.post(
+        "/login",
+        data={"username": "dr.smith", "password": "med-pw"},
+    )
+    assert resp.status_code in (302, 303)
+    with _db_connection() as conn:
+        rows = conn.execute(sql_text("SELECT * FROM user_preferences")).fetchall()
+    assert rows == []
+
+
 def test_login_page_suppresses_banner_even_for_unverified_locale(client):
     """The login page is the unauthenticated front door and intentionally
     skips the machine-translated draft banner — no clinical content there.

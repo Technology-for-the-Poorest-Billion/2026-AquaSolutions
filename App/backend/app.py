@@ -37,7 +37,7 @@ from sqlalchemy import text
 from database import connection, init_db
 from labels import label_readings_for_report
 from sensor_ingest import sensor_bp
-from language import init_babel
+from language import init_babel, adopt_cookie_preference
 
 load_dotenv()
 
@@ -255,6 +255,11 @@ def login():
     session["username"] = username
     session["display_name"] = user["display_name"]
     session["role"] = user["role"]
+
+    # If the user chose a language anonymously on /login, promote that
+    # choice to user_preferences so DB-first precedence reflects it after
+    # sign-in. Otherwise the existing saved pref (or NULL) would win.
+    adopt_cookie_preference(username)
 
     next_path = request.args.get("next") or request.form.get("next") or ""
     # only allow internal redirects
