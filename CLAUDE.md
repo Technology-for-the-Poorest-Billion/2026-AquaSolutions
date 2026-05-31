@@ -88,3 +88,14 @@ The pilot site is **deliberately not locked** in this document. The Bengal Delta
 - `WNTR/` is a vendored copy of EPA's Water Network Tool for Resilience, earmarked as a pre-hardware network simulator. Not yet integrated; treat as a library, not project code.
 - `.venv/` is the local Python environment. Do not commit changes to it.
 - Phase-1 ML notebooks live in `ML/`. They are evidence for the predictive-ceiling finding, not the deliverable.
+- The Flask app's UI is internationalised (en/sn/nd, framework supports
+  all 16). Translation catalogs live in `App/backend/translations/`. If
+  you edit a `.po` file, run `make i18n-compile` from `App/backend/`
+  before restarting Flask or the change won't take effect. The
+  `#, fuzzy` flag means "machine-translated, not yet native-reviewed";
+  removing it from a catalog entry promotes that translation to verified.
+  Known caveat: `scripts/translate_po.py` does not yet protect format
+  placeholders (`{role}`, `%(station_id)s` etc.) — they get translated
+  along with surrounding words and break `.format()` / `%`-substitution
+  if not manually restored after a re-translation. See
+  `docs/superpowers/specs/2026-05-30-i18n-design.md` for the full design.
