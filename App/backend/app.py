@@ -381,11 +381,16 @@ def medical_report_submit():
                 report_time=report_time,
             )
 
-    success = (
-        f"Report received for {station['name']} (station {station_id}). "
-        f"{labelled} reading(s) in the trailing-window were flagged. "
-        f"Anchor: {onset_date_raw or 'now'}."
-    )
+    success = _(
+        "Report received for %(name)s (station %(sid)s). "
+        "%(n)d reading(s) in the trailing-window were flagged. "
+        "Anchor: %(anchor)s."
+    ) % {
+        "name": station["name"],
+        "sid": station_id,
+        "n": labelled,
+        "anchor": onset_date_raw or _("now"),
+    }
     return render(success=success)
 
 

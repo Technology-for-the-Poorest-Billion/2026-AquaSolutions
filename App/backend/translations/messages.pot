@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-05-31 11:01+0100\n"
+"POT-Creation-Date: 2026-05-31 11:03+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -47,34 +47,45 @@ msgstr ""
 msgid "Station %(station_id)s is not in the system."
 msgstr ""
 
-#: app.py:677
-msgid "invalid action_type"
+#: app.py:385
+#, python-format
+msgid ""
+"Report received for %(name)s (station %(sid)s). %(n)d reading(s) in the "
+"trailing-window were flagged. Anchor: %(anchor)s."
+msgstr ""
+
+#: app.py:392
+msgid "now"
 msgstr ""
 
 #: app.py:682
+msgid "invalid action_type"
+msgstr ""
+
+#: app.py:687
 msgid "invalid station_id"
 msgstr ""
 
-#: app.py:689
+#: app.py:694
 msgid "invalid related_report_id"
-msgstr ""
-
-#: app.py:698
-#, python-format
-msgid "unknown station_id %(station_id)s"
-msgstr ""
-
-#: app.py:701
-#, python-format
-msgid "station %(station_id)s is already closed"
 msgstr ""
 
 #: app.py:703
 #, python-format
+msgid "unknown station_id %(station_id)s"
+msgstr ""
+
+#: app.py:706
+#, python-format
+msgid "station %(station_id)s is already closed"
+msgstr ""
+
+#: app.py:708
+#, python-format
 msgid "station %(station_id)s is already open"
 msgstr ""
 
-#: app.py:742
+#: app.py:747
 #, python-format
 msgid ""
 "This page is for government officials. Medical staff can view this report"
