@@ -82,3 +82,11 @@ def test_dashboard_uses_panels_rows_and_pills(signed_in_gov):
         b'class="pill pill-clear"' in body
         or b'class="pill pill-severe"' in body
     )
+
+
+def test_medical_report_form_uses_chips_and_segmented(signed_in_med):
+    resp = signed_in_med.get("/medical/report")
+    body = resp.data
+    assert b'class="form-grid-3"' in body
+    assert b'class="chip"' in body or b"class='chip'" in body
+    assert b'class="segmented"' in body
