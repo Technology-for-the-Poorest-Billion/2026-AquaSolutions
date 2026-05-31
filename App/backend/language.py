@@ -14,15 +14,15 @@ Locale precedence (highest to lowest):
   5. DEFAULT_LANGUAGE ("en")
 
 Not yet implemented (land in later tasks per the plan):
-- POST /lang route + cookie/DB upsert — Task 5
 - unverified_locale() helper for the machine-translation banner — Task 15
 """
 
 from __future__ import annotations
 
 import sys
+from urllib.parse import urlparse
 
-from flask import Flask, request, session
+from flask import Blueprint, Flask, redirect, request, session
 from flask_babel import Babel
 from sqlalchemy import text
 
@@ -100,11 +100,56 @@ def current_lang() -> str:
     return select_locale()
 
 
+COOKIE_NAME = "aqua_lang"
+COOKIE_MAX_AGE = 60 * 60 * 24 * 365  # 1 year
+
+lang_bp = Blueprint("lang", __name__)
+
+
+def _safe_redirect_target() -> str:
+    """Return a safe local redirect path from the Referer header, or /dashboard."""
+    referrer = request.referrer or ""
+    if not referrer:
+        return "/dashboard"
+    parsed = urlparse(referrer)
+    if parsed.netloc and parsed.netloc != request.host:
+        return "/dashboard"
+    return parsed.path or "/dashboard"
+
+
+@lang_bp.post("/lang")
+def set_lang_view():
+    code = _validate(request.form.get("code"))
+    if code is None:
+        return "Invalid language code.", 400
+
+    response = redirect(_safe_redirect_target(), code=302)
+    response.set_cookie(COOKIE_NAME, code, max_age=COOKIE_MAX_AGE, samesite="Lax")
+
+    username = session.get("username")
+    if username is not None:
+        # Use dynamic lookup so per-test DB rotation is respected
+        # (language.py is not re-imported between tests).
+        db_mod = sys.modules["database"]
+        with db_mod.connection() as conn:
+            with conn.begin():
+                conn.execute(
+                    text(
+                        "INSERT INTO user_preferences (username, language) "
+                        "VALUES (:u, :c) "
+                        "ON CONFLICT (username) DO UPDATE SET language = excluded.language"
+                    ),
+                    {"u": username, "c": code},
+                )
+    return response
+
+
 def init_babel(app: Flask) -> None:
     """Register Babel with the app, plus jinja globals for templates."""
     app.config.setdefault("BABEL_DEFAULT_LOCALE", DEFAULT_LANGUAGE)
     app.config.setdefault("BABEL_TRANSLATION_DIRECTORIES", "translations")
     babel.init_app(app, locale_selector=select_locale)
+    app.register_blueprint(lang_bp)
     app.jinja_env.globals["LANGUAGES"] = LANGUAGES
     app.jinja_env.globals["current_lang"] = current_lang
 

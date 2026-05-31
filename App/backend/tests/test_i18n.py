@@ -92,3 +92,75 @@ def test_invalid_db_value_is_ignored(med_session):
     med_session.set_cookie("aqua_lang", "nd")
     resp = med_session.get("/medical/report")
     assert resp.headers.get("X-Active-Locale") == "nd"
+
+
+# ---------------------------------------------------------------------------
+# Task 5: POST /lang route
+# ---------------------------------------------------------------------------
+
+def _db_connection():
+    """Return the live database connection (dynamic lookup for test-isolation)."""
+    import sys
+    return sys.modules["database"].connection()
+
+
+def test_post_lang_sets_cookie_and_redirects(client):
+    resp = client.post("/lang", data={"code": "sn"})
+    assert resp.status_code == 302
+    assert resp.location.endswith("/dashboard")
+    # Werkzeug 3.x: cookie is on the test-client jar after the response.
+    assert client.get_cookie("aqua_lang").value == "sn"
+
+
+def test_post_lang_rejects_invalid_code(client):
+    resp = client.post("/lang", data={"code": "zz"})
+    assert resp.status_code == 400
+
+
+def test_post_lang_rejects_missing_code(client):
+    resp = client.post("/lang", data={})
+    assert resp.status_code == 400
+
+
+def test_post_lang_upserts_user_preferences_when_signed_in(med_session):
+    resp = med_session.post("/lang", data={"code": "sn"})
+    assert resp.status_code == 302
+    with _db_connection() as conn:
+        row = conn.execute(
+            sql_text("SELECT language FROM user_preferences WHERE username='dr.smith'")
+        ).fetchone()
+    assert row is not None and row[0] == "sn"
+
+    # Second submission upserts (no duplicate row).
+    med_session.post("/lang", data={"code": "nd"})
+    with _db_connection() as conn:
+        rows = conn.execute(sql_text("SELECT * FROM user_preferences")).fetchall()
+    assert len(rows) == 1
+    assert rows[0][1] == "nd"
+
+
+def test_post_lang_no_db_write_when_anonymous(client):
+    client.post("/lang", data={"code": "sn"})
+    with _db_connection() as conn:
+        rows = conn.execute(sql_text("SELECT * FROM user_preferences")).fetchall()
+    assert rows == []
+
+
+def test_post_lang_redirects_to_safe_referrer(med_session):
+    resp = med_session.post(
+        "/lang",
+        data={"code": "sn"},
+        headers={"Referer": "http://localhost/medical/history"},
+    )
+    assert resp.status_code == 302
+    assert resp.location.endswith("/medical/history")
+
+
+def test_post_lang_ignores_external_referrer(med_session):
+    resp = med_session.post(
+        "/lang",
+        data={"code": "sn"},
+        headers={"Referer": "https://evil.example.com/x"},
+    )
+    assert resp.status_code == 302
+    assert resp.location.endswith("/dashboard")
