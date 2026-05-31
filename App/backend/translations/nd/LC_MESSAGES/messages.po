@@ -30,7 +30,7 @@ msgstr ""
 #, python-brace-format
 #, fuzzy
 msgid "forbidden — this page requires the '{role}' role"
-msgstr "akuvunyelwe — leli khasi lidinga indima '{indima}'"
+msgstr "akuvunyelwe — leli khasi lidinga indima '{role}'"
 
 #: app.py:251
 #, fuzzy
