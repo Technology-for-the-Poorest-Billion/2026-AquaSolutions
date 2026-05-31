@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-05-31 10:50+0100\n"
+"POT-Creation-Date: 2026-05-31 10:58+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,6 +22,7 @@ msgstr ""
 msgid "Water-safety pipeline"
 msgstr ""
 
+#. aria-label for the language picker dropdown.
 #: templates/_lang_picker.html:4
 msgid "Language"
 msgstr ""
@@ -56,6 +57,12 @@ msgstr ""
 msgid "Faecal-contamination risk + community illness signal."
 msgstr ""
 
+#. This negation is the project's central safety claim.            The sensor
+#. does NOT detect cholera. Preserve the negation when translating.
+#. This negation is the project's central safety claim.        The sensor does
+#. NOT detect cholera. Preserve the negation when translating.
+#. This negation is the project's central safety claim.                The
+#. sensor does NOT detect cholera. Preserve the negation when translating.
 #: templates/dashboard.html:108 templates/dashboard_report_detail.html:55
 #: templates/login.html:102 templates/medical_history.html:58
 #: templates/medical_report.html:154 templates/medical_report_detail.html:49

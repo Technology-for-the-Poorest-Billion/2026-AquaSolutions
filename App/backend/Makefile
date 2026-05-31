@@ -13,7 +13,7 @@ BABEL_CFG := babel.cfg
 .PHONY: i18n-extract i18n-init i18n-update i18n-compile
 
 i18n-extract:
-	pybabel extract -F $(BABEL_CFG) -o $(POT) .
+	pybabel extract -F $(BABEL_CFG) -c TRANSLATORS: -o $(POT) .
 
 i18n-init:
 	@test -n "$(LANG)" || (echo "Usage: make i18n-init LANG=<code>"; exit 1)
