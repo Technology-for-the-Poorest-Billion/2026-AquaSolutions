@@ -90,3 +90,46 @@ def test_medical_report_form_uses_chips_and_segmented(signed_in_med):
     assert b'class="form-grid-3"' in body
     assert b'class="chip"' in body or b"class='chip'" in body
     assert b'class="segmented"' in body
+
+
+def test_medical_history_uses_panels(signed_in_med):
+    resp = signed_in_med.get("/medical/history")
+    body = resp.data
+    # Two panels: the map and the reports table.
+    assert body.count(b'class="panel"') >= 2
+
+
+def test_medical_report_detail_uses_kv(signed_in_med):
+    # Need a report row to exist. Skip if none — that's a fixture problem,
+    # not a UI bug.
+    from sqlalchemy import text as sql_text
+    import sys
+    db = sys.modules['database']
+    with db.connection() as conn:
+        row = conn.execute(sql_text(
+            "SELECT report_id FROM illness_reports "
+            "WHERE report_source='medical_portal' LIMIT 1"
+        )).fetchone()
+    if row is None:
+        pytest.skip("no medical_portal report fixture available")
+    resp = signed_in_med.get(f"/medical/reports/{row[0]}")
+    assert resp.status_code == 200
+    assert b'class="kv"' in resp.data
+
+
+def test_dashboard_report_detail_uses_grid_and_actions(signed_in_gov):
+    from sqlalchemy import text as sql_text
+    import sys
+    db = sys.modules['database']
+    with db.connection() as conn:
+        row = conn.execute(sql_text(
+            "SELECT report_id FROM illness_reports LIMIT 1"
+        )).fetchone()
+    if row is None:
+        pytest.skip("no report fixture available")
+    resp = signed_in_gov.get(f"/dashboard/reports/{row[0]}")
+    assert resp.status_code == 200
+    body = resp.data
+    assert b'class="grid-2-asym"' in body
+    assert b'class="kv"' in body
+    assert b'class="btn' in body
