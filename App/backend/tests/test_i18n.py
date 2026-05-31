@@ -190,6 +190,38 @@ def test_estimator_rationale_is_wrapped(app):
     assert rationale  # non-empty
 
 
+def test_unverified_locale_false_for_english(app):
+    from language import unverified_locale
+    with app.test_request_context("/"):
+        assert unverified_locale("en") is False
+
+
+def test_unverified_locale_true_for_fuzzy_shona(app):
+    """sn was machine-translated and committed with #, fuzzy markers."""
+    from language import unverified_locale
+    with app.test_request_context("/"):
+        assert unverified_locale("sn") is True
+
+
+def test_unverified_locale_false_for_nonexistent_catalog(app):
+    from language import unverified_locale
+    with app.test_request_context("/"):
+        # 'zz' isn't even an allowed code, but the helper must not raise.
+        assert unverified_locale("zz") is False
+
+
+def test_banner_renders_when_locale_is_unverified(med_session):
+    """The yellow banner appears on every page when sn is active."""
+    resp = med_session.get("/medical/report?lang=sn")
+    # The banner copy is wrapped in _(); search for a stable class.
+    assert b'class="unverified-banner"' in resp.data
+
+
+def test_banner_does_not_render_for_english(med_session):
+    resp = med_session.get("/medical/report?lang=en")
+    assert b'class="unverified-banner"' not in resp.data
+
+
 def test_messages_pot_contains_login_button(tmp_path):
     """After running pybabel extract, the catalog must contain known strings."""
     import subprocess

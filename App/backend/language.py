@@ -12,14 +12,12 @@ Locale precedence (highest to lowest):
   3. aqua_lang cookie
   4. Accept-Language header
   5. DEFAULT_LANGUAGE ("en")
-
-Not yet implemented (land in later tasks per the plan):
-- unverified_locale() helper for the machine-translation banner — Task 15
 """
 
 from __future__ import annotations
 
 import sys
+from pathlib import Path
 from urllib.parse import urlparse
 
 from flask import Blueprint, Flask, redirect, request, session
@@ -35,6 +33,33 @@ LANGUAGES: dict[str, str] = {
 DEFAULT_LANGUAGE = "en"
 
 babel = Babel()
+
+_BACKEND_DIR = Path(__file__).resolve().parent
+_TRANSLATIONS_DIR = _BACKEND_DIR / "translations"
+
+
+def unverified_locale(code: str | None = None) -> bool:
+    """Return True if the given locale's .po has any #, fuzzy entries.
+
+    The active locale's banner is shown whenever this returns True for it.
+    English (the source locale) is always False.
+    Unknown locales / missing files return False (no banner; safe default).
+    """
+    if code is None:
+        code = current_lang()
+    if code == DEFAULT_LANGUAGE:
+        return False
+    po_path = _TRANSLATIONS_DIR / code / "LC_MESSAGES" / "messages.po"
+    if not po_path.exists():
+        return False
+    try:
+        with po_path.open("r", encoding="utf-8") as f:
+            for line in f:
+                if line.startswith("#,") and "fuzzy" in line:
+                    return True
+    except OSError:
+        return False
+    return False
 
 
 def _validate(code: str | None) -> str | None:
@@ -152,6 +177,7 @@ def init_babel(app: Flask) -> None:
     app.register_blueprint(lang_bp)
     app.jinja_env.globals["LANGUAGES"] = LANGUAGES
     app.jinja_env.globals["current_lang"] = current_lang
+    app.jinja_env.globals["unverified_locale"] = unverified_locale
 
     @app.after_request
     def _stamp_active_locale(response):

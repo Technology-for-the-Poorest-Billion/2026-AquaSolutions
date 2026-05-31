@@ -5,17 +5,15 @@
 # linguistic proxy — Zimbabwean Ndebele descended from Zulu and is
 # approximately 85% lexically similar. ALL entries require native-speaker
 # review before they can be considered correct for Northern Ndebele.
-#
 # North Ndebele translations for PROJECT.
 # Copyright (C) 2026 ORGANIZATION
 # This file is distributed under the same license as the PROJECT project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
-#
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-05-31 11:07+0100\n"
+"POT-Creation-Date: 2026-05-31 12:09+0100\n"
 "PO-Revision-Date: 2026-05-31 11:09+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: nd\n"
@@ -27,8 +25,7 @@ msgstr ""
 "Generated-By: Babel 2.18.0\n"
 
 #: app.py:130
-#, python-brace-format
-#, fuzzy
+#, fuzzy, python-brace-format
 msgid "forbidden — this page requires the '{role}' role"
 msgstr "akuvunyelwe — leli khasi lidinga indima '{role}'"
 
@@ -58,18 +55,18 @@ msgid "Invalid risk tier value."
 msgstr "Inani lesigaba sobungozi elingavumelekile."
 
 #: app.py:353
-#, python-format
-#, fuzzy
+#, fuzzy, python-format
 msgid "Station %(station_id)s is not in the system."
 msgstr "Isiteshi %(station_id)s asikho ohlelweni."
 
 #: app.py:385
-#, python-format
-#, fuzzy
+#, fuzzy, python-format
 msgid ""
 "Report received for %(name)s (station %(sid)s). %(n)d reading(s) in the "
 "trailing-window were flagged. Anchor: %(anchor)s."
-msgstr "Umbiko owamukelwe we-%(name)s (isiteshi %(sid)s). %(n)d ukufunda efasiteleni elilandelanayo kumakiwe. Ihange: %(anchor)s."
+msgstr ""
+"Umbiko owamukelwe we-%(name)s (isiteshi %(sid)s). %(n)d ukufunda "
+"efasiteleni elilandelanayo kumakiwe. Ihange: %(anchor)s."
 
 #: app.py:392
 #, fuzzy
@@ -92,37 +89,37 @@ msgid "invalid related_report_id"
 msgstr "ubunikazi_bombiko_ohlobene obungavumelekile"
 
 #: app.py:703
-#, python-format
-#, fuzzy
+#, fuzzy, python-format
 msgid "unknown station_id %(station_id)s"
 msgstr "station_id engaziwa %(station_id)s"
 
 #: app.py:706
-#, python-format
-#, fuzzy
+#, fuzzy, python-format
 msgid "station %(station_id)s is already closed"
 msgstr "isiteshi %(station_id)s sesivele sivaliwe"
 
 #: app.py:708
-#, python-format
-#, fuzzy
+#, fuzzy, python-format
 msgid "station %(station_id)s is already open"
 msgstr "isiteshi %(station_id)s sesivele sivuliwe"
 
 #: app.py:747
-#, python-format
-#, fuzzy
+#, fuzzy, python-format
 msgid ""
 "This page is for government officials. Medical staff can view this report"
 " at /medical/reports/%(report_id)s"
-msgstr "Leli khasi elezikhulu zikahulumeni. Abasebenzi bezokwelapha bangabuka lo mbiko kokuthi /medical/reports/%(report_id)s"
+msgstr ""
+"Leli khasi elezikhulu zikahulumeni. Abasebenzi bezokwelapha bangabuka lo "
+"mbiko kokuthi /medical/reports/%(report_id)s"
 
 #: estimator.py:61
 #, fuzzy
 msgid ""
 "textbook severe-cholera pattern (diarrhoea + dehydration + recent onset +"
 " multiple cases)"
-msgstr "iphethini yekholera enzima (isifo sohudo + ukuphelelwa amanzi emzimbeni + ukuqala kwakamuva + izimo eziningi)"
+msgstr ""
+"iphethini yekholera enzima (isifo sohudo + ukuphelelwa amanzi emzimbeni +"
+" ukuqala kwakamuva + izimo eziningi)"
 
 #: estimator.py:66
 #, fuzzy
@@ -140,8 +137,7 @@ msgid "recent-onset diarrhoea"
 msgstr "isifo sohudo esisanda kuqala"
 
 #: estimator.py:75
-#, python-format
-#, fuzzy
+#, fuzzy, python-format
 msgid "%(num)d non-specific symptom reported"
 msgid_plural "%(num)d non-specific symptoms reported"
 msgstr[0] "%(num)d uphawu olungaqondile olubikiwe"
@@ -152,7 +148,7 @@ msgstr[1] "%(num)d izimpawu ezingaqondile ezibikiwe"
 msgid "no symptoms reported — request clinical assessment regardless"
 msgstr "azikho izimpawu ezibikiwe - cela ukuhlolwa komtholampilo kungakhathaliseki"
 
-#: language.py:124
+#: language.py:149
 #, fuzzy
 msgid "Invalid language code."
 msgstr "Ikhodi yolimi engavumelekile."
@@ -162,6 +158,15 @@ msgstr "Ikhodi yolimi engavumelekile."
 #, fuzzy
 msgid "Water-safety pipeline"
 msgstr "Ipayipi lokuphepha kwamanzi"
+
+#. shown on every page when the active locale's                catalog still
+#. has unverified (fuzzy) machine-translated entries.
+#: templates/_base.html:64
+msgid ""
+"Machine-translated draft — awaiting native review. Translations of "
+"medical terms may be inaccurate; for clinical decisions, switch to "
+"English."
+msgstr ""
 
 #. aria-label for the language picker dropdown.
 #: templates/_lang_picker.html:4
@@ -348,6 +353,8 @@ msgstr "akuhlukanisiwe"
 #, fuzzy
 msgid "No illness reports yet. Text the Twilio number to generate one."
 msgstr "Ayikho imibiko yokugula okwamanje. Thumela umbhalo kunombolo ye-Twilio ukuze wenze eyodwa."
+"Ayikho imibiko yokugula okwamanje. Thumela umbhalo kunombolo ye-Twilio "
+"ukuze wenze eyodwa."
 
 #: templates/dashboard_report_detail.html:3
 #: templates/dashboard_report_detail.html:43
@@ -434,6 +441,8 @@ msgstr "Ilinganiselwa nge-automated heuristic — hhayi iseluleko sezokwelapha."
 #, fuzzy
 msgid "See rationale below. Pattern-based; clinical assessment overrides."
 msgstr "Bona isizathu esingezansi. Iphethini-based; ukuhlolwa komtholampilo kuyachitha."
+"Bona isizathu esingezansi. Iphethini-based; ukuhlolwa komtholampilo "
+"kuyachitha."
 
 #: templates/dashboard_report_detail.html:94
 #: templates/medical_report_detail.html:79
@@ -531,7 +540,10 @@ msgstr "Iphasiwedi"
 msgid ""
 "Sign in as a government official to view the station-status dashboard, or"
 " as a medical professional to file an illness report."
-msgstr "Ngena ngemvume njengesikhulu sikahulumeni ukuze ubuke ideshibhodi yesimo sesiteshi, noma njengochwepheshe bezokwelapha ukuze ufake umbiko wokugula."
+msgstr ""
+"Ngena ngemvume njengesikhulu sikahulumeni ukuze ubuke ideshibhodi yesimo "
+"sesiteshi, noma njengochwepheshe bezokwelapha ukuze ufake umbiko "
+"wokugula."
 
 #: templates/medical_history.html:3 templates/medical_history.html:46
 #: templates/medical_report.html:142 templates/medical_report_detail.html:36
@@ -573,6 +585,8 @@ msgstr "Qalisa"
 #, fuzzy
 msgid "No medical-portal reports yet. File one via \"File a report\" above."
 msgstr "Ayikho imibiko ye-medical-portal okwamanje. Faka eyodwa usebenzisa \\"Faka umbiko\\" ngenhla."
+"Ayikho imibiko ye-medical-portal okwamanje. Faka eyodwa usebenzisa "
+"\\\"Faka umbiko\\\" ngenhla."
 
 #: templates/medical_report.html:3
 #, fuzzy
@@ -628,6 +642,8 @@ msgstr "MEDIUM - ukugula okubangelwa amanzi"
 #, fuzzy
 msgid "HIGH — likely waterborne illness, clinical workup recommended"
 msgstr "OKUPHEZULU - ukugula okubangelwa amanzi, kunconyiwe ukusebenza komtholampilo"
+"OKUPHEZULU - ukugula okubangelwa amanzi, kunconyiwe ukusebenza "
+"komtholampilo"
 
 #: templates/medical_report.html:186
 #, fuzzy

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-05-31 11:07+0100\n"
+"POT-Creation-Date: 2026-05-31 12:09+0100\n"
 "PO-Revision-Date: 2026-05-31 11:09+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: sn\n"
@@ -19,8 +19,7 @@ msgstr ""
 "Generated-By: Babel 2.18.0\n"
 
 #: app.py:130
-#, python-brace-format
-#, fuzzy
+#, fuzzy, python-brace-format
 msgid "forbidden — this page requires the '{role}' role"
 msgstr "zvakarambidzwa — peji ino inoda basa re'{role}'"
 
@@ -50,18 +49,18 @@ msgid "Invalid risk tier value."
 msgstr "Hukoshi hwechikamu chenjodzi haikodzeri."
 
 #: app.py:353
-#, python-format
-#, fuzzy
+#, fuzzy, python-format
 msgid "Station %(station_id)s is not in the system."
 msgstr "Chiteshi %(station_id)s haisi muhurongwa."
 
 #: app.py:385
-#, python-format
-#, fuzzy
+#, fuzzy, python-format
 msgid ""
 "Report received for %(name)s (station %(sid)s). %(n)d reading(s) in the "
 "trailing-window were flagged. Anchor: %(anchor)s."
-msgstr "Chirevo chakagamuchirwa che %(name)s (chiteshi %(sid)s). %(n)d kuverenga(s) mufafitera rekutevera zvakaiswa mireza. Anchor: %(anchor)s."
+msgstr ""
+"Chirevo chakagamuchirwa che %(name)s (chiteshi %(sid)s). %(n)d "
+"kuverenga(s) mufafitera rekutevera zvakaiswa mireza. Anchor: %(anchor)s."
 
 #: app.py:392
 #, fuzzy
@@ -84,37 +83,37 @@ msgid "invalid related_report_id"
 msgstr "invalid related_report_id"
 
 #: app.py:703
-#, python-format
-#, fuzzy
+#, fuzzy, python-format
 msgid "unknown station_id %(station_id)s"
 msgstr "isingazivikanwe chiteshi_id %(station_id)s"
 
 #: app.py:706
-#, python-format
-#, fuzzy
+#, fuzzy, python-format
 msgid "station %(station_id)s is already closed"
 msgstr "chiteshi %(station_id)s chakatovharwa"
 
 #: app.py:708
-#, python-format
-#, fuzzy
+#, fuzzy, python-format
 msgid "station %(station_id)s is already open"
 msgstr "chiteshi %(station_id)s chatovhurwa"
 
 #: app.py:747
-#, python-format
-#, fuzzy
+#, fuzzy, python-format
 msgid ""
 "This page is for government officials. Medical staff can view this report"
 " at /medical/reports/%(report_id)s"
-msgstr "Peji rino nderevakuru vakuru vehurumende. Vashandi vekurapa vanogona kuona iyi report pa /medical/reports/%(report_id)s"
+msgstr ""
+"Peji rino nderevakuru vakuru vehurumende. Vashandi vekurapa vanogona "
+"kuona iyi report pa /medical/reports/%(report_id)s"
 
 #: estimator.py:61
 #, fuzzy
 msgid ""
 "textbook severe-cholera pattern (diarrhoea + dehydration + recent onset +"
 " multiple cases)"
-msgstr "bhuku rezvinyorwa zvakakomba-cholera pateni (manyoka + kupera mvura mumuviri + ichangotanga + nyaya dzakawanda)"
+msgstr ""
+"bhuku rezvinyorwa zvakakomba-cholera pateni (manyoka + kupera mvura "
+"mumuviri + ichangotanga + nyaya dzakawanda)"
 
 #: estimator.py:66
 #, fuzzy
@@ -132,8 +131,7 @@ msgid "recent-onset diarrhoea"
 msgstr "manyoka achangotanga"
 
 #: estimator.py:75
-#, python-format
-#, fuzzy
+#, fuzzy, python-format
 msgid "%(num)d non-specific symptom reported"
 msgid_plural "%(num)d non-specific symptoms reported"
 msgstr[0] "%(num)d isiri-chaiyo chiratidzo chataurwa"
@@ -144,7 +142,7 @@ msgstr[1] "%(num)d zviratidzo zvisiri-chaiyo zvakashumwa"
 msgid "no symptoms reported — request clinical assessment regardless"
 msgstr "hapana zviratidzo zvinoshumwa - kumbira kuongororwa kwekiriniki zvisinei"
 
-#: language.py:124
+#: language.py:149
 #, fuzzy
 msgid "Invalid language code."
 msgstr "Kodhi yemutauro isiriyo."
@@ -154,6 +152,15 @@ msgstr "Kodhi yemutauro isiriyo."
 #, fuzzy
 msgid "Water-safety pipeline"
 msgstr "Mvura-yakachengeteka pombi"
+
+#. shown on every page when the active locale's                catalog still
+#. has unverified (fuzzy) machine-translated entries.
+#: templates/_base.html:64
+msgid ""
+"Machine-translated draft — awaiting native review. Translations of "
+"medical terms may be inaccurate; for clinical decisions, switch to "
+"English."
+msgstr ""
 
 #. aria-label for the language picker dropdown.
 #: templates/_lang_picker.html:4
@@ -245,7 +252,7 @@ msgstr "pH"
 #: templates/dashboard.html:120 templates/dashboard_report_detail.html:107
 #, fuzzy
 msgid "Turb (NTU)"
-msgstr "Turb (NTU)"
+msgstr "Turbo (NTU)"
 
 #: templates/dashboard.html:121 templates/dashboard_report_detail.html:108
 #, fuzzy
@@ -340,6 +347,8 @@ msgstr "unparsed"
 #, fuzzy
 msgid "No illness reports yet. Text the Twilio number to generate one."
 msgstr "Hapasati pari kutaurwa nezvehurwere. Nyora iyo Twilio nhamba kuti uite imwe."
+"Hapasati pari kutaurwa nezvehurwere. Nyora iyo Twilio nhamba kuti uite "
+"imwe."
 
 #: templates/dashboard_report_detail.html:3
 #: templates/dashboard_report_detail.html:43
@@ -426,6 +435,8 @@ msgstr "Zvinofungidzirwa ne automated heuristic - kwete zano rekurapa."
 #, fuzzy
 msgid "See rationale below. Pattern-based; clinical assessment overrides."
 msgstr "Ona chikonzero chiri pasi apa. Pattern-based; kuongororwa kwekliniki kunodarika."
+"Ona chikonzero chiri pasi apa. Pattern-based; kuongororwa kwekliniki "
+"kunodarika."
 
 #: templates/dashboard_report_detail.html:94
 #: templates/medical_report_detail.html:79
@@ -523,7 +534,9 @@ msgstr "Pasiwedhi"
 msgid ""
 "Sign in as a government official to view the station-status dashboard, or"
 " as a medical professional to file an illness report."
-msgstr "Saina semukuru wehurumende kuti utarise station-status dashboard, kana senyanzvi yekurapa kuti unyore repoti yehurwere."
+msgstr ""
+"Saina semukuru wehurumende kuti utarise station-status dashboard, kana "
+"senyanzvi yekurapa kuti unyore repoti yehurwere."
 
 #: templates/medical_history.html:3 templates/medical_history.html:46
 #: templates/medical_report.html:142 templates/medical_report_detail.html:36
@@ -565,6 +578,8 @@ msgstr "Kutanga"
 #, fuzzy
 msgid "No medical-portal reports yet. File one via \"File a report\" above."
 msgstr "Hapana mishumo yekurapa-portal parizvino. Faera imwe uchishandisa \\"Fayira report\\" pamusoro."
+"Hapana mishumo yekurapa-portal parizvino. Faera imwe uchishandisa "
+"\\\"Fayira report\\\" pamusoro."
 
 #: templates/medical_report.html:3
 #, fuzzy

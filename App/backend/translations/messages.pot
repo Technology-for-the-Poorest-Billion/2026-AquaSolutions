@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-05-31 11:07+0100\n"
+"POT-Creation-Date: 2026-05-31 12:09+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -121,13 +121,22 @@ msgstr[1] ""
 msgid "no symptoms reported — request clinical assessment regardless"
 msgstr ""
 
-#: language.py:124
+#: language.py:149
 msgid "Invalid language code."
 msgstr ""
 
 #: templates/_base.html:6 templates/dashboard.html:3
 #: templates/dashboard.html:94 templates/login.html:3 templates/login.html:98
 msgid "Water-safety pipeline"
+msgstr ""
+
+#. shown on every page when the active locale's                catalog still
+#. has unverified (fuzzy) machine-translated entries.
+#: templates/_base.html:64
+msgid ""
+"Machine-translated draft — awaiting native review. Translations of "
+"medical terms may be inaccurate; for clinical decisions, switch to "
+"English."
 msgstr ""
 
 #. aria-label for the language picker dropdown.

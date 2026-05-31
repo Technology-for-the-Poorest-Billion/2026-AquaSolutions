@@ -57,7 +57,15 @@
     <div class="topbar">
         {% include "_lang_picker.html" %}
     </div>
-    {# unverified-locale banner wires in Task 15 — left silent here. #}
+    {% if unverified_locale() %}
+        <div class="unverified-banner">
+            {# TRANSLATORS: shown on every page when the active locale's
+               catalog still has unverified (fuzzy) machine-translated entries. #}
+            {{ _("Machine-translated draft — awaiting native review. "
+                 "Translations of medical terms may be inaccurate; "
+                 "for clinical decisions, switch to English.") }}
+        </div>
+    {% endif %}
     {% block content %}{% endblock %}
     {% block scripts %}{% endblock %}
 </body>
