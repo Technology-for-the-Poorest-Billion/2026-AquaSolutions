@@ -1,6 +1,6 @@
-{# Top-right language picker. Submits to POST /lang. #}
-<form method="POST" action="/lang" class="lang-picker">
-    {# TRANSLATORS: aria-label for the language picker dropdown. #}
+{# Top-right language picker. Submits to POST /lang.
+   Styled to sit in the dark topbar — see .topbar .right select in app.css. #}
+<form method="POST" action="/lang" class="lang-picker" style="margin:0">
     <select name="code" onchange="this.form.submit()" aria-label="{{ _('Language') }}">
         {% for code, label in LANGUAGES.items() %}
             <option value="{{ code }}" {% if code == current_lang() %}selected{% endif %}>
