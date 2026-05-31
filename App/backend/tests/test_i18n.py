@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from language import LANGUAGES, current_lang
 
 
@@ -227,7 +229,7 @@ def test_messages_pot_contains_login_button(tmp_path):
     import subprocess
     import shutil
     backend = tmp_path / "backend"
-    src = "/Users/tristanmartin/Desktop/GM2/GM2_Aqua_Solutions/.claude/worktrees/feat+i18n/App/backend"
+    src = str(Path(__file__).resolve().parent.parent)  # App/backend
     shutil.copytree(src, backend, ignore=shutil.ignore_patterns("__pycache__", ".pytest_cache", "*.db", "*.db-*", "*.mo"))
     result = subprocess.run(
         ["pybabel", "extract", "-F", "babel.cfg", "-o", "translations/messages.pot", "."],
