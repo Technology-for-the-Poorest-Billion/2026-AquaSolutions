@@ -1,0 +1,2 @@
+# Development-only dependencies. Not installed on Railway.
+googletrans==4.0.0rc1
