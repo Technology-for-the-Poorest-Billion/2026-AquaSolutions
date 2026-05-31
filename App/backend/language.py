@@ -182,4 +182,16 @@ def init_babel(app: Flask) -> None:
     @app.after_request
     def _stamp_active_locale(response):
         response.headers["X-Active-Locale"] = current_lang()
+        # Prevent browsers from serving a stale HTML page after the picker
+        # flips the cookie. Without this, the picker change has no visible
+        # effect until the user hard-refreshes. Only HTML responses need
+        # the directive — leave static assets alone.
+        content_type = response.headers.get("Content-Type", "")
+        if content_type.startswith("text/html"):
+            response.headers["Cache-Control"] = "no-store"
+            existing_vary = response.headers.get("Vary", "")
+            if "Cookie" not in existing_vary:
+                response.headers["Vary"] = (
+                    f"{existing_vary}, Cookie".lstrip(", ") if existing_vary else "Cookie"
+                )
         return response
