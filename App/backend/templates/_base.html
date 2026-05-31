@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="{{ current_lang() }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Water-safety pipeline{% endblock %}</title>
+    <style>
+        :root {
+            --bg: #0f1115;
+            --panel: #181b22;
+            --text: #e6e7eb;
+            --muted: #8a92a3;
+            --accent: #5ec8a8;
+            --danger: #ff6b6b;
+            --border: #262a33;
+            --input-bg: #11141a;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                         "Helvetica Neue", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        .topbar {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 8px 16px;
+            border-bottom: 1px solid var(--border);
+            background: var(--panel);
+        }
+        .lang-picker select {
+            background: var(--input-bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 13px;
+        }
+        .unverified-banner {
+            background: rgba(255, 215, 0, 0.08);
+            border-bottom: 1px solid rgba(255, 215, 0, 0.25);
+            color: #f6d97b;
+            padding: 8px 16px;
+            font-size: 13px;
+            text-align: center;
+        }
+        {% block extra_style %}{% endblock %}
+    </style>
+</head>
+<body>
+    <div class="topbar">
+        {% include "_lang_picker.html" %}
+    </div>
+    {# unverified-locale banner wires in Task 15 — left silent here. #}
+    {% block content %}{% endblock %}
+</body>
+</html>
