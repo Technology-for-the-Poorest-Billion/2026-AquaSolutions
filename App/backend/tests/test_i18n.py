@@ -296,3 +296,23 @@ def test_messages_pot_contains_login_button(tmp_path):
     assert 'msgid "Sign in"' in pot
     assert 'msgid "Username"' in pot
     assert 'msgid "Password"' in pot
+
+
+def test_app_css_is_served_with_design_tokens(client):
+    """The new shared stylesheet must be reachable and must carry the
+    full token set the rest of the redesign depends on."""
+    resp = client.get("/static/app.css")
+    assert resp.status_code == 200, "app.css must be served by Flask's static handler"
+    body = resp.data.decode("utf-8")
+    for token in (
+        "--ink", "--accent", "--teal", "--blue",
+        "--bg", "--panel", "--border", "--muted",
+        "--clear-bg", "--clear-fg",
+        "--medium-bg", "--medium-fg",
+        "--high-bg", "--high-fg",
+        "--severe-bg", "--severe-fg",
+        "--font-sans", "--font-mono",
+        "--space-1", "--space-2", "--space-3", "--space-4", "--space-6",
+        "--radius-sm", "--radius-md", "--radius-lg",
+    ):
+        assert token in body, f"missing token: {token}"
