@@ -1,178 +1,163 @@
 {% extends "_base.html" %}
 
-{% block title %}{{ _("Report") }} #{{ report['report_id'] }} — {{ _("government detail") }}{% endblock %}
-
-{% block extra_style %}
-        header { padding: 16px 24px; border-bottom: 1px solid var(--border);
-                 display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-        header .brand-row { display: flex; align-items: center; gap: 12px; min-width: 0; }
-        header .brand-row img.logo { height: 36px; width: auto; flex: 0 0 auto; }
-        header a { color: var(--accent); text-decoration: none; }
-        .disclaimer { background: #2d1f15; color: var(--warn); font-size: 12px;
-                      padding: 8px 24px; border-bottom: 1px solid var(--border); }
-        main { max-width: 900px; margin: 0 auto; padding: 24px; }
-        section { background: var(--panel); border: 1px solid var(--border);
-                  border-radius: 8px; padding: 16px; margin-bottom: 16px; }
-        section h2 { margin: 0 0 12px 0; font-size: 14px; font-weight: 600;
-                     color: var(--muted); text-transform: uppercase;
-                     letter-spacing: 0.05em; }
-        dl { display: grid; grid-template-columns: 180px 1fr; gap: 8px 16px; margin: 0; font-size: 13px; }
-        dt { color: var(--muted); }
-        dd { margin: 0; }
-        .pill { display: inline-block; padding: 4px 10px; border-radius: 12px;
-                font-size: 12px; font-weight: 600; }
-        .tier-low      { background: rgba(94, 200, 168, 0.15); color: var(--accent); }
-        .tier-medium   { background: rgba(240, 198, 116, 0.15); color: var(--warn); }
-        .tier-high     { background: rgba(255, 165, 90, 0.20); color: #ffa55a; }
-        .tier-severe   { background: rgba(255, 107, 107, 0.20); color: var(--danger); }
-        .tier-muted { opacity: 0.7; }
-        .banner { background: rgba(240, 198, 116, 0.12); color: var(--warn);
-                  padding: 10px 12px; border-radius: 6px; font-size: 13px;
-                  margin-bottom: 12px; line-height: 1.4; }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--border); }
-        th { color: var(--muted); font-weight: 500; }
-{% endblock %}
+{% block title %}{{ _("Report") }} #{{ report['report_id'] }} — {{ _("Dashboard") }}{% endblock %}
 
 {% block content %}
-<header>
-    <div class="brand-row">
-        <img src="{{ url_for('static', filename='aqua_solutions_logo.png') }}" alt="Aqua Solutions logo" class="logo">
-        <h1 style="font-size: 18px; margin: 0;">
-            <a href="{{ url_for('dashboard') }}">← {{ _("Dashboard") }}</a>
-            &nbsp;›&nbsp; {{ _("Report") }} #{{ report['report_id'] }} · {{ report['station_name'] or _('unparsed') }}
-        </h1>
-    </div>
-    <div style="color: var(--muted); font-size: 12px;">
-        {{ _("Signed in as") }} {{ session['display_name'] }}
-        · <a href="{{ url_for('logout') }}">{{ _("Sign out") }}</a>
-    </div>
-</header>
-<div class="disclaimer">
-    {{ _("Faecal-contamination risk + community illness signal.") }}
-    {# TRANSLATORS: This negation is the project's central safety claim.
-       The sensor does NOT detect cholera. Preserve the negation when translating. #}
-    {{ _("NOT a cholera detector.") }}
+<div class="crumb">
+    <a href="{{ url_for('dashboard') }}">← {{ _("Dashboard") }}</a>
+    &nbsp;›&nbsp;
+    {{ _("Report") }} <span class="mono">#{{ report['report_id'] }}</span>
+    {% if report['station_name'] %} · {{ report['station_name'] }}{% endif %}
 </div>
-<main>
 
-<section>
-    <h2>{{ _("Report metadata") }}</h2>
-    <dl>
-        <dt>{{ _("Source") }}</dt>             <dd>{{ report['report_source'] }}</dd>
-        <dt>{{ _("Received at") }}</dt>        <dd>{{ report['received_at'] }}</dd>
-        <dt>{{ _("Submitter") }}</dt>          <dd>{{ report['submitter'] or report['reporter_phone'] or '—' }}</dd>
-        <dt>{{ _("Parser version") }}</dt>     <dd>{{ report['parser_version'] }}</dd>
-    </dl>
-</section>
+<div class="grid-2-asym">
+    <div>
+        <section class="panel">
+            <h4>{{ _("Report metadata") }}</h4>
+            <dl class="kv">
+                <dt>{{ _("Source") }}</dt>
+                <dd>{{ report['report_source']|upper }}</dd>
 
-<section>
-    <h2>{{ _("Structured fields") }}</h2>
-    <dl>
-        <dt>{{ _("Station") }}</dt>     <dd>#{{ report['station_id'] }} {{ report['station_name'] }}</dd>
-        <dt>{{ _("Case count") }}</dt>  <dd>{{ report['case_count'] or '—' }}</dd>
-        <dt>{{ _("Symptoms") }}</dt>    <dd>{{ symptoms_display }}</dd>
-        <dt>{{ _("Onset date") }}</dt>  <dd>{{ report['onset_date'] or '—' }}</dd>
-        <dt>{{ _("Notes / raw") }}</dt> <dd><code style="font-size: 11px;">{{ report['raw_message'] }}</code></dd>
-    </dl>
-</section>
+                <dt>{{ _("Received") }}</dt>
+                <dd>{{ report['received_at'] }}</dd>
 
-<section>
-    <h2>{{ _("Risk tier") }}</h2>
-    {% if tier_source == 'reporter' %}
-        <span class="pill tier-{{ tier }}">{{ tier|upper }}</span>
-        <span style="color: var(--muted); font-size: 12px; margin-left: 8px;">
-            {{ _("Reporter's clinical assessment") }}
-        </span>
-    {% elif tier_source == 'estimated' %}
-        <div class="banner">
-            <strong>{{ _("Estimated by automated heuristic — not medical advice.") }}</strong>
-            {{ _("See rationale below. Pattern-based; clinical assessment overrides.") }}
-        </div>
-        <span class="pill tier-{{ tier }} tier-muted">{{ tier|upper }}</span>
-        <span style="color: var(--muted); font-size: 12px; margin-left: 8px;">
-            {{ _("Estimated risk tier") }}
-        </span>
-        <p style="margin-top: 12px; font-size: 13px;">{{ tier_rationale }}</p>
-    {% else %}
-        <span style="color: var(--muted); font-size: 13px;">{{ tier_pending_text }}</span>
-    {% endif %}
-</section>
+                <dt>{{ _("Submitter") }}</dt>
+                <dd>{{ report['submitter'] or report['reporter_phone'] or '—' }}</dd>
 
-<section>
-    <h2>{{ _("Labelled readings") }} ({{ labelled_readings|length }})</h2>
-    {% if labelled_readings %}
-    <table>
-        <thead><tr>
-            <th>{{ _("Reading") }}</th><th>{{ _("Recorded at") }}</th><th>{{ _("pH") }}</th><th>{{ _("Turb (NTU)") }}</th>
-            <th>{{ _("Temp (°C)") }}</th><th>{{ _("Rule") }}</th>
-        </tr></thead>
-        <tbody>
-            {% for lr in labelled_readings %}
-            <tr>
-                <td>#{{ lr['reading_id'] }}</td>
-                <td>{{ lr['recorded_at'][:19] }}</td>
-                <td>{{ '%.2f'|format(lr['ph']) if lr['ph'] is not none else '—' }}</td>
-                <td>{{ '%.1f'|format(lr['turbidity_ntu']) if lr['turbidity_ntu'] is not none else '—' }}</td>
-                <td>{{ '%.1f'|format(lr['temperature_c']) if lr['temperature_c'] is not none else '—' }}</td>
-                <td style="font-size: 11px; color: var(--muted);">{{ lr['rule_description'] }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-    <p style="color: var(--muted); font-size: 13px;">{{ _("No readings labelled by this report.") }}</p>
-    {% endif %}
-</section>
+                <dt>{{ _("Parser version") }}</dt>
+                <dd>{{ report['parser_version'] or '—' }}</dd>
+            </dl>
+        </section>
 
+        <section class="panel">
+            <h4>{{ _("Structured fields") }}</h4>
+            <dl class="kv">
+                <dt>{{ _("Station") }}</dt>
+                <dd>{% if report['station_id'] %}<span class="mono">#{{ report['station_id'] }}</span> · {{ report['station_name'] or '' }}{% else %}—{% endif %}</dd>
 
-<section>
-    <h2>{{ _("Actions") }}</h2>
-    <form method="POST" action="{{ url_for('post_action') }}" style="display: inline;"
-          onsubmit="return confirm('Close station {{ report['station_id'] }}?');">
-        <input type="hidden" name="action_type" value="close_borehole">
-        <input type="hidden" name="station_id" value="{{ report['station_id'] }}">
-        <input type="hidden" name="related_report_id" value="{{ report['report_id'] }}">
-        <button type="submit">{{ _("Close borehole") }}</button>
-    </form>
-    <form method="POST" action="{{ url_for('post_action') }}" style="display: inline;"
-          onsubmit="return confirm('Dispatch sample team?');">
-        <input type="hidden" name="action_type" value="dispatch_sample_team">
-        <input type="hidden" name="station_id" value="{{ report['station_id'] }}">
-        <input type="hidden" name="related_report_id" value="{{ report['report_id'] }}">
-        <button type="submit">{{ _("Send sample team") }}</button>
-    </form>
-    <form method="POST" action="{{ url_for('post_action') }}" style="display: inline;"
-          onsubmit="return confirm('Dispatch medical team?');">
-        <input type="hidden" name="action_type" value="dispatch_medical_team">
-        <input type="hidden" name="station_id" value="{{ report['station_id'] }}">
-        <input type="hidden" name="related_report_id" value="{{ report['report_id'] }}">
-        <button type="submit">{{ _("Send medical team") }}</button>
-    </form>
-</section>
+                <dt>{{ _("Case count") }}</dt>
+                <dd>{{ report['case_count'] or '—' }}</dd>
 
-<section>
-    <h2>{{ _("Interventions linked to this report") }} ({{ interventions|length }})</h2>
-    {% if interventions %}
-    <table>
-        <thead><tr>
-            <th>{{ _("When") }}</th><th>{{ _("Action") }}</th><th>{{ _("Triggered by") }}</th><th>{{ _("Notes") }}</th>
-        </tr></thead>
-        <tbody>
-            {% for iv in interventions %}
-            <tr>
-                <td>{{ iv['triggered_at'][:19] }}</td>
-                <td><code>{{ iv['action_type'] }}</code></td>
-                <td>{{ iv['triggered_by'] }}</td>
-                <td>{{ iv['notes'] or '—' }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-    <p style="color: var(--muted); font-size: 13px;">{{ _("No interventions yet.") }}</p>
-    {% endif %}
-</section>
+                <dt>{{ _("Symptoms") }}</dt>
+                <dd>{{ symptoms_display }}</dd>
 
-</main>
+                <dt>{{ _("Onset date") }}</dt>
+                <dd>{{ report['onset_date'] or '—' }}</dd>
+
+                <dt>{{ _("Notes / raw") }}</dt>
+                <dd><code style="font-size:11px">{{ report['raw_message'] }}</code></dd>
+            </dl>
+        </section>
+
+        <section class="panel">
+            <h4>{{ _("Risk tier") }}</h4>
+            {% if tier_source == 'reporter' %}
+                <span class="pill pill-{{ tier }}">{{ tier|upper }}</span>
+                <span style="color:var(--muted);font-size:12px;margin-left:8px">{{ _("Reporter's clinical assessment") }}</span>
+            {% elif tier_source == 'estimated' %}
+                <div style="background:rgba(240,198,116,0.12);color:var(--medium-fg);padding:10px 12px;border-radius:6px;font-size:13px;margin-bottom:12px;line-height:1.4">
+                    <strong>{{ _("Estimated by automated heuristic — not medical advice.") }}</strong>
+                    {{ _("See rationale below. Pattern-based; clinical assessment overrides.") }}
+                </div>
+                <span class="pill pill-{{ tier }}" style="opacity:0.7">{{ tier|upper }}</span>
+                <span style="color:var(--muted);font-size:12px;margin-left:8px">{{ _("Estimated risk tier") }}</span>
+                {% if tier_rationale %}
+                    <p style="margin-top:12px;font-size:13px">{{ tier_rationale }}</p>
+                {% endif %}
+            {% else %}
+                <span style="color:var(--muted);font-size:13px">{{ tier_pending_text }}</span>
+            {% endif %}
+        </section>
+
+        <section class="panel">
+            <h4>{{ _("Labelled readings") }} ({{ labelled_readings|length }})</h4>
+            {% if labelled_readings %}
+            <table class="reading-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>{{ _("Recorded at") }}</th>
+                        <th>{{ _("pH") }}</th>
+                        <th>{{ _("Turb (NTU)") }}</th>
+                        <th>{{ _("Temp (°C)") }}</th>
+                        <th>{{ _("Rule") }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for lr in labelled_readings %}
+                    <tr>
+                        <td>#{{ lr['reading_id'] }}</td>
+                        <td>{{ lr['recorded_at'][:19] }}</td>
+                        <td>{{ '%.2f'|format(lr['ph']) if lr['ph'] is not none else '—' }}</td>
+                        <td>{{ '%.1f'|format(lr['turbidity_ntu']) if lr['turbidity_ntu'] is not none else '—' }}</td>
+                        <td>{{ '%.1f'|format(lr['temperature_c']) if lr['temperature_c'] is not none else '—' }}</td>
+                        <td style="font-size:11px;color:var(--muted)">{{ lr['rule_description'] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p style="color:var(--muted);font-size:13px">{{ _("No readings labelled by this report.") }}</p>
+            {% endif %}
+        </section>
+    </div>
+
+    <div>
+        <section class="panel">
+            <h4>{{ _("Actions") }}</h4>
+            <form method="POST" action="{{ url_for('post_action') }}" style="margin-bottom:var(--space-2)"
+                  onsubmit="return confirm('Close station {{ report['station_id'] }}?');">
+                <input type="hidden" name="action_type" value="close_borehole">
+                <input type="hidden" name="station_id" value="{{ report['station_id'] }}">
+                <input type="hidden" name="related_report_id" value="{{ report['report_id'] }}">
+                <button type="submit" class="btn btn-danger" style="width:100%">{{ _("Close borehole") }}</button>
+            </form>
+            <form method="POST" action="{{ url_for('post_action') }}" style="margin-bottom:var(--space-2)"
+                  onsubmit="return confirm('Dispatch sample team?');">
+                <input type="hidden" name="action_type" value="dispatch_sample_team">
+                <input type="hidden" name="station_id" value="{{ report['station_id'] }}">
+                <input type="hidden" name="related_report_id" value="{{ report['report_id'] }}">
+                <button type="submit" class="btn btn-light" style="width:100%">{{ _("Send sample team") }}</button>
+            </form>
+            <form method="POST" action="{{ url_for('post_action') }}" style="margin-bottom:var(--space-2)"
+                  onsubmit="return confirm('Dispatch medical team?');">
+                <input type="hidden" name="action_type" value="dispatch_medical_team">
+                <input type="hidden" name="station_id" value="{{ report['station_id'] }}">
+                <input type="hidden" name="related_report_id" value="{{ report['report_id'] }}">
+                <button type="submit" class="btn btn-light" style="width:100%">{{ _("Send medical team") }}</button>
+            </form>
+        </section>
+
+        {% if interventions %}
+        <section class="panel">
+            <h4>{{ _("Interventions linked to this report") }} ({{ interventions|length }})</h4>
+            <table class="reading-table">
+                <thead>
+                    <tr>
+                        <th>{{ _("When") }}</th>
+                        <th>{{ _("Action") }}</th>
+                        <th>{{ _("Triggered by") }}</th>
+                        <th>{{ _("Notes") }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for iv in interventions %}
+                    <tr>
+                        <td>{{ iv['triggered_at'][:19] }}</td>
+                        <td><code>{{ iv['action_type'] }}</code></td>
+                        <td>{{ iv['triggered_by'] }}</td>
+                        <td>{{ iv['notes'] or '—' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+        {% else %}
+        <section class="panel">
+            <h4>{{ _("Interventions linked to this report") }}</h4>
+            <p style="color:var(--muted);font-size:13px">{{ _("No interventions yet.") }}</p>
+        </section>
+        {% endif %}
+    </div>
+</div>
 {% endblock %}

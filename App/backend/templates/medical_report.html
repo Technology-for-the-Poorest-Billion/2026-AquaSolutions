@@ -1,216 +1,110 @@
 {% extends "_base.html" %}
 
-{% block title %}{{ _("File an illness report") }} — {{ _("medical portal") }}{% endblock %}
-
-{% block extra_style %}
-        header {
-            padding: 16px 24px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 16px;
-        }
-        header .brand-row {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            min-width: 0;
-        }
-        header .brand-row img.logo {
-            height: 36px;
-            width: auto;
-            flex: 0 0 auto;
-        }
-        header h1 { font-size: 18px; margin: 0; font-weight: 600; }
-        header .meta { color: var(--muted); font-size: 12px; }
-        header .meta a {
-            color: var(--accent);
-            text-decoration: none;
-            margin-left: 8px;
-        }
-        .disclaimer {
-            background: #2d1f15;
-            color: #f0c674;
-            font-size: 12px;
-            padding: 8px 24px;
-            border-bottom: 1px solid var(--border);
-        }
-        main {
-            max-width: 640px;
-            margin: 0 auto;
-            padding: 24px;
-        }
-        section {
-            background: var(--panel);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 16px;
-        }
-        section h2 {
-            margin: 0 0 16px 0;
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-        .field { margin-bottom: 16px; }
-        label {
-            display: block;
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--text);
-            margin-bottom: 6px;
-        }
-        label .hint {
-            color: var(--muted);
-            font-weight: 400;
-            font-size: 12px;
-        }
-        select, input[type=number], input[type=date], textarea {
-            width: 100%;
-            padding: 9px 12px;
-            background: var(--input-bg);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            color: var(--text);
-            font-size: 14px;
-            font-family: inherit;
-        }
-        select:focus, input:focus, textarea:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-        textarea { min-height: 80px; resize: vertical; }
-        .checkboxes {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
-        .checkboxes label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 12px;
-            background: var(--input-bg);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 400;
-            font-size: 13px;
-            margin: 0;
-        }
-        .checkboxes input { width: auto; margin: 0; }
-        button {
-            padding: 10px 18px;
-            background: var(--accent);
-            color: #0f1115;
-            border: none;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        button:hover { filter: brightness(1.1); }
-        .success {
-            background: rgba(94, 200, 168, 0.12);
-            color: var(--accent);
-            padding: 12px 14px;
-            border-radius: 6px;
-            font-size: 13px;
-            margin-bottom: 16px;
-            line-height: 1.4;
-        }
-        .error {
-            background: rgba(255, 107, 107, 0.12);
-            color: var(--danger);
-            padding: 12px 14px;
-            border-radius: 6px;
-            font-size: 13px;
-            margin-bottom: 16px;
-        }
-{% endblock %}
+{% block title %}{{ _("File a report") }} — {{ _("Water-safety pipeline") }}{% endblock %}
 
 {% block content %}
-    <header>
-        <div class="brand-row">
-            <img src="{{ url_for('static', filename='aqua_solutions_logo.png') }}" alt="Aqua Solutions logo" class="logo">
-            <h1 style="font-size: 18px; margin: 0;">
-                <a href="{{ url_for('medical_report_form') }}" style="color: var(--accent); text-decoration: none; margin-right: 12px;">{{ _("File a report") }}</a>
-                <a href="{{ url_for('medical_history') }}" style="color: var(--accent); text-decoration: none; margin-right: 12px;">{{ _("History") }}</a>
-            </h1>
+<section class="panel">
+    <h4>{{ _("File a community illness report") }}</h4>
+
+    {% if success_message %}<div class="pill pill-clear" style="display:block;padding:8px var(--space-3);font-family:var(--font-sans);font-size:12px;margin-bottom:var(--space-3)">{{ success_message }}</div>{% endif %}
+    {% if error_message %}<div class="pill pill-severe" style="display:block;padding:8px var(--space-3);font-family:var(--font-sans);font-size:12px;margin-bottom:var(--space-3)">{{ error_message }}</div>{% endif %}
+
+    <form method="POST" action="{{ url_for('medical_report_submit') }}" id="report-form">
+
+        <div class="form-grid-3">
+            <div class="field">
+                <label for="station_id">{{ _("Station") }}</label>
+                <select id="station_id" name="station_id" required>
+                    <option value="">— {{ _("select") }} —</option>
+                    {% for s in stations %}
+                        <option value="{{ s['station_id'] }}">{{ s['station_id'] }} · {{ s['name'] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="field">
+                <label for="case_count">{{ _("Cases") }}</label>
+                <input id="case_count" type="number" name="case_count" min="1" max="200" required>
+            </div>
+            <div class="field">
+                <label for="onset_date">{{ _("Onset date") }}</label>
+                <input id="onset_date" type="date" name="onset_date">
+            </div>
         </div>
-        <div class="meta">
-            {{ _("Signed in as") }} {{ session['display_name'] }} ({{ session['role'] }})
-            <a href="{{ url_for('logout') }}">{{ _("Sign out") }}</a>
+
+        <div class="field-row">
+            <label>{{ _("Symptoms") }}</label>
+            <div class="inline-row" id="symptom-chips">
+                {% for key, label_text in symptoms %}
+                    <span class="chip" data-symptom="{{ key }}" onclick="toggleChip(this)">
+                        <span class="check">✓</span> {{ label_text }}
+                    </span>
+                {% endfor %}
+            </div>
         </div>
-    </header>
-    <div class="disclaimer">
-        {{ _("Faecal-contamination risk + community illness signal.") }}
-        {# TRANSLATORS: This negation is the project's central safety claim.
-           The sensor does NOT detect cholera. Preserve the negation when translating. #}
-        {{ _("NOT a cholera detector.") }}
-    </div>
 
-    <main>
-        <section>
-            <h2>{{ _("New report") }}</h2>
-            {% if success_message %}<div class="success">{{ success_message }}</div>{% endif %}
-            {% if error_message %}<div class="error">{{ error_message }}</div>{% endif %}
+        <div class="field-row">
+            <label>{{ _("Risk tier") }} <span style="font-weight:500;text-transform:none;color:var(--muted)">({{ _("clinical assessment, optional") }})</span></label>
+            <div class="segmented" id="risk-tier">
+                <span class="seg on" data-tier="" onclick="pickTier(this)">{{ _("Not assessed") }}</span>
+                <span class="seg" data-tier="low" onclick="pickTier(this)">LOW</span>
+                <span class="seg" data-tier="medium" onclick="pickTier(this)">MEDIUM</span>
+                <span class="seg" data-tier="high" onclick="pickTier(this)">HIGH</span>
+                <span class="seg" data-tier="severe" onclick="pickTier(this)">SEVERE</span>
+            </div>
+        </div>
 
-            <form method="POST" action="{{ url_for('medical_report_submit') }}">
-                <div class="field">
-                    <label for="station_id">{{ _("Water station") }} <span class="hint">({{ _("required") }})</span></label>
-                    <select name="station_id" id="station_id" required>
-                        <option value="" disabled selected>{{ _("Choose a station…") }}</option>
-                        {% for s in stations %}
-                        <option value="{{ s['station_id'] }}">#{{ s['station_id'] }} {{ s['name'] }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
+        <div class="field">
+            <label for="notes">{{ _("Notes") }} <span style="font-weight:500;text-transform:none;color:var(--muted)">({{ _("optional") }})</span></label>
+            <textarea id="notes" name="notes" rows="2"></textarea>
+        </div>
 
-                <div class="field">
-                    <label for="case_count">{{ _("Number of suspected cases") }} <span class="hint">({{ _("required") }})</span></label>
-                    <input type="number" name="case_count" id="case_count" min="1" value="1" required>
-                </div>
+        {# Hidden input the JS keeps in sync with the segmented control. #}
+        <input type="hidden" id="risk-tier-hidden" name="risk_tier" value="">
 
-                <div class="field">
-                    <label>{{ _("Risk tier") }} <span class="hint">({{ _("your clinical assessment, optional") }})</span></label>
-                    <select name="risk_tier">
-                        <option value="" selected>{{ _("Not yet assessed — estimate on review") }}</option>
-                        <option value="low">{{ _("LOW — non-specific symptoms") }}</option>
-                        <option value="medium">{{ _("MEDIUM — possible waterborne illness") }}</option>
-                        <option value="high">{{ _("HIGH — likely waterborne illness, clinical workup recommended") }}</option>
-                        <option value="severe">{{ _("SEVERE — suspected severe cholera, urgent action") }}</option>
-                    </select>
-                </div>
+        <div class="meta-row">
+            <span style="font-size:11px;color:var(--muted)">{{ _("Reviewed by the government dashboard within ~30s of submission.") }}</span>
+            <div class="btn-row">
+                <button type="reset" class="btn btn-light" onclick="resetForm()">{{ _("Reset") }}</button>
+                <button type="submit" class="btn">{{ _("Submit report") }}</button>
+            </div>
+        </div>
+    </form>
+</section>
+{% endblock %}
 
-                <div class="field">
-                    <label>{{ _("Symptoms observed") }} <span class="hint">({{ _("tick all that apply") }})</span></label>
-                    <div class="checkboxes">
-                        {% for key, label_text in symptoms %}
-                        <label>
-                            <input type="checkbox" name="symptoms" value="{{ key }}">
-                            {{ label_text }}
-                        </label>
-                        {% endfor %}
-                    </div>
-                </div>
-
-                <div class="field">
-                    <label for="onset_date">{{ _("Symptom onset date") }} <span class="hint">({{ _("optional — anchors the labelling window") }})</span></label>
-                    <input type="date" name="onset_date" id="onset_date">
-                </div>
-
-                <div class="field">
-                    <label for="notes">{{ _("Notes") }} <span class="hint">({{ _("optional") }})</span></label>
-                    <textarea name="notes" id="notes" placeholder="{{ _('Anything else worth flagging…') }}"></textarea>
-                </div>
-
-                <button type="submit">{{ _("Submit report") }}</button>
-            </form>
-        </section>
-    </main>
+{% block scripts %}
+<script>
+  // Symptoms — append hidden inputs per toggled chip so the form submits
+  // multi-value (request.form.getlist('symptoms')) style, matching what
+  // the submit handler expects at line 300 of app.py.
+  function toggleChip(el) {
+    el.classList.toggle('on');
+    syncSymptomsMulti();
+  }
+  function syncSymptomsMulti() {
+    // Remove any existing dynamic symptom hidden inputs.
+    document.querySelectorAll('input[name="symptoms"].dyn').forEach(n => n.remove());
+    const form = document.getElementById('report-form');
+    document.querySelectorAll('#symptom-chips .chip.on').forEach(c => {
+      const inp = document.createElement('input');
+      inp.type = 'hidden';
+      inp.name = 'symptoms';
+      inp.className = 'dyn';
+      inp.value = c.dataset.symptom;
+      form.appendChild(inp);
+    });
+  }
+  function pickTier(el) {
+    document.querySelectorAll('#risk-tier .seg').forEach(s => s.classList.remove('on'));
+    el.classList.add('on');
+    document.getElementById('risk-tier-hidden').value = el.dataset.tier;
+  }
+  function resetForm() {
+    document.querySelectorAll('#symptom-chips .chip').forEach(c => c.classList.remove('on'));
+    syncSymptomsMulti();
+    document.querySelectorAll('#risk-tier .seg').forEach(s => s.classList.remove('on'));
+    const firstSeg = document.querySelector('#risk-tier .seg');
+    if (firstSeg) { firstSeg.classList.add('on'); document.getElementById('risk-tier-hidden').value = ''; }
+  }
+</script>
 {% endblock %}

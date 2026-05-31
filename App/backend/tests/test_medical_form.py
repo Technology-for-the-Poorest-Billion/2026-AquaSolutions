@@ -1,17 +1,18 @@
-"""Tests for /medical/report — the risk-tier dropdown and its persistence."""
+"""Tests for /medical/report — the risk-tier segmented control and its persistence."""
 
 
-def test_form_renders_risk_tier_dropdown(med_session):
+def test_form_renders_risk_tier_segmented(med_session):
     r = med_session.get("/medical/report")
     assert r.status_code == 200
     body = r.data.decode("utf-8")
-    # All five options must be in the form
+    # Hidden input carries the submitted value; segmented control holds the tiers.
     assert 'name="risk_tier"' in body
-    assert 'value=""' in body                    # "Not yet assessed"
-    assert 'value="low"' in body
-    assert 'value="medium"' in body
-    assert 'value="high"' in body
-    assert 'value="severe"' in body
+    # All five tiers must be present (hidden input default "" + four data-tier spans).
+    assert 'data-tier=""' in body                # "Not assessed"
+    assert 'data-tier="low"' in body
+    assert 'data-tier="medium"' in body
+    assert 'data-tier="high"' in body
+    assert 'data-tier="severe"' in body
 
 
 def test_submitting_with_risk_tier_persists_it(med_session):

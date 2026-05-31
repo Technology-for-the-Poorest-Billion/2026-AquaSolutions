@@ -2,121 +2,44 @@
 
 {% block title %}{{ _("Sign in") }} — {{ _("Water-safety pipeline") }}{% endblock %}
 
+{% block body_class %}app-login{% endblock %}
+
 {# Front page intentionally skips the machine-translated draft banner —
-   no clinical content here, so the warning is irrelevant. The banner
-   returns on every signed-in page. #}
+   no clinical content here, so the warning is irrelevant. #}
 {% block unverified_banner %}{% endblock %}
 
-{% block extra_style %}
-        body {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        main {
-            width: 100%;
-            max-width: 380px;
-            padding: 24px;
-        }
-        .brand {
-            text-align: center;
-            margin-bottom: 24px;
-            color: var(--muted);
-            font-size: 13px;
-            line-height: 1.5;
-        }
-        .brand img.logo {
-            display: block;
-            width: 100%;
-            max-width: 220px;
-            height: auto;
-            margin: 0 auto 16px auto;
-        }
-        .brand h1 {
-            color: var(--text);
-            font-size: 18px;
-            font-weight: 600;
-            margin: 0 0 4px 0;
-        }
-        form {
-            background: var(--panel);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 20px;
-        }
-        label {
-            display: block;
-            font-size: 12px;
-            font-weight: 500;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 6px;
-        }
-        input {
-            width: 100%;
-            padding: 10px 12px;
-            background: var(--input-bg);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            color: var(--text);
-            font-size: 14px;
-            margin-bottom: 16px;
-        }
-        input:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-        button {
-            width: 100%;
-            padding: 10px 12px;
-            background: var(--accent);
-            color: #0f1115;
-            border: none;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        button:hover { filter: brightness(1.1); }
-        .error {
-            background: rgba(255, 107, 107, 0.12);
-            color: var(--danger);
-            padding: 10px 12px;
-            border-radius: 6px;
-            font-size: 13px;
-            margin-bottom: 16px;
-        }
-        .footer {
-            margin-top: 16px;
-            font-size: 12px;
-            color: var(--muted);
-            text-align: center;
-            line-height: 1.5;
-        }
-{% endblock %}
+{# Login also skips the cholera disclaimer — it's a public sign-in page. #}
+{% block disclaimer %}{% endblock %}
 
 {% block content %}
-    <main>
-        <div class="brand">
-            <img src="{{ url_for('static', filename='aqua_solutions_logo.png') }}" alt="Aqua Solutions logo" class="logo">
-            <h1>{{ _("Water-safety pipeline") }}</h1>
-            <div>{{ _("Faecal-contamination risk + community illness signal.") }}<br>
-            {# TRANSLATORS: This negation is the project's central safety claim.
-               The sensor does NOT detect cholera. Preserve the negation when translating. #}
-            {{ _("NOT a cholera detector.") }}</div>
-        </div>
+<div class="login-body">
+    <div class="login-card">
+        <span class="brand-mark">
+            <img class="drop" src="{{ url_for('static', filename='aqua_solutions_drop.png') }}" alt="">
+            <span class="wordmark"><span class="aqua">AQUA</span> <span class="solutions">SOLUTIONS</span></span>
+        </span>
+        <h3>{{ _("Water-safety pipeline") }}</h3>
+        {# TRANSLATORS: tagline under the sign-in title, from the brand. #}
+        <p class="sub">{{ _("clean water for Africa") }}</p>
+
+        {% if error %}<div class="error">{{ error }}</div>{% endif %}
+
         <form method="POST" action="{{ url_for('login') }}">
-            {% if error %}<div class="error">{{ error }}</div>{% endif %}
-            <label for="username">{{ _("Username") }}</label>
-            <input type="text" id="username" name="username" autocomplete="username" autofocus required>
-            <label for="password">{{ _("Password") }}</label>
-            <input type="password" id="password" name="password" autocomplete="current-password" required>
+            <div class="field">
+                <label for="username">{{ _("Username") }}</label>
+                <input type="text" id="username" name="username" autocomplete="username" autofocus required>
+            </div>
+            <div class="field">
+                <label for="password">{{ _("Password") }}</label>
+                <input type="password" id="password" name="password" autocomplete="current-password" required>
+            </div>
             <input type="hidden" name="next" value="{{ request.args.get('next', '') }}">
-            <button type="submit">{{ _("Sign in") }}</button>
+            <button type="submit" class="btn" style="width:100%">{{ _("Sign in") }}</button>
         </form>
+
         <div class="footer">
             {{ _("Sign in as a government official to view the station-status dashboard, or as a medical professional to file an illness report.") }}
         </div>
-    </main>
+    </div>
+</div>
 {% endblock %}
