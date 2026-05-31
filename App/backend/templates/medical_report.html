@@ -1,28 +1,8 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>File an illness report — medical portal</title>
-    <style>
-        :root {
-            --bg: #0f1115;
-            --panel: #181b22;
-            --text: #e6e7eb;
-            --muted: #8a92a3;
-            --accent: #5ec8a8;
-            --danger: #ff6b6b;
-            --border: #262a33;
-            --input-bg: #11141a;
-        }
-        * { box-sizing: border-box; }
-        body {
-            margin: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
-                         "Helvetica Neue", sans-serif;
-            background: var(--bg);
-            color: var(--text);
-        }
+{% extends "_base.html" %}
+
+{% block title %}File an illness report — medical portal{% endblock %}
+
+{% block extra_style %}
         header {
             padding: 16px 24px;
             border-bottom: 1px solid var(--border);
@@ -151,9 +131,9 @@
             font-size: 13px;
             margin-bottom: 16px;
         }
-    </style>
-</head>
-<body>
+{% endblock %}
+
+{% block content %}
     <header>
         <div class="brand-row">
             <img src="{{ url_for('static', filename='aqua_solutions_logo.png') }}" alt="Aqua Solutions logo" class="logo">
@@ -230,5 +210,4 @@
             </form>
         </section>
     </main>
-</body>
-</html>
+{% endblock %}

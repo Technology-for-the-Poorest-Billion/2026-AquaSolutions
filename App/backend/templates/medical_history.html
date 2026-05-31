@@ -1,21 +1,14 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>History — medical portal</title>
+{% extends "_base.html" %}
+
+{% block title %}History — medical portal{% endblock %}
+
+{% block head_extra %}
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
           integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
           crossorigin=""/>
-    <style>
-        :root {
-            --bg: #0f1115; --panel: #181b22; --text: #e6e7eb;
-            --muted: #8a92a3; --accent: #5ec8a8; --danger: #ff6b6b;
-            --warn: #f0c674; --border: #262a33;
-        }
-        * { box-sizing: border-box; }
-        body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-               background: var(--bg); color: var(--text); }
+{% endblock %}
+
+{% block extra_style %}
         header { padding: 16px 24px; border-bottom: 1px solid var(--border);
                  display: flex; align-items: center; justify-content: space-between; gap: 16px; }
         header .brand-row { display: flex; align-items: center; gap: 12px; min-width: 0; }
@@ -42,9 +35,10 @@
         .tier-high { background: rgba(255, 165, 90, 0.20); color: #ffa55a; }
         .tier-severe { background: rgba(255, 107, 107, 0.22); color: var(--danger); }
         .tier-muted { opacity: 0.65; }
-    </style>
-</head>
-<body>
+        :root { --warn: #f0c674; }
+{% endblock %}
+
+{% block content %}
 <header>
     <div class="brand-row">
         <img src="{{ url_for('static', filename='aqua_solutions_logo.png') }}" alt="Aqua Solutions logo" class="logo">
@@ -98,7 +92,9 @@
         {% endif %}
     </section>
 </main>
+{% endblock %}
 
+{% block scripts %}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
         crossorigin=""></script>
@@ -127,5 +123,4 @@
         );
     });
 </script>
-</body>
-</html>
+{% endblock %}
