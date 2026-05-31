@@ -1,6 +1,7 @@
 {# Top-right language picker. Submits to POST /lang. #}
 <form method="POST" action="/lang" class="lang-picker">
-    <select name="code" onchange="this.form.submit()" aria-label="Language">
+    {# TRANSLATORS: aria-label for the language picker dropdown. #}
+    <select name="code" onchange="this.form.submit()" aria-label="{{ _('Language') }}">
         {% for code, label in LANGUAGES.items() %}
             <option value="{{ code }}" {% if code == current_lang() %}selected{% endif %}>
                 {{ label }}

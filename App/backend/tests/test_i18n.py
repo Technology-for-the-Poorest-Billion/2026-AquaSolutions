@@ -164,3 +164,30 @@ def test_post_lang_ignores_external_referrer(med_session):
     )
     assert resp.status_code == 302
     assert resp.location.endswith("/dashboard")
+
+
+def test_login_page_strings_are_extractable(client):
+    """The login button's text must be wrapped in _() so it appears in messages.pot."""
+    resp = client.get("/login")
+    # We still expect English text in the rendered page (no translations yet).
+    assert b"Sign in" in resp.data
+
+
+def test_messages_pot_contains_login_button(tmp_path):
+    """After running pybabel extract, the catalog must contain known strings."""
+    import subprocess
+    import shutil
+    backend = tmp_path / "backend"
+    src = "/Users/tristanmartin/Desktop/GM2/GM2_Aqua_Solutions/.claude/worktrees/feat+i18n/App/backend"
+    shutil.copytree(src, backend, ignore=shutil.ignore_patterns("__pycache__", ".pytest_cache", "*.db", "*.db-*", "*.mo"))
+    result = subprocess.run(
+        ["pybabel", "extract", "-F", "babel.cfg", "-o", "translations/messages.pot", "."],
+        cwd=backend,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, result.stderr
+    pot = (backend / "translations" / "messages.pot").read_text()
+    assert 'msgid "Sign in"' in pot
+    assert 'msgid "Username"' in pot
+    assert 'msgid "Password"' in pot

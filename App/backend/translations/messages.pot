@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-05-31 10:31+0100\n"
+"POT-Creation-Date: 2026-05-31 10:50+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,4 +16,418 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
+
+#: templates/_base.html:6 templates/dashboard.html:3
+#: templates/dashboard.html:94 templates/login.html:3 templates/login.html:98
+msgid "Water-safety pipeline"
+msgstr ""
+
+#: templates/_lang_picker.html:4
+msgid "Language"
+msgstr ""
+
+#: templates/dashboard.html:3 templates/dashboard.html:94
+msgid "government dashboard"
+msgstr ""
+
+#: templates/dashboard.html:97
+msgid "Generated"
+msgstr ""
+
+#: templates/dashboard.html:97
+msgid "auto-refresh 30s"
+msgstr ""
+
+#: templates/dashboard.html:99 templates/dashboard_report_detail.html:47
+#: templates/medical_history.html:50 templates/medical_report.html:146
+#: templates/medical_report_detail.html:41
+msgid "Signed in as"
+msgstr ""
+
+#: templates/dashboard.html:100 templates/dashboard_report_detail.html:48
+#: templates/medical_history.html:51 templates/medical_report.html:147
+#: templates/medical_report_detail.html:42
+msgid "Sign out"
+msgstr ""
+
+#: templates/dashboard.html:105 templates/dashboard_report_detail.html:52
+#: templates/login.html:99 templates/medical_history.html:55
+#: templates/medical_report.html:151 templates/medical_report_detail.html:46
+msgid "Faecal-contamination risk + community illness signal."
+msgstr ""
+
+#: templates/dashboard.html:108 templates/dashboard_report_detail.html:55
+#: templates/login.html:102 templates/medical_history.html:58
+#: templates/medical_report.html:154 templates/medical_report_detail.html:49
+msgid "NOT a cholera detector."
+msgstr ""
+
+#: templates/dashboard.html:113
+msgid "Station status"
+msgstr ""
+
+#: templates/dashboard.html:113
+msgid "stations"
+msgstr ""
+
+#: templates/dashboard.html:113
+msgid "day window"
+msgstr ""
+
+#: templates/dashboard.html:117 templates/dashboard.html:186
+#: templates/dashboard_report_detail.html:72 templates/medical_history.html:67
+#: templates/medical_report_detail.html:63
+msgid "Station"
+msgstr ""
+
+#: templates/dashboard.html:118
+msgid "Latest reading"
+msgstr ""
+
+#: templates/dashboard.html:119 templates/dashboard_report_detail.html:107
+msgid "pH"
+msgstr ""
+
+#: templates/dashboard.html:120 templates/dashboard_report_detail.html:107
+msgid "Turb (NTU)"
+msgstr ""
+
+#: templates/dashboard.html:121 templates/dashboard_report_detail.html:108
+msgid "Temp (°C)"
+msgstr ""
+
+#: templates/dashboard.html:122
+msgid "Rain (mm)"
+msgstr ""
+
+#: templates/dashboard.html:123
+msgid "Status"
+msgstr ""
+
+#: templates/dashboard.html:124 templates/dashboard_report_detail.html:130
+msgid "Actions"
+msgstr ""
+
+#: templates/dashboard.html:133
+msgid "no readings yet"
+msgstr ""
+
+#: templates/dashboard.html:140
+msgid "unsafe"
+msgstr ""
+
+#: templates/dashboard.html:142
+msgid "clear"
+msgstr ""
+
+#: templates/dashboard.html:151
+msgid "Reopen"
+msgstr ""
+
+#: templates/dashboard.html:158
+msgid "Close"
+msgstr ""
+
+#: templates/dashboard.html:165
+msgid "Sample"
+msgstr ""
+
+#: templates/dashboard.html:171
+msgid "Medical"
+msgstr ""
+
+#: templates/dashboard.html:181
+msgid "Recent illness reports"
+msgstr ""
+
+#: templates/dashboard.html:185
+msgid "Received"
+msgstr ""
+
+#: templates/dashboard.html:187 templates/dashboard_report_detail.html:62
+#: templates/medical_report_detail.html:55
+msgid "Source"
+msgstr ""
+
+#: templates/dashboard.html:188 templates/dashboard_report_detail.html:81
+#: templates/medical_history.html:68 templates/medical_report.html:180
+#: templates/medical_report_detail.html:70
+msgid "Risk tier"
+msgstr ""
+
+#: templates/dashboard.html:189
+msgid "Labelled"
+msgstr ""
+
+#: templates/dashboard.html:201 templates/dashboard_report_detail.html:43
+#: templates/medical_report_detail.html:37
+msgid "unparsed"
+msgstr ""
+
+#: templates/dashboard.html:220
+msgid "No illness reports yet. Text the Twilio number to generate one."
+msgstr ""
+
+#: templates/dashboard_report_detail.html:3
+#: templates/dashboard_report_detail.html:43
+#: templates/medical_report_detail.html:3
+#: templates/medical_report_detail.html:37
+msgid "Report"
+msgstr ""
+
+#: templates/dashboard_report_detail.html:3
+msgid "government detail"
+msgstr ""
+
+#: templates/dashboard_report_detail.html:42
+msgid "Dashboard"
+msgstr ""
+
+#: templates/dashboard_report_detail.html:60
+#: templates/medical_report_detail.html:53
+msgid "Report metadata"
+msgstr ""
+
+#: templates/dashboard_report_detail.html:63
+#: templates/medical_report_detail.html:56
+msgid "Received at"
+msgstr ""
+
+#: templates/dashboard_report_detail.html:64 templates/medical_history.html:67
+#: templates/medical_report_detail.html:57
+msgid "Submitter"
+msgstr ""
+
+#: templates/dashboard_report_detail.html:65
+msgid "Parser version"
+msgstr ""
+
+#: templates/dashboard_report_detail.html:70
+#: templates/medical_report_detail.html:61
+msgid "Structured fields"
+msgstr ""
+
+#: templates/dashboard_report_detail.html:73
+#: templates/medical_report_detail.html:64
+msgid "Case count"
+msgstr ""
+
+#: templates/dashboard_report_detail.html:74 templates/medical_history.html:68
+#: templates/medical_report_detail.html:65
+msgid "Symptoms"
+msgstr ""
+
+#: templates/dashboard_report_detail.html:75
+#: templates/medical_report_detail.html:66
+msgid "Onset date"
+msgstr ""
+
+#: templates/dashboard_report_detail.html:76
+msgid "Notes / raw"
+msgstr ""
+
+#: templates/dashboard_report_detail.html:85
+#: templates/medical_report_detail.html:74
+msgid "Reporter's clinical assessment"
+msgstr ""
+
+#: templates/dashboard_report_detail.html:89
+msgid "Estimated by automated heuristic — not medical advice."
+msgstr ""
+
+#: templates/dashboard_report_detail.html:90
+msgid "See rationale below. Pattern-based; clinical assessment overrides."
+msgstr ""
+
+#: templates/dashboard_report_detail.html:94
+#: templates/medical_report_detail.html:79
+msgid "Estimated risk tier"
+msgstr ""
+
+#: templates/dashboard_report_detail.html:103
+msgid "Labelled readings"
+msgstr ""
+
+#: templates/dashboard_report_detail.html:107
+msgid "Reading"
+msgstr ""
+
+#: templates/dashboard_report_detail.html:107
+msgid "Recorded at"
+msgstr ""
+
+#: templates/dashboard_report_detail.html:108
+msgid "Rule"
+msgstr ""
+
+#: templates/dashboard_report_detail.html:124
+msgid "No readings labelled by this report."
+msgstr ""
+
+#: templates/dashboard_report_detail.html:136
+msgid "Close borehole"
+msgstr ""
+
+#: templates/dashboard_report_detail.html:143
+msgid "Send sample team"
+msgstr ""
+
+#: templates/dashboard_report_detail.html:150
+msgid "Send medical team"
+msgstr ""
+
+#: templates/dashboard_report_detail.html:155
+msgid "Interventions linked to this report"
+msgstr ""
+
+#: templates/dashboard_report_detail.html:159
+msgid "When"
+msgstr ""
+
+#: templates/dashboard_report_detail.html:159
+msgid "Action"
+msgstr ""
+
+#: templates/dashboard_report_detail.html:159
+msgid "Triggered by"
+msgstr ""
+
+#: templates/dashboard_report_detail.html:159 templates/medical_report.html:208
+msgid "Notes"
+msgstr ""
+
+#: templates/dashboard_report_detail.html:173
+msgid "No interventions yet."
+msgstr ""
+
+#: templates/login.html:3 templates/login.html:111
+msgid "Sign in"
+msgstr ""
+
+#: templates/login.html:106
+msgid "Username"
+msgstr ""
+
+#: templates/login.html:108
+msgid "Password"
+msgstr ""
+
+#: templates/login.html:114
+msgid ""
+"Sign in as a government official to view the station-status dashboard, or"
+" as a medical professional to file an illness report."
+msgstr ""
+
+#: templates/medical_history.html:3 templates/medical_history.html:46
+#: templates/medical_report.html:142 templates/medical_report_detail.html:36
+msgid "History"
+msgstr ""
+
+#: templates/medical_history.html:3 templates/medical_report.html:3
+msgid "medical portal"
+msgstr ""
+
+#: templates/medical_history.html:45 templates/medical_report.html:141
+msgid "File a report"
+msgstr ""
+
+#: templates/medical_history.html:63
+msgid "Reports filed via medical portal"
+msgstr ""
+
+#: templates/medical_history.html:67
+msgid "Submitted"
+msgstr ""
+
+#: templates/medical_history.html:68
+msgid "Cases"
+msgstr ""
+
+#: templates/medical_history.html:68
+msgid "Onset"
+msgstr ""
+
+#: templates/medical_history.html:93
+msgid "No medical-portal reports yet. File one via \"File a report\" above."
+msgstr ""
+
+#: templates/medical_report.html:3
+msgid "File an illness report"
+msgstr ""
+
+#: templates/medical_report.html:159
+msgid "New report"
+msgstr ""
+
+#: templates/medical_report.html:165
+msgid "Water station"
+msgstr ""
+
+#: templates/medical_report.html:165 templates/medical_report.html:175
+msgid "required"
+msgstr ""
+
+#: templates/medical_report.html:167
+msgid "Choose a station…"
+msgstr ""
+
+#: templates/medical_report.html:175
+msgid "Number of suspected cases"
+msgstr ""
+
+#: templates/medical_report.html:180
+msgid "your clinical assessment, optional"
+msgstr ""
+
+#: templates/medical_report.html:182
+msgid "Not yet assessed — estimate on review"
+msgstr ""
+
+#: templates/medical_report.html:183
+msgid "LOW — non-specific symptoms"
+msgstr ""
+
+#: templates/medical_report.html:184
+msgid "MEDIUM — possible waterborne illness"
+msgstr ""
+
+#: templates/medical_report.html:185
+msgid "HIGH — likely waterborne illness, clinical workup recommended"
+msgstr ""
+
+#: templates/medical_report.html:186
+msgid "SEVERE — suspected severe cholera, urgent action"
+msgstr ""
+
+#: templates/medical_report.html:191
+msgid "Symptoms observed"
+msgstr ""
+
+#: templates/medical_report.html:191
+msgid "tick all that apply"
+msgstr ""
+
+#: templates/medical_report.html:203
+msgid "Symptom onset date"
+msgstr ""
+
+#: templates/medical_report.html:203
+msgid "optional — anchors the labelling window"
+msgstr ""
+
+#: templates/medical_report.html:208
+msgid "optional"
+msgstr ""
+
+#: templates/medical_report.html:209
+msgid "Anything else worth flagging…"
+msgstr ""
+
+#: templates/medical_report.html:212
+msgid "Submit report"
+msgstr ""
+
+#: templates/medical_report_detail.html:3
+msgid "medical detail"
+msgstr ""
 
