@@ -53,3 +53,18 @@ def test_medical_history_has_topbar_and_brand_mark(signed_in_med):
     assert resp.status_code == 200
     assert b'class="topbar"' in resp.data
     assert b'class="brand-mark"' in resp.data
+
+
+def test_login_uses_login_card_and_no_disclaimer(client):
+    """Login overrides the disclaimer block to empty and renders a
+    centered card with the brand mark above the form."""
+    resp = client.get("/login")
+    body = resp.data
+    assert b'class="login-card"' in body
+    # The body class signals login layout so app.css can centre the card.
+    assert b'app-login' in body
+    # Disclaimer block is overridden to empty.
+    assert b'class="disclaim"' not in body
+    # Form fields still present.
+    assert b'name="username"' in body
+    assert b'name="password"' in body
