@@ -14,6 +14,7 @@ EXPECTED_TABLES = {
     "illness_reports",
     "reading_labels",
     "interventions",
+    "user_preferences",
 }
 
 EXPECTED_REPORT_COLUMNS = {

@@ -1,21 +1,14 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>History — medical portal</title>
+{% extends "_base.html" %}
+
+{% block title %}{{ _("History") }} — {{ _("medical portal") }}{% endblock %}
+
+{% block head_extra %}
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
           integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
           crossorigin=""/>
-    <style>
-        :root {
-            --bg: #0f1115; --panel: #181b22; --text: #e6e7eb;
-            --muted: #8a92a3; --accent: #5ec8a8; --danger: #ff6b6b;
-            --warn: #f0c674; --border: #262a33;
-        }
-        * { box-sizing: border-box; }
-        body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-               background: var(--bg); color: var(--text); }
+{% endblock %}
+
+{% block extra_style %}
         header { padding: 16px 24px; border-bottom: 1px solid var(--border);
                  display: flex; align-items: center; justify-content: space-between; gap: 16px; }
         header .brand-row { display: flex; align-items: center; gap: 12px; min-width: 0; }
@@ -42,34 +35,37 @@
         .tier-high { background: rgba(255, 165, 90, 0.20); color: #ffa55a; }
         .tier-severe { background: rgba(255, 107, 107, 0.22); color: var(--danger); }
         .tier-muted { opacity: 0.65; }
-    </style>
-</head>
-<body>
+{% endblock %}
+
+{% block content %}
 <header>
     <div class="brand-row">
         <img src="{{ url_for('static', filename='aqua_solutions_logo.png') }}" alt="Aqua Solutions logo" class="logo">
         <h1 style="font-size: 18px; margin: 0;">
-            <a href="{{ url_for('medical_report_form') }}">File a report</a>
-            <a href="{{ url_for('medical_history') }}">History</a>
+            <a href="{{ url_for('medical_report_form') }}">{{ _("File a report") }}</a>
+            <a href="{{ url_for('medical_history') }}">{{ _("History") }}</a>
         </h1>
     </div>
     <div style="color: var(--muted); font-size: 12px;">
-        Signed in as {{ session['display_name'] }}
-        · <a href="{{ url_for('logout') }}">Sign out</a>
+        {{ _("Signed in as") }} {{ session['display_name'] }}
+        · <a href="{{ url_for('logout') }}">{{ _("Sign out") }}</a>
     </div>
 </header>
 <div class="disclaimer">
-    Faecal-contamination risk + community illness signal. NOT a cholera detector.
+    {{ _("Faecal-contamination risk + community illness signal.") }}
+    {# TRANSLATORS: This negation is the project's central safety claim.
+       The sensor does NOT detect cholera. Preserve the negation when translating. #}
+    {{ _("NOT a cholera detector.") }}
 </div>
 <main>
     <div id="map"></div>
     <section>
-        <h2>Reports filed via medical portal ({{ reports|length }})</h2>
+        <h2>{{ _("Reports filed via medical portal") }} ({{ reports|length }})</h2>
         {% if reports %}
         <table>
             <thead><tr>
-                <th>Submitted</th><th>Submitter</th><th>Station</th>
-                <th>Cases</th><th>Symptoms</th><th>Risk tier</th><th>Onset</th>
+                <th>{{ _("Submitted") }}</th><th>{{ _("Submitter") }}</th><th>{{ _("Station") }}</th>
+                <th>{{ _("Cases") }}</th><th>{{ _("Symptoms") }}</th><th>{{ _("Risk tier") }}</th><th>{{ _("Onset") }}</th>
             </tr></thead>
             <tbody>
                 {% for rep in reports %}
@@ -94,11 +90,13 @@
             </tbody>
         </table>
         {% else %}
-        <p style="color: var(--muted);">No medical-portal reports yet. File one via "File a report" above.</p>
+        <p style="color: var(--muted);">{{ _('No medical-portal reports yet. File one via "File a report" above.') }}</p>
         {% endif %}
     </section>
 </main>
+{% endblock %}
 
+{% block scripts %}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
         crossorigin=""></script>
@@ -127,5 +125,4 @@
         );
     });
 </script>
-</body>
-</html>
+{% endblock %}

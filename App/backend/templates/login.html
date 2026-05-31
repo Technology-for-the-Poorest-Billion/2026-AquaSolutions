@@ -1,28 +1,9 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Sign in — water-safety pipeline</title>
-    <style>
-        :root {
-            --bg: #0f1115;
-            --panel: #181b22;
-            --text: #e6e7eb;
-            --muted: #8a92a3;
-            --accent: #5ec8a8;
-            --danger: #ff6b6b;
-            --border: #262a33;
-            --input-bg: #11141a;
-        }
-        * { box-sizing: border-box; }
+{% extends "_base.html" %}
+
+{% block title %}{{ _("Sign in") }} — {{ _("Water-safety pipeline") }}{% endblock %}
+
+{% block extra_style %}
         body {
-            margin: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
-                         "Helvetica Neue", sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -108,27 +89,29 @@
             text-align: center;
             line-height: 1.5;
         }
-    </style>
-</head>
-<body>
+{% endblock %}
+
+{% block content %}
     <main>
         <div class="brand">
             <img src="{{ url_for('static', filename='aqua_solutions_logo.png') }}" alt="Aqua Solutions logo" class="logo">
-            <h1>Water-safety pipeline</h1>
-            <div>Faecal-contamination risk + community illness signal.<br>NOT a cholera detector.</div>
+            <h1>{{ _("Water-safety pipeline") }}</h1>
+            <div>{{ _("Faecal-contamination risk + community illness signal.") }}<br>
+            {# TRANSLATORS: This negation is the project's central safety claim.
+               The sensor does NOT detect cholera. Preserve the negation when translating. #}
+            {{ _("NOT a cholera detector.") }}</div>
         </div>
         <form method="POST" action="{{ url_for('login') }}">
             {% if error %}<div class="error">{{ error }}</div>{% endif %}
-            <label for="username">Username</label>
+            <label for="username">{{ _("Username") }}</label>
             <input type="text" id="username" name="username" autocomplete="username" autofocus required>
-            <label for="password">Password</label>
+            <label for="password">{{ _("Password") }}</label>
             <input type="password" id="password" name="password" autocomplete="current-password" required>
             <input type="hidden" name="next" value="{{ request.args.get('next', '') }}">
-            <button type="submit">Sign in</button>
+            <button type="submit">{{ _("Sign in") }}</button>
         </form>
         <div class="footer">
-            Sign in as a government official to view the station-status dashboard, or as a medical professional to file an illness report.
+            {{ _("Sign in as a government official to view the station-status dashboard, or as a medical professional to file an illness report.") }}
         </div>
     </main>
-</body>
-</html>
+{% endblock %}

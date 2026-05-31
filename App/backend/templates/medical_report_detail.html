@@ -1,18 +1,8 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Report #{{ report['report_id'] }} — medical detail</title>
-    <style>
-        :root {
-            --bg: #0f1115; --panel: #181b22; --text: #e6e7eb;
-            --muted: #8a92a3; --accent: #5ec8a8; --danger: #ff6b6b;
-            --warn: #f0c674; --border: #262a33;
-        }
-        * { box-sizing: border-box; }
-        body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-               background: var(--bg); color: var(--text); }
+{% extends "_base.html" %}
+
+{% block title %}{{ _("Report") }} #{{ report['report_id'] }} — {{ _("medical detail") }}{% endblock %}
+
+{% block extra_style %}
         header { padding: 16px 24px; border-bottom: 1px solid var(--border);
                  display: flex; align-items: center; justify-content: space-between; gap: 16px; }
         header .brand-row { display: flex; align-items: center; gap: 12px; min-width: 0; }
@@ -36,59 +26,61 @@
         .tier-high     { background: rgba(255, 165, 90, 0.20); color: #ffa55a; }
         .tier-severe   { background: rgba(255, 107, 107, 0.20); color: var(--danger); }
         .tier-muted { opacity: 0.7; }
-    </style>
-</head>
-<body>
+{% endblock %}
+
+{% block content %}
 <header>
     <div class="brand-row">
         <img src="{{ url_for('static', filename='aqua_solutions_logo.png') }}" alt="Aqua Solutions logo" class="logo">
         <h1 style="font-size: 18px; margin: 0;">
-            <a href="{{ url_for('medical_history') }}">← History</a>
-            Report #{{ report['report_id'] }} · {{ report['station_name'] or 'unparsed' }}
+            <a href="{{ url_for('medical_history') }}">← {{ _("History") }}</a>
+            {{ _("Report") }} #{{ report['report_id'] }} · {{ report['station_name'] or _('unparsed') }}
         </h1>
     </div>
     <div style="color: var(--muted); font-size: 12px;">
-        Signed in as {{ session['display_name'] }}
-        · <a href="{{ url_for('logout') }}">Sign out</a>
+        {{ _("Signed in as") }} {{ session['display_name'] }}
+        · <a href="{{ url_for('logout') }}">{{ _("Sign out") }}</a>
     </div>
 </header>
 <div class="disclaimer">
-    Faecal-contamination risk + community illness signal. NOT a cholera detector.
+    {{ _("Faecal-contamination risk + community illness signal.") }}
+    {# TRANSLATORS: This negation is the project's central safety claim.
+       The sensor does NOT detect cholera. Preserve the negation when translating. #}
+    {{ _("NOT a cholera detector.") }}
 </div>
 <main>
 <section>
-    <h2>Report metadata</h2>
+    <h2>{{ _("Report metadata") }}</h2>
     <dl>
-        <dt>Source</dt>      <dd>{{ report['report_source'] }}</dd>
-        <dt>Received at</dt> <dd>{{ report['received_at'] }}</dd>
-        <dt>Submitter</dt>   <dd>{{ report['submitter'] or '—' }}</dd>
+        <dt>{{ _("Source") }}</dt>      <dd>{{ report['report_source'] }}</dd>
+        <dt>{{ _("Received at") }}</dt> <dd>{{ report['received_at'] }}</dd>
+        <dt>{{ _("Submitter") }}</dt>   <dd>{{ report['submitter'] or '—' }}</dd>
     </dl>
 </section>
 <section>
-    <h2>Structured fields</h2>
+    <h2>{{ _("Structured fields") }}</h2>
     <dl>
-        <dt>Station</dt>     <dd>#{{ report['station_id'] }} {{ report['station_name'] }}</dd>
-        <dt>Case count</dt>  <dd>{{ report['case_count'] or '—' }}</dd>
-        <dt>Symptoms</dt>    <dd>{{ symptoms_display }}</dd>
-        <dt>Onset date</dt>  <dd>{{ report['onset_date'] or '—' }}</dd>
+        <dt>{{ _("Station") }}</dt>     <dd>#{{ report['station_id'] }} {{ report['station_name'] }}</dd>
+        <dt>{{ _("Case count") }}</dt>  <dd>{{ report['case_count'] or '—' }}</dd>
+        <dt>{{ _("Symptoms") }}</dt>    <dd>{{ symptoms_display }}</dd>
+        <dt>{{ _("Onset date") }}</dt>  <dd>{{ report['onset_date'] or '—' }}</dd>
     </dl>
 </section>
 <section>
-    <h2>Risk tier</h2>
+    <h2>{{ _("Risk tier") }}</h2>
     {% if tier_source == 'reporter' %}
         <span class="pill tier-{{ tier }}">{{ tier|upper }}</span>
         <span style="color: var(--muted); font-size: 12px; margin-left: 8px;">
-            Reporter's clinical assessment
+            {{ _("Reporter's clinical assessment") }}
         </span>
     {% elif tier_source == 'estimated' %}
         <span class="pill tier-{{ tier }} tier-muted">{{ tier|upper }}</span>
         <span style="color: var(--muted); font-size: 12px; margin-left: 8px;">
-            Estimated risk tier
+            {{ _("Estimated risk tier") }}
         </span>
     {% else %}
         <span style="color: var(--muted); font-size: 13px;">{{ tier_pending_text }}</span>
     {% endif %}
 </section>
 </main>
-</body>
-</html>
+{% endblock %}
