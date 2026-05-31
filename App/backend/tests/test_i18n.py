@@ -224,6 +224,19 @@ def test_banner_does_not_render_for_english(med_session):
     assert b'class="unverified-banner"' not in resp.data
 
 
+def test_login_page_suppresses_banner_even_for_unverified_locale(client):
+    """The login page is the unauthenticated front door and intentionally
+    skips the machine-translated draft banner — no clinical content there.
+    The banner reappears on every signed-in page."""
+    for lang in ("sn", "nd"):
+        resp = client.get(f"/login?lang={lang}")
+        assert resp.status_code == 200
+        # Picker is still present (so the user can switch language).
+        assert b'class="lang-picker"' in resp.data
+        # Banner is suppressed even though the locale is unverified.
+        assert b'class="unverified-banner"' not in resp.data
+
+
 def test_messages_pot_contains_login_button(tmp_path):
     """After running pybabel extract, the catalog must contain known strings."""
     import subprocess

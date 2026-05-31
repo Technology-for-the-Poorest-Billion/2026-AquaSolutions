@@ -2,6 +2,11 @@
 
 {% block title %}{{ _("Sign in") }} — {{ _("Water-safety pipeline") }}{% endblock %}
 
+{# Front page intentionally skips the machine-translated draft banner —
+   no clinical content here, so the warning is irrelevant. The banner
+   returns on every signed-in page. #}
+{% block unverified_banner %}{% endblock %}
+
 {% block extra_style %}
         body {
             display: flex;

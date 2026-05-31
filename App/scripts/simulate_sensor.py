@@ -53,12 +53,16 @@ def _post(url: str, secret: str, payload: dict) -> tuple[int, str]:
         method="POST",
     )
     try:
-        with urllib.request.urlopen(req, timeout=5) as resp:
+        with urllib.request.urlopen(req, timeout=10) as resp:
             return resp.status, resp.read().decode("utf-8")
     except urllib.error.HTTPError as e:
         return e.code, e.read().decode("utf-8")
     except urllib.error.URLError as e:
         return 0, str(e)
+    except (TimeoutError, OSError) as e:
+        # Don't crash the simulator on a single slow Railway response;
+        # report and move on to the next station / round.
+        return 0, f"timeout/network: {e}"
 
 
 def main() -> int:
