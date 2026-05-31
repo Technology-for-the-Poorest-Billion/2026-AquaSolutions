@@ -23,7 +23,7 @@ import sys
 from urllib.parse import urlparse
 
 from flask import Blueprint, Flask, redirect, request, session
-from flask_babel import Babel
+from flask_babel import Babel, gettext as _
 from sqlalchemy import text
 
 LANGUAGES: dict[str, str] = {
@@ -121,7 +121,7 @@ def _safe_redirect_target() -> str:
 def set_lang_view():
     code = _validate(request.form.get("code"))
     if code is None:
-        return "Invalid language code.", 400
+        return _("Invalid language code."), 400
 
     response = redirect(_safe_redirect_target(), code=302)
     response.set_cookie(COOKIE_NAME, code, max_age=COOKIE_MAX_AGE, samesite="Lax")

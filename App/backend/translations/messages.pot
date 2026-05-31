@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-05-31 10:58+0100\n"
+"POT-Creation-Date: 2026-05-31 11:01+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,6 +16,74 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
+
+#: app.py:130
+#, python-brace-format
+msgid "forbidden — this page requires the '{role}' role"
+msgstr ""
+
+#: app.py:251
+msgid "Unknown username or wrong password."
+msgstr ""
+
+#: app.py:314
+msgid "Please select a valid station."
+msgstr ""
+
+#: app.py:321
+msgid "Case count must be a positive integer."
+msgstr ""
+
+#: app.py:331
+msgid "Onset date must be YYYY-MM-DD."
+msgstr ""
+
+#: app.py:334
+msgid "Invalid risk tier value."
+msgstr ""
+
+#: app.py:353
+#, python-format
+msgid "Station %(station_id)s is not in the system."
+msgstr ""
+
+#: app.py:677
+msgid "invalid action_type"
+msgstr ""
+
+#: app.py:682
+msgid "invalid station_id"
+msgstr ""
+
+#: app.py:689
+msgid "invalid related_report_id"
+msgstr ""
+
+#: app.py:698
+#, python-format
+msgid "unknown station_id %(station_id)s"
+msgstr ""
+
+#: app.py:701
+#, python-format
+msgid "station %(station_id)s is already closed"
+msgstr ""
+
+#: app.py:703
+#, python-format
+msgid "station %(station_id)s is already open"
+msgstr ""
+
+#: app.py:742
+#, python-format
+msgid ""
+"This page is for government officials. Medical staff can view this report"
+" at /medical/reports/%(report_id)s"
+msgstr ""
+
+#: language.py:124
+msgid "Invalid language code."
+msgstr ""
 
 #: templates/_base.html:6 templates/dashboard.html:3
 #: templates/dashboard.html:94 templates/login.html:3 templates/login.html:98

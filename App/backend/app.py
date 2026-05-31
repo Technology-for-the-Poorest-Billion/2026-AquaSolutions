@@ -28,6 +28,7 @@ from dotenv import load_dotenv
 from flask import (
     Flask, abort, redirect, render_template, request, session, url_for,
 )
+from flask_babel import gettext as _, ngettext
 from twilio.request_validator import RequestValidator
 from twilio.twiml.messaging_response import MessagingResponse
 
@@ -126,8 +127,8 @@ def role_required(role: str):
             if "username" not in session:
                 return redirect(url_for("login", next=request.path))
             if session.get("role") != role:
-                return ("forbidden — this page requires the "
-                        f"'{role}' role", 403)
+                return (_("forbidden — this page requires the "
+                          "'{role}' role").format(role=role), 403)
             return view(*args, **kwargs)
         return wrapped
     return decorator
@@ -247,7 +248,7 @@ def login():
     if user is None:
         return render_template(
             "login.html",
-            error="Unknown username or wrong password.",
+            error=_("Unknown username or wrong password."),
         ), 401
 
     session.clear()
@@ -310,14 +311,14 @@ def medical_report_submit():
     try:
         station_id = int(raw_station)
     except (TypeError, ValueError):
-        return render(error="Please select a valid station.")
+        return render(error=_("Please select a valid station."))
 
     try:
         case_count = int(case_count_raw) if case_count_raw else 1
         if case_count < 1:
             raise ValueError
     except ValueError:
-        return render(error="Case count must be a positive integer.")
+        return render(error=_("Case count must be a positive integer."))
 
     report_time = datetime.now(timezone.utc)
     if onset_date_raw:
@@ -327,10 +328,10 @@ def medical_report_submit():
             )
             report_time = onset_dt + timedelta(days=1) - timedelta(seconds=1)
         except ValueError:
-            return render(error="Onset date must be YYYY-MM-DD.")
+            return render(error=_("Onset date must be YYYY-MM-DD."))
 
     if risk_tier_raw not in ("", "low", "medium", "high", "severe"):
-        return render(error="Invalid risk tier value.")
+        return render(error=_("Invalid risk tier value."))
     risk_tier_value = risk_tier_raw or None
 
     valid_keys = {key for key, _label in SYMPTOMS}
@@ -349,7 +350,7 @@ def medical_report_submit():
                 {"sid": station_id},
             ).mappings().first()
             if station is None:
-                return render(error=f"Station {station_id} is not in the system.")
+                return render(error=_("Station %(station_id)s is not in the system.", station_id=station_id))
 
             report_id = conn.execute(
                 text(
@@ -673,19 +674,19 @@ def post_action():
     notes = (request.form.get("notes", "") or "").strip()[:500] or None
 
     if action_type not in ACTION_TYPES:
-        return ("invalid action_type", 400)
+        return (_("invalid action_type"), 400)
 
     try:
         station_id = int(station_raw)
     except (TypeError, ValueError):
-        return ("invalid station_id", 400)
+        return (_("invalid station_id"), 400)
 
     related_id = None
     if related_raw:
         try:
             related_id = int(related_raw)
         except (TypeError, ValueError):
-            return ("invalid related_report_id", 400)
+            return (_("invalid related_report_id"), 400)
 
     with connection() as conn:
         with conn.begin():
@@ -694,12 +695,12 @@ def post_action():
                 {"sid": station_id},
             ).mappings().first()
             if station is None:
-                return (f"unknown station_id {station_id}", 400)
+                return (_("unknown station_id %(station_id)s", station_id=station_id), 400)
 
             if action_type == "close_borehole" and station["is_closed"]:
-                return (f"station {station_id} is already closed", 400)
+                return (_("station %(station_id)s is already closed", station_id=station_id), 400)
             if action_type == "reopen_borehole" and not station["is_closed"]:
-                return (f"station {station_id} is already open", 400)
+                return (_("station %(station_id)s is already open", station_id=station_id), 400)
 
             conn.execute(
                 text(
@@ -738,8 +739,9 @@ def dashboard_report_detail(report_id: int):
         return redirect(url_for("login", next=request.path))
     if session.get("role") != "government":
         return (
-            "This page is for government officials. "
-            f"Medical staff can view this report at /medical/reports/{report_id}",
+            _("This page is for government officials. "
+              "Medical staff can view this report at /medical/reports/%(report_id)s",
+              report_id=report_id),
             403,
         )
 
