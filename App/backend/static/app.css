@@ -159,6 +159,7 @@ main.app-main { padding: var(--space-4); }
   letter-spacing: 0.03em;
 }
 .pill-clear  { background: var(--clear-bg);  color: var(--clear-fg);  }
+.pill-low    { background: var(--clear-bg);  color: var(--clear-fg);  }
 .pill-medium { background: var(--medium-bg); color: var(--medium-fg); }
 .pill-high   { background: var(--high-bg);   color: var(--high-fg);   }
 .pill-severe { background: var(--severe-bg); color: var(--severe-fg); }
