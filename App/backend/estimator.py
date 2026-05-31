@@ -16,6 +16,8 @@ from __future__ import annotations
 from datetime import date, timedelta
 from typing import Iterable
 
+from flask_babel import gettext as _, ngettext
+
 KNOWN_SYMPTOMS = {"diarrhoea", "vomiting", "fever", "dehydration"}
 RECENT_ONSET_DAYS = 3
 
@@ -56,20 +58,22 @@ def estimate_risk_tier(
         and cases >= 3
     ):
         return ("severe",
-                "textbook severe-cholera pattern (diarrhoea + dehydration + "
-                "recent onset + multiple cases)")
+                _("textbook severe-cholera pattern (diarrhoea + dehydration + "
+                  "recent onset + multiple cases)"))
 
     # 2. HIGH — three sub-rules, ORed
     if len(syms) >= 3:
-        return ("high", "3+ symptoms reported")
+        return ("high", _("3+ symptoms reported"))
     if cases >= 5 and len(syms) >= 2:
-        return ("high", "outbreak-scale case count (≥5) with multiple symptoms")
+        return ("high", _("outbreak-scale case count (≥5) with multiple symptoms"))
     if "diarrhoea" in syms and recent:
-        return ("high", "recent-onset diarrhoea")
+        return ("high", _("recent-onset diarrhoea"))
 
-    # 3. MEDIUM — 1 or 2 symptoms
+    # 3. MEDIUM — uses ngettext for the count
     if 1 <= len(syms) <= 2:
-        return ("medium", f"{len(syms)} non-specific symptom(s) reported")
+        n = len(syms)
+        return ("medium", ngettext("%(num)d non-specific symptom reported",
+                                   "%(num)d non-specific symptoms reported", n))
 
     # 4. LOW — fallthrough
-    return ("low", "no symptoms reported — request clinical assessment regardless")
+    return ("low", _("no symptoms reported — request clinical assessment regardless"))

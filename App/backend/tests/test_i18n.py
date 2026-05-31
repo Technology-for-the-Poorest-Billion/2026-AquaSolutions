@@ -173,6 +173,23 @@ def test_login_page_strings_are_extractable(client):
     assert b"Sign in" in resp.data
 
 
+def test_estimator_rationale_is_wrapped(app):
+    """The rationale string emitted by estimate_risk_tier passes through gettext.
+    With only an English catalog the output is unchanged; the test asserts that
+    no exception is raised under a request context (i.e. _() resolves)."""
+    from estimator import estimate_risk_tier
+    from datetime import date
+    with app.test_request_context("/"):
+        tier, rationale = estimate_risk_tier(
+            symptoms=["diarrhoea", "vomiting", "fever"],
+            onset_date=None,
+            case_count=1,
+        )
+    assert tier == "high"
+    assert isinstance(rationale, str)
+    assert rationale  # non-empty
+
+
 def test_messages_pot_contains_login_button(tmp_path):
     """After running pybabel extract, the catalog must contain known strings."""
     import subprocess

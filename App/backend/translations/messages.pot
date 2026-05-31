@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-05-31 11:03+0100\n"
+"POT-Creation-Date: 2026-05-31 11:07+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -90,6 +90,35 @@ msgstr ""
 msgid ""
 "This page is for government officials. Medical staff can view this report"
 " at /medical/reports/%(report_id)s"
+msgstr ""
+
+#: estimator.py:61
+msgid ""
+"textbook severe-cholera pattern (diarrhoea + dehydration + recent onset +"
+" multiple cases)"
+msgstr ""
+
+#: estimator.py:66
+msgid "3+ symptoms reported"
+msgstr ""
+
+#: estimator.py:68
+msgid "outbreak-scale case count (≥5) with multiple symptoms"
+msgstr ""
+
+#: estimator.py:70
+msgid "recent-onset diarrhoea"
+msgstr ""
+
+#: estimator.py:75
+#, python-format
+msgid "%(num)d non-specific symptom reported"
+msgid_plural "%(num)d non-specific symptoms reported"
+msgstr[0] ""
+msgstr[1] ""
+
+#: estimator.py:79
+msgid "no symptoms reported — request clinical assessment regardless"
 msgstr ""
 
 #: language.py:124
