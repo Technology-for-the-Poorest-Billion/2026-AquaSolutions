@@ -76,6 +76,24 @@ body.app {
 .topbar a { color: rgba(255,255,255,0.85); text-decoration: none; }
 .topbar a:hover { color: #fff; text-decoration: underline; }
 
+.topnav {
+  display: flex;
+  gap: var(--space-4);
+  margin-left: var(--space-6);
+  flex: 1;
+}
+.topbar .topnav a {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 6px 0;
+  border-bottom: 2px solid transparent;
+  color: rgba(255,255,255,0.7);
+  text-decoration: none;
+}
+.topbar .topnav a:hover { color: #fff; border-bottom-color: rgba(62,177,232,0.4); text-decoration: none; }
+.topbar .topnav a.active { color: #fff; border-bottom-color: var(--accent); }
+
 .brand-mark {
   display: inline-flex;
   align-items: center;
