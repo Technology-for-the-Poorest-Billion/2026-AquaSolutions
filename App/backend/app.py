@@ -633,6 +633,9 @@ def dashboard():
                        r.turbidity_ntu,
                        r.temperature_c,
                        r.rainfall_mm,
+                       r.chlorine_mg_l,
+                       r.orp_mv,
+                       r.uv_absorbance,
                        EXISTS (
                            SELECT 1 FROM illness_reports ir
                            WHERE ir.station_id = s.station_id

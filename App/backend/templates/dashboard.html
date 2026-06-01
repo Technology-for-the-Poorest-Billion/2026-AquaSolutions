@@ -24,6 +24,9 @@
                             {% if s['turbidity_ntu'] is not none %} · {{ '%.0f'|format(s['turbidity_ntu'] ) }} NTU{% endif %}
                             {% if s['temperature_c'] is not none %} · {{ '%.1f'|format(s['temperature_c']) }}°C{% endif %}
                             {% if s['rainfall_mm'] is not none %} · {{ '%.1f'|format(s['rainfall_mm']) }} mm{% endif %}
+                            {% if s['chlorine_mg_l'] is not none %} · Cl {{ '%.2f'|format(s['chlorine_mg_l']) }} mg/L{% endif %}
+                            {% if s['orp_mv'] is not none %} · ORP {{ '%.0f'|format(s['orp_mv']) }} mV{% endif %}
+                            {% if s['uv_absorbance'] is not none %} · UV₂₅₄ {{ '%.3f'|format(s['uv_absorbance']) }}{% endif %}
                         </small>
                     {% else %}
                         <br><small style="color:var(--muted);font-size:10px">{{ _("no readings yet") }}</small>
