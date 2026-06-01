@@ -31,6 +31,7 @@ stations = Table(
     Column("latitude", Float),
     Column("longitude", Float),
     Column("is_closed", Integer, nullable=False, server_default=text("0")),
+    Column("neighborhood_id", Integer, ForeignKey("neighborhoods.neighborhood_id")),
     Column("created_at", Text, nullable=False, server_default=func.current_timestamp()),
 )
 
@@ -127,6 +128,13 @@ user_preferences = Table(
 )
 
 
+neighborhoods = Table(
+    "neighborhoods", metadata,
+    Column("neighborhood_id", Integer, primary_key=True, autoincrement=False),
+    Column("name", Text, unique=True, nullable=False),
+)
+
+
 # Demo stations spread across recognisable Harare suburbs. Coordinates are
 # approximate suburb centres — close enough that markers map to the right
 # neighbourhood on a Leaflet zoom-12 view (~10 km wide). Names and lat/lon
@@ -198,6 +206,12 @@ def _migrate(conn: Connection) -> None:
     if "is_closed" not in existing_station_cols:
         conn.execute(text(
             "ALTER TABLE stations ADD COLUMN is_closed INTEGER NOT NULL DEFAULT 0"
+        ))
+
+    if "neighborhood_id" not in existing_station_cols:
+        conn.execute(text(
+            "ALTER TABLE stations ADD COLUMN neighborhood_id INTEGER "
+            "REFERENCES neighborhoods(neighborhood_id)"
         ))
 
     # Sensor-readings backfill: the three water-quality indicators added
