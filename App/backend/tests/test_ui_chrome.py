@@ -73,8 +73,8 @@ def test_login_uses_login_card_and_no_disclaimer(client):
 def test_dashboard_uses_panels_rows_and_pills(signed_in_gov):
     resp = signed_in_gov.get("/dashboard")
     body = resp.data
-    # Two-column grid for the two panels.
-    assert b'class="grid-2"' in body
+    # Two-column grid for the two panels (65/35-ish split via grid-2-asym).
+    assert b'class="grid-2-asym"' in body
     # Two panels (Station status + Recent illness reports).
     assert body.count(b'class="panel"') >= 2
     # At least one status pill (clear/severe/unsafe).
