@@ -122,17 +122,21 @@ user_preferences = Table(
 )
 
 
+# Demo stations spread across recognisable Harare suburbs. Coordinates are
+# approximate suburb centres — close enough that markers map to the right
+# neighbourhood on a Leaflet zoom-12 view (~10 km wide). Names and lat/lon
+# refresh on every redeploy via the ON CONFLICT DO UPDATE in init_db().
 SEED_STATIONS = [
-    (1,  "Borehole A — village centre",   -17.829, 31.052),
-    (2,  "Borehole B — clinic",           -17.831, 31.057),
-    (3,  "Borehole C — school",           -17.828, 31.049),
-    (4,  "Borehole D — market",           -17.833, 31.054),
-    (5,  "Borehole E — north well",       -17.820, 31.060),
-    (6,  "Borehole F — east settlement",  -17.836, 31.069),
-    (7,  "Borehole G — south farm",       -17.847, 31.055),
-    (8,  "Borehole H — west outpost",     -17.838, 31.041),
-    (9,  "Borehole I — river crossing",   -17.826, 31.073),
-    (10, "Borehole J — bus station",      -17.842, 31.062),
+    (1,  "Avenues — central clinic",        -17.815, 31.050),
+    (2,  "Belvedere — community hall",      -17.840, 31.025),
+    (3,  "Eastlea — primary school",        -17.825, 31.062),
+    (4,  "Mbare — Musika market",           -17.860, 31.045),
+    (5,  "Hatfield — community borehole",   -17.852, 31.072),
+    (6,  "Newlands — shopping centre",      -17.810, 31.067),
+    (7,  "Milton Park — health post",       -17.832, 31.030),
+    (8,  "Hillside — water point",          -17.847, 31.058),
+    (9,  "Mt Pleasant — north well",        -17.795, 31.045),
+    (10, "Greendale — east settlement",     -17.835, 31.082),
 ]
 
 
@@ -208,7 +212,10 @@ def init_db() -> None:
                 text(
                     "INSERT INTO stations (station_id, name, latitude, longitude) "
                     "VALUES (:sid, :name, :lat, :lon) "
-                    "ON CONFLICT (station_id) DO NOTHING"
+                    "ON CONFLICT (station_id) DO UPDATE SET "
+                    "    name = excluded.name, "
+                    "    latitude = excluded.latitude, "
+                    "    longitude = excluded.longitude"
                 ),
                 {"sid": sid, "name": name, "lat": lat, "lon": lon},
             )

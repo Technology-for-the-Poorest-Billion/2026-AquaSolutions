@@ -37,7 +37,7 @@ def test_medical_user_sees_report(med_session):
     r = med_session.get(f"/medical/reports/{rid}")
     assert r.status_code == 200
     body = r.data.decode("utf-8")
-    assert "Borehole A" in body
+    assert "Avenues" in body
     assert "diarrhoea" in body
     assert "fever" in body
 

@@ -79,13 +79,14 @@
     stations.forEach(s => {
         if (s.latitude && s.longitude) {
             const radius = 6 + Math.min(s.report_count, 10) * 2;
-            // Brand blue (--blue: #3b8fd1) for every station; opacity carries
-            // the "has medical-portal reports" signal.
+            // Brand cyan (--accent: #3eb1e8 — same blue as the SOLUTIONS
+            // wordmark). Opacity carries the "has medical-portal reports"
+            // signal so quieter stations stay visible but recede.
             L.circleMarker([s.latitude, s.longitude], {
                 radius: radius,
-                fillColor: '#3b8fd1',
-                color: '#3b8fd1',
-                fillOpacity: s.report_count > 0 ? 0.7 : 0.3,
+                fillColor: '#3eb1e8',
+                color: '#3eb1e8',
+                fillOpacity: s.report_count > 0 ? 0.75 : 0.35,
                 weight: 1,
             }).addTo(map).bindPopup(
                 `<strong>${s.name}</strong><br>` +
