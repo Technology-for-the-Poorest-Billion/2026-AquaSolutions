@@ -16,10 +16,10 @@
         </span>
         <nav class="topnav">
             {% if session.get('role') == 'medical' %}
-                <a href="{{ url_for('medical_report_form') }}"
-                   class="{% if request.endpoint == 'medical_report_form' %}active{% endif %}">{{ _("File a report") }}</a>
                 <a href="{{ url_for('medical_history') }}"
                    class="{% if request.endpoint == 'medical_history' %}active{% endif %}">{{ _("History") }}</a>
+                <a href="{{ url_for('medical_report_form') }}"
+                   class="{% if request.endpoint == 'medical_report_form' %}active{% endif %}">{{ _("File a report") }}</a>
             {% elif session.get('role') == 'government' %}
                 <a href="{{ url_for('dashboard') }}"
                    class="{% if request.endpoint == 'dashboard' %}active{% endif %}">{{ _("Dashboard") }}</a>
