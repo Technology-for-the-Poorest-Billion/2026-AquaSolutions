@@ -3,8 +3,8 @@
 Schema is declared as SQLAlchemy MetaData/Table objects so the same code
 emits SQLite DDL locally and Postgres DDL on Railway. init_db() is
 idempotent: it creates any missing tables, adds any newly-added columns
-on existing tables, and seeds the 10 stations row by row with
-ON CONFLICT DO NOTHING.
+on existing tables, and seeds the 32 stations row by row with
+ON CONFLICT DO UPDATE.
 """
 
 from __future__ import annotations
@@ -259,6 +259,33 @@ def _migrate(conn: Connection) -> None:
                 f"ALTER TABLE sensor_readings ADD COLUMN {col_name} REAL"
             ))
 
+    # Postgres-only: stations.station_id was created with autoincrement=False,
+    # so there is no sequence. New rows inserted via the dashboard's Add
+    # Station POST need an auto-assigned id. Create the sequence if missing,
+    # wire it as the column's DEFAULT, and advance it past the highest
+    # currently-seeded id.
+    if conn.engine.dialect.name == "postgresql":
+        conn.execute(text("""
+            DO $$
+            BEGIN
+                IF NOT EXISTS (
+                    SELECT 1 FROM pg_sequences WHERE sequencename = 'stations_station_id_seq'
+                ) THEN
+                    CREATE SEQUENCE stations_station_id_seq;
+                    ALTER TABLE stations
+                        ALTER COLUMN station_id SET DEFAULT nextval('stations_station_id_seq');
+                END IF;
+                PERFORM setval(
+                    'stations_station_id_seq',
+                    GREATEST(
+                        (SELECT COALESCE(MAX(station_id), 0) FROM stations),
+                        32
+                    )
+                );
+            END;
+            $$;
+        """))
+
 
 def init_db() -> None:
     """Create all tables, run any needed column-level migrations, and seed stations.
@@ -300,15 +327,6 @@ def init_db() -> None:
                 {"sid": sid, "name": name, "lat": lat, "lon": lon, "nid": nid},
             )
 
-        # Postgres only: advance the stations_id sequence past the highest
-        # seeded id so user-created stations from POST /dashboard/stations
-        # don't collide. SQLite's INTEGER PRIMARY KEY AUTOINCREMENT handles
-        # this automatically via sqlite_sequence.
-        if engine.dialect.name == "postgresql":
-            conn.execute(text(
-                "SELECT setval('stations_station_id_seq', "
-                "  (SELECT COALESCE(MAX(station_id), 0) FROM stations))"
-            ))
 
 
 if __name__ == "__main__":

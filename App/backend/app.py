@@ -727,7 +727,7 @@ def add_station():
                 {"nid": nid},
             ).first()
             if exists is None:
-                return redirect(url_for("dashboard", station_error="bad_neighborhood"))
+                return redirect(url_for("dashboard", neighborhood=nid, station_error="bad_neighborhood"))
 
             conn.execute(
                 text(
