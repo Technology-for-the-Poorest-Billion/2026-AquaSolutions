@@ -6,8 +6,8 @@
 <section class="panel">
     <h4>{{ _("File a community illness report") }}</h4>
 
-    {% if success_message %}<div class="pill pill-clear" style="display:block;padding:8px var(--space-3);font-family:var(--font-sans);font-size:12px;margin-bottom:var(--space-3)">{{ success_message }}</div>{% endif %}
-    {% if error_message %}<div class="pill pill-severe" style="display:block;padding:8px var(--space-3);font-family:var(--font-sans);font-size:12px;margin-bottom:var(--space-3)">{{ error_message }}</div>{% endif %}
+    {% if success_message %}<div class="flash flash-ok">{{ success_message }}</div>{% endif %}
+    {% if error_message %}<div class="flash flash-err">{{ error_message }}</div>{% endif %}
 
     <form method="POST" action="{{ url_for('medical_report_submit') }}" id="report-form">
 
@@ -43,7 +43,7 @@
         </div>
 
         <div class="field-row">
-            <label>{{ _("Risk tier") }} <span style="font-weight:500;text-transform:none;color:var(--muted)">({{ _("clinical assessment, optional") }})</span></label>
+            <label>{{ _("Risk tier") }} <span class="opt">({{ _("clinical assessment, optional") }})</span></label>
             <div class="segmented" id="risk-tier">
                 <span class="seg on" data-tier="" onclick="pickTier(this)">{{ _("Not assessed") }}</span>
                 <span class="seg" data-tier="low" onclick="pickTier(this)">{{ _("LOW") }}</span>
@@ -54,7 +54,7 @@
         </div>
 
         <div class="field">
-            <label for="notes">{{ _("Notes") }} <span style="font-weight:500;text-transform:none;color:var(--muted)">({{ _("optional") }})</span></label>
+            <label for="notes">{{ _("Notes") }} <span class="opt">({{ _("optional") }})</span></label>
             <textarea id="notes" name="notes" rows="2"></textarea>
         </div>
 
@@ -62,7 +62,7 @@
         <input type="hidden" id="risk-tier-hidden" name="risk_tier" value="">
 
         <div class="meta-row">
-            <span style="font-size:11px;color:var(--muted)">{{ _("Reviewed by the government dashboard within ~30s of submission.") }}</span>
+            <span class="note sm">{{ _("Reviewed by the government dashboard within ~30s of submission.") }}</span>
             <div class="btn-row">
                 <button type="reset" class="btn btn-light" onclick="resetForm()">{{ _("Reset") }}</button>
                 <button type="submit" class="btn">{{ _("Submit report") }}</button>

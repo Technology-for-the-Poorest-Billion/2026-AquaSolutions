@@ -23,7 +23,7 @@
 <section class="panel">
     <h4>{{ _("Reports filed via medical portal") }} ({{ reports|length }})</h4>
     {% if reports %}
-    <table class="reading-table" style="width:100%">
+    <table class="reading-table">
         <thead>
             <tr>
                 <th>{{ _("Submitted") }}</th>
@@ -37,7 +37,7 @@
         </thead>
         <tbody>
             {% for rep in reports %}
-            <tr class="row" style="cursor:pointer" onclick="window.location='/medical/reports/{{ rep['report_id'] }}'">
+            <tr class="clickable" onclick="window.location='/medical/reports/{{ rep['report_id'] }}'">
                 <td>{{ rep['received_at'][:19] if rep['received_at'] else '—' }}</td>
                 <td>{{ rep['submitter'] or '—' }}</td>
                 <td>{% if rep['station_id'] %}#{{ rep['station_id'] }} {{ rep['station_name'] or '' }}{% else %}—{% endif %}</td>
@@ -53,9 +53,9 @@
                     {% if rep['tier_source'] == 'reporter' %}
                         <span class="pill pill-{{ rep['tier'] }}">{{ tier_labels.get(rep['tier'], rep['tier']|upper) }}</span>
                     {% elif rep['tier_source'] == 'estimated' %}
-                        <span class="pill pill-{{ rep['tier'] }}" style="opacity:0.7">{{ tier_labels.get(rep['tier'], rep['tier']|upper) }}</span>
+                        <span class="pill pill-{{ rep['tier'] }} dim">{{ tier_labels.get(rep['tier'], rep['tier']|upper) }}</span>
                     {% else %}
-                        <span style="color:var(--muted);font-size:11px">—</span>
+                        <span class="note sm">—</span>
                     {% endif %}
                 </td>
                 <td>{{ rep['onset_date'] or '—' }}</td>
@@ -64,7 +64,7 @@
         </tbody>
     </table>
     {% else %}
-    <p style="color:var(--muted)">{{ _('No medical-portal reports yet. File one via "File a report" above.') }}</p>
+    <p class="note">{{ _('No medical-portal reports yet. File one via "File a report" above.') }}</p>
     {% endif %}
 </section>
 {% endblock %}

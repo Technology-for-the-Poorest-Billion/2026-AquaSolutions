@@ -47,15 +47,15 @@
             } %}
             {% if tier_source == 'reporter' %}
                 <span class="pill pill-{{ tier }}">{{ tier_labels.get(tier, tier|upper) }}</span>
-                <span style="color:var(--muted);font-size:12px;margin-left:8px">{{ _("Reporter's clinical assessment") }}</span>
+                <span class="note ml-2">{{ _("Reporter's clinical assessment") }}</span>
             {% elif tier_source == 'estimated' %}
-                <span class="pill pill-{{ tier }}" style="opacity:0.7">{{ tier_labels.get(tier, tier|upper) }}</span>
-                <span style="color:var(--muted);font-size:12px;margin-left:8px">{{ _("Estimated risk tier") }}</span>
+                <span class="pill pill-{{ tier }} dim">{{ tier_labels.get(tier, tier|upper) }}</span>
+                <span class="note ml-2">{{ _("Estimated risk tier") }}</span>
                 {% if tier_rationale %}
-                    <p style="font-size:11px;color:var(--muted);margin-top:var(--space-2)">{{ tier_rationale }}</p>
+                    <p class="note sm mt-2">{{ tier_rationale }}</p>
                 {% endif %}
             {% else %}
-                <span style="color:var(--muted);font-size:13px">{{ tier_pending_text }}</span>
+                <span class="note">{{ tier_pending_text }}</span>
             {% endif %}
         </dd>
     </dl>
@@ -72,13 +72,13 @@
             <dt>{{ _("Columns") }}</dt>
             <dd>reading_id, station_id, recorded_at, ph, turbidity_ntu, temperature_c, rainfall_mm, chlorine_mg_l, orp_mv, uv_absorbance, label, rule_description</dd>
         </dl>
-        <div style="margin-top:var(--space-3)">
+        <div class="mt-3">
             <a class="btn" href="{{ url_for('medical_labelled_readings_csv', report_id=report['report_id']) }}">
                 ⤓ {{ _("Download labelled readings (CSV)") }}
             </a>
         </div>
     {% else %}
-        <p style="color:var(--muted);font-size:13px">{{ _("No readings labelled by this report.") }}</p>
+        <p class="note">{{ _("No readings labelled by this report.") }}</p>
     {% endif %}
 </section>
 {% endblock %}

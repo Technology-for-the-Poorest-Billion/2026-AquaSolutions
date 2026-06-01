@@ -61,6 +61,7 @@ body.app {
   align-items: center;
   color: rgba(255,255,255,0.75);
 }
+.topbar .right .lang-picker { margin: 0; }
 .topbar .right select {
   background: #142035;
   color: #fff;
@@ -316,6 +317,11 @@ main.app-main { padding: var(--space-4); }
   font-family: var(--font-mono);
   border-bottom: 1px dotted var(--border);
 }
+/* Whole-row link (e.g. medical history). Must stay a real table row —
+   never apply .row here: .row is display:flex and would break the cells
+   out of their columns, misaligning them from the header. */
+.reading-table tbody tr.clickable { cursor: pointer; }
+.reading-table tbody tr.clickable:hover { background: var(--bg); }
 
 /* ----- Inline form layout helpers ----- */
 .form-grid-3 {
@@ -397,12 +403,72 @@ body.app.app-login {
   line-height: 1.5;
 }
 
-/* ----- Unverified-translation banner (from the i18n work) ----- */
+/* ----- Utilities + small primitives -----
+   These absorb inline styles that had drifted across the templates so the
+   design system stays the single source of truth (spec §4: "templates use
+   primitives by class name with zero per-page customisation"). */
+
+/* Monospace data anywhere (promoted from the crumb-scoped rule). */
+.mono { font-family: var(--font-mono); }
+
+/* Muted helper / caption / empty-state text. Modifiers compose:
+   class="note sm italic block". Collapses the previous 10/11/12/13px soup
+   to a two-size scale. */
+.note { color: var(--muted); font-size: 12px; }
+.note.sm { font-size: 10px; }
+.note.italic { font-style: italic; }
+.note.block { display: block; }
+.note.err { color: var(--severe-fg); }
+
+/* The "optional / clinical-assessment" qualifier inside an uppercase field
+   label — overrides the label's weight + casing. */
+.opt { font-weight: 500; text-transform: none; color: var(--muted); }
+
+/* Inline advisory callout (e.g. the automated-heuristic disclaimer). Reuses
+   the MEDIUM amber pair instead of a one-off rgba. */
+.callout {
+  background: var(--medium-bg);
+  color: var(--medium-fg);
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  line-height: 1.4;
+  margin-bottom: var(--space-3);
+}
+
+/* Block submit-feedback message (success / error). Previously these abused
+   .pill with a display:block override. */
+.flash {
+  display: block;
+  padding: 8px var(--space-3);
+  font-size: 12px;
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-3);
+}
+.flash-ok  { background: var(--clear-bg);  color: var(--clear-fg);  }
+.flash-err { background: var(--severe-bg); color: var(--severe-fg); }
+
+/* Composable bits for the repeated form/button shapes. */
+.btn-block { width: 100%; }
+.form-inline { display: inline; margin: 0; }
+.pill.dim { opacity: 0.7; }
+.m-0 { margin: 0; }
+.mt-2 { margin-top: var(--space-2); }
+.mt-3 { margin-top: var(--space-3); }
+.mb-2 { margin-bottom: var(--space-2); }
+.ml-2 { margin-left: var(--space-2); }
+
+/* ----- Unverified-translation banner (from the i18n work) -----
+   Reuses the MEDIUM-tier amber pair so the "unverified" warning reads as
+   a real warning on the light theme. The previous pale-gold-on-near-white
+   colours were a dark-theme orphan left behind by the light re-skin and
+   were effectively illegible (~1.3:1 contrast). */
 .unverified-banner {
-  background: rgba(255, 215, 0, 0.08);
-  border-bottom: 1px solid rgba(255, 215, 0, 0.25);
-  color: #f6d97b;
+  background: #ffd633;          /* solid amber — reads instantly as a warning */
+  color: var(--ink);           /* navy text on amber ≈ 8.9:1 contrast */
+  border-bottom: 1px solid #e6b800;
   padding: 8px var(--space-4);
   font-size: 13px;
+  font-weight: 600;
   text-align: center;
 }

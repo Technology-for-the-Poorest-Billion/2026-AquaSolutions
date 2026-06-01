@@ -50,6 +50,21 @@ init_babel(app)
 init_db()
 
 
+# Cache-bust app.css with a query string keyed to its mtime. The stylesheet
+# is otherwise cached by the browser, so edits (and redeploys) would keep
+# serving the stale CSS until a manual hard-refresh. Recomputed at startup,
+# which on Railway means once per deploy.
+try:
+    _ASSET_V = str(int(os.path.getmtime(os.path.join(app.static_folder, "app.css"))))
+except OSError:
+    _ASSET_V = "0"
+
+
+@app.context_processor
+def inject_asset_version():
+    return {"asset_v": _ASSET_V}
+
+
 STATION_PARSER_VERSION = "lenient_first_int_v1"
 STATION_RE = re.compile(r"\b(\d{1,4})\b")
 # Strict station RE: requires an explicit "station" keyword before the number.

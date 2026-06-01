@@ -12,7 +12,7 @@
     <section class="panel">
         <h4 style="display:flex;justify-content:space-between;align-items:center">
             <span>{{ _("Station status") }} · {{ stations|length }} {{ _("stations") }} · {{ status_window_days }}-{{ _("day window") }}</span>
-            <form method="GET" action="{{ url_for('dashboard') }}" style="margin:0">
+            <form method="GET" action="{{ url_for('dashboard') }}" class="m-0">
                 <select name="neighborhood" onchange="this.form.submit()"
                         style="font-size:11px;padding:2px 6px;background:var(--panel);color:var(--ink);border:1px solid var(--border);border-radius:var(--radius-sm)">
                     <option value="">{{ _("All neighborhoods") }}</option>
@@ -26,10 +26,10 @@
             <div class="row">
                 <span>
                     {% if s['is_closed'] %}🔒 {% endif %}
-                    <strong style="font-family:var(--font-mono)">STN-{{ s['station_id'] }}</strong>
+                    <strong class="mono">STN-{{ s['station_id'] }}</strong>
                     · {{ s['name'] }}
                     {% if s['recorded_at'] %}
-                        <br><small style="color:var(--muted);font-size:10px">
+                        <br><small class="note sm">
                             {{ s['recorded_at'][:16] }}
                             {% if s['ph'] is not none %} · pH {{ '%.1f'|format(s['ph']) }}{% endif %}
                             {% if s['turbidity_ntu'] is not none %} · {{ '%.0f'|format(s['turbidity_ntu'] ) }} NTU{% endif %}
@@ -40,7 +40,7 @@
                             {% if s['uv_absorbance'] is not none %} · UV₂₅₄ {{ '%.3f'|format(s['uv_absorbance']) }}{% endif %}
                         </small>
                     {% else %}
-                        <br><small style="color:var(--muted);font-size:10px">{{ _("no readings yet") }}</small>
+                        <br><small class="note sm">{{ _("no readings yet") }}</small>
                     {% endif %}
                 </span>
                 <span class="btn-row">
@@ -50,27 +50,27 @@
                         <span class="pill pill-clear">{{ _("CLEAR") }}</span>
                     {% endif %}
                     {% if s['is_closed'] %}
-                        <form method="POST" action="{{ url_for('post_action') }}" style="display:inline;margin:0"
+                        <form method="POST" action="{{ url_for('post_action') }}" class="form-inline"
                               onsubmit="return confirm('{{ _('Reopen station') }} {{ s['station_id'] }}?')">
                             <input type="hidden" name="action_type" value="reopen_borehole">
                             <input type="hidden" name="station_id" value="{{ s['station_id'] }}">
                             <button type="submit" class="btn btn-light">{{ _("Reopen") }}</button>
                         </form>
                     {% else %}
-                        <form method="POST" action="{{ url_for('post_action') }}" style="display:inline;margin:0"
+                        <form method="POST" action="{{ url_for('post_action') }}" class="form-inline"
                               onsubmit="return confirm('{{ _('Close station') }} {{ s['station_id'] }}?')">
                             <input type="hidden" name="action_type" value="close_borehole">
                             <input type="hidden" name="station_id" value="{{ s['station_id'] }}">
                             <button type="submit" class="btn btn-danger">{{ _("Close") }}</button>
                         </form>
                     {% endif %}
-                    <form method="POST" action="{{ url_for('post_action') }}" style="display:inline;margin:0"
+                    <form method="POST" action="{{ url_for('post_action') }}" class="form-inline"
                           onsubmit="return confirm('{{ _('Dispatch sample team to station') }} {{ s['station_id'] }}?')">
                         <input type="hidden" name="action_type" value="dispatch_sample_team">
                         <input type="hidden" name="station_id" value="{{ s['station_id'] }}">
                         <button type="submit" class="btn btn-light">{{ _("Sample") }}</button>
                     </form>
-                    <form method="POST" action="{{ url_for('post_action') }}" style="display:inline;margin:0"
+                    <form method="POST" action="{{ url_for('post_action') }}" class="form-inline"
                           onsubmit="return confirm('{{ _('Dispatch medical team to station') }} {{ s['station_id'] }}?')">
                         <input type="hidden" name="action_type" value="dispatch_medical_team">
                         <input type="hidden" name="station_id" value="{{ s['station_id'] }}">
@@ -82,15 +82,15 @@
             {% if selected_neighborhood_id %}
                 <form method="POST" action="/dashboard/stations" style="margin-top:var(--space-3);padding-top:var(--space-3);border-top:1px dotted var(--border)">
                     <div style="display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:var(--space-2);align-items:end">
-                        <div class="field" style="margin:0">
+                        <div class="field m-0">
                             <label for="add-station-name">{{ _("New station name") }}</label>
                             <input id="add-station-name" type="text" name="name" required>
                         </div>
-                        <div class="field" style="margin:0">
+                        <div class="field m-0">
                             <label for="add-station-lat">{{ _("Latitude") }}</label>
                             <input id="add-station-lat" type="number" step="any" min="-90" max="90" name="latitude" required>
                         </div>
-                        <div class="field" style="margin:0">
+                        <div class="field m-0">
                             <label for="add-station-lon">{{ _("Longitude") }}</label>
                             <input id="add-station-lon" type="number" step="any" min="-180" max="180" name="longitude" required>
                         </div>
@@ -99,7 +99,7 @@
                     </div>
                 </form>
                 {% if add_station_error %}
-                    <p style="color:var(--severe-fg);font-size:12px;margin-top:var(--space-2)">
+                    <p class="note err mt-2">
                         {% if add_station_error == 'invalid_field' %}
                             {{ _("Please enter a valid station name and lat/lon values.") }}
                         {% elif add_station_error == 'bad_neighborhood' %}
@@ -110,7 +110,7 @@
                     </p>
                 {% endif %}
             {% else %}
-                <p style="color:var(--muted);font-size:12px;font-style:italic;margin-top:var(--space-3)">{{ _("Select a neighborhood to add a station.") }}</p>
+                <p class="note italic mt-3">{{ _("Select a neighborhood to add a station.") }}</p>
             {% endif %}
     </section>
 
@@ -122,17 +122,17 @@
                     <span>
                         <a href="{{ url_for('dashboard_report_detail', report_id=r['report_id']) }}"
                            style="color:inherit;text-decoration:none">
-                            <span style="font-family:var(--font-mono);font-size:11px">{{ r['received_at'][:16] }}</span>
+                            <span class="mono">{{ r['received_at'][:16] }}</span>
                             ·
                             {% if r['station_id'] %}
-                                <span style="font-family:var(--font-mono);font-size:11px">STN-{{ r['station_id'] }}</span>
+                                <span class="mono">STN-{{ r['station_id'] }}</span>
                                 {% if r['station_name'] %}· {{ r['station_name'] }}{% endif %}
                             {% else %}
                                 <span class="pill pill-medium">{{ _("UNPARSED") }}</span>
                             {% endif %}
                         </a>
                         {% if r['report_source'] %}
-                            <small style="color:var(--muted);font-size:10px;display:block">{{ r['report_source'] }}</small>
+                            <small class="note sm block">{{ r['report_source'] }}</small>
                         {% endif %}
                     </span>
                     <span style="text-align:right">
@@ -146,18 +146,18 @@
                         {% if tb['tier_source'] == 'reporter' %}
                             <span class="pill pill-{{ tb['tier'] }}">{{ tier_labels.get(tb['tier'], tb['tier']|upper) }}</span>
                         {% elif tb['tier_source'] == 'estimated' %}
-                            <span class="pill pill-{{ tb['tier'] }}" style="opacity:0.65">{{ tier_labels.get(tb['tier'], tb['tier']|upper) }}</span>
+                            <span class="pill pill-{{ tb['tier'] }} dim">{{ tier_labels.get(tb['tier'], tb['tier']|upper) }}</span>
                         {% else %}
-                            <small style="color:var(--muted);font-size:10px">{{ tb['tier_pending_text'].split(' — ')[0] if tb['tier_pending_text'] else '—' }}</small>
+                            <small class="note sm">{{ tb['tier_pending_text'].split(' — ')[0] if tb['tier_pending_text'] else '—' }}</small>
                         {% endif %}
                         {% if r['readings_labelled'] %}
-                            <small style="color:var(--muted);font-size:10px;display:block">{{ r['readings_labelled'] }} {{ _("labelled") }}</small>
+                            <small class="note sm block">{{ r['readings_labelled'] }} {{ _("labelled") }}</small>
                         {% endif %}
                     </span>
                 </div>
             {% endfor %}
         {% else %}
-            <p class="row" style="color:var(--muted)">{{ _("No illness reports yet. Text the Twilio number to generate one.") }}</p>
+            <p class="row note">{{ _("No illness reports yet. Text the Twilio number to generate one.") }}</p>
         {% endif %}
     </section>
 
