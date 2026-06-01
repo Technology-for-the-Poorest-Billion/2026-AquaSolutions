@@ -617,9 +617,22 @@ def dashboard():
         datetime.now(timezone.utc) - timedelta(days=STATION_STATUS_WINDOW_DAYS)
     ).isoformat()
 
+    nid_raw = request.args.get("neighborhood", "")
+    selected_neighborhood_id = int(nid_raw) if nid_raw.isdigit() else None
+
     with connection() as conn:
+        neighborhoods = conn.execute(
+            text("SELECT neighborhood_id, name FROM neighborhoods ORDER BY neighborhood_id")
+        ).mappings().all()
+
+        # Build the stations query — neighborhood filter is optional.
+        where_clause = "WHERE s.neighborhood_id = :nid" if selected_neighborhood_id else ""
+        stations_params = {"cutoff": status_cutoff}
+        if selected_neighborhood_id is not None:
+            stations_params["nid"] = selected_neighborhood_id
+
         stations = conn.execute(
-            text("""
+            text(f"""
                 WITH latest AS (
                     SELECT station_id, MAX(recorded_at) AS latest_at
                     FROM sensor_readings
@@ -628,6 +641,7 @@ def dashboard():
                 SELECT s.station_id,
                        s.name,
                        s.is_closed,
+                       s.neighborhood_id,
                        r.recorded_at,
                        r.ph,
                        r.turbidity_ntu,
@@ -646,9 +660,10 @@ def dashboard():
                 LEFT JOIN sensor_readings r
                     ON r.station_id = s.station_id
                    AND r.recorded_at = l.latest_at
+                {where_clause}
                 ORDER BY s.station_id
             """),
-            {"cutoff": status_cutoff},
+            stations_params,
         ).mappings().all()
 
         reports = conn.execute(
@@ -676,8 +691,53 @@ def dashboard():
         stations=stations,
         reports=reports_with_tier,
         status_window_days=STATION_STATUS_WINDOW_DAYS,
+        neighborhoods=neighborhoods,
+        selected_neighborhood_id=selected_neighborhood_id,
+        add_station_error=request.args.get("station_error"),
         generated_at=datetime.now(timezone.utc).isoformat(timespec="seconds"),
     )
+
+
+@app.post("/dashboard/stations")
+@role_required("government")
+def add_station():
+    name = (request.form.get("name") or "").strip()
+    lat_raw = request.form.get("latitude") or ""
+    lon_raw = request.form.get("longitude") or ""
+    nid_raw = request.form.get("neighborhood_id") or ""
+
+    try:
+        nid = int(nid_raw)
+    except ValueError:
+        return redirect(url_for("dashboard", station_error="invalid_field"))
+
+    try:
+        lat = float(lat_raw)
+        lon = float(lon_raw)
+    except ValueError:
+        return redirect(url_for("dashboard", neighborhood=nid, station_error="invalid_field"))
+
+    if not name or not (-90 <= lat <= 90) or not (-180 <= lon <= 180):
+        return redirect(url_for("dashboard", neighborhood=nid, station_error="invalid_field"))
+
+    with connection() as conn:
+        with conn.begin():
+            exists = conn.execute(
+                text("SELECT 1 FROM neighborhoods WHERE neighborhood_id = :nid"),
+                {"nid": nid},
+            ).first()
+            if exists is None:
+                return redirect(url_for("dashboard", neighborhood=nid, station_error="bad_neighborhood"))
+
+            conn.execute(
+                text(
+                    "INSERT INTO stations (name, latitude, longitude, neighborhood_id) "
+                    "VALUES (:name, :lat, :lon, :nid)"
+                ),
+                {"name": name, "lat": lat, "lon": lon, "nid": nid},
+            )
+
+    return redirect(url_for("dashboard", neighborhood=nid))
 
 
 @app.post("/actions")
