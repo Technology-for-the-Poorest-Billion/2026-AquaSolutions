@@ -44,6 +44,11 @@ sensor_readings = Table(
     Column("turbidity_ntu", Float),
     Column("temperature_c", Float),
     Column("rainfall_mm", Float),
+    # Additional water-quality indicators (added 2026-06-01). All nullable
+    # so older readings remain valid.
+    Column("chlorine_mg_l", Float),     # free chlorine residual, mg/L
+    Column("orp_mv", Float),            # oxidation-reduction potential, mV
+    Column("uv_absorbance", Float),     # UV absorbance at 254 nm (organic-matter proxy)
     Column("provenance", Text, nullable=False, server_default=text("'unknown'")),
     Column("received_at", Text, nullable=False, server_default=func.current_timestamp()),
     Index("idx_readings_station_time", "station_id", "recorded_at"),
@@ -194,6 +199,15 @@ def _migrate(conn: Connection) -> None:
         conn.execute(text(
             "ALTER TABLE stations ADD COLUMN is_closed INTEGER NOT NULL DEFAULT 0"
         ))
+
+    # Sensor-readings backfill: the three water-quality indicators added
+    # 2026-06-01 may be missing from a pre-existing table.
+    existing_reading_cols = {c["name"] for c in insp.get_columns("sensor_readings")}
+    for col_name in ("chlorine_mg_l", "orp_mv", "uv_absorbance"):
+        if col_name not in existing_reading_cols:
+            conn.execute(text(
+                f"ALTER TABLE sensor_readings ADD COLUMN {col_name} REAL"
+            ))
 
 
 def init_db() -> None:

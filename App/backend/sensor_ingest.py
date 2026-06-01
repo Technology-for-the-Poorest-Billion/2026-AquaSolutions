@@ -14,7 +14,10 @@ sensor_bp = Blueprint("sensor_ingest", __name__)
 
 
 REQUIRED_FIELDS = ("station_id", "recorded_at")
-OPTIONAL_NUMERIC = ("ph", "turbidity_ntu", "temperature_c", "rainfall_mm")
+OPTIONAL_NUMERIC = (
+    "ph", "turbidity_ntu", "temperature_c", "rainfall_mm",
+    "chlorine_mg_l", "orp_mv", "uv_absorbance",
+)
 
 
 def _authorised(req) -> bool:
@@ -69,9 +72,11 @@ def ingest():
                 text(
                     "INSERT INTO sensor_readings "
                     "(station_id, recorded_at, ph, turbidity_ntu, "
-                    " temperature_c, rainfall_mm, provenance) "
+                    " temperature_c, rainfall_mm, chlorine_mg_l, orp_mv, "
+                    " uv_absorbance, provenance) "
                     "VALUES (:station_id, :recorded_at, :ph, :turbidity_ntu, "
-                    " :temperature_c, :rainfall_mm, :provenance) "
+                    " :temperature_c, :rainfall_mm, :chlorine_mg_l, :orp_mv, "
+                    " :uv_absorbance, :provenance) "
                     "RETURNING reading_id"
                 ),
                 {
@@ -81,6 +86,9 @@ def ingest():
                     "turbidity_ntu": numeric_values["turbidity_ntu"],
                     "temperature_c": numeric_values["temperature_c"],
                     "rainfall_mm": numeric_values["rainfall_mm"],
+                    "chlorine_mg_l": numeric_values["chlorine_mg_l"],
+                    "orp_mv": numeric_values["orp_mv"],
+                    "uv_absorbance": numeric_values["uv_absorbance"],
                     "provenance": provenance,
                 },
             ).scalar_one()

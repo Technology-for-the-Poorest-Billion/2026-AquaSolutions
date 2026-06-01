@@ -16,7 +16,9 @@ POST /ingest          — sensor reading ingest (via sensor_ingest blueprint)
 
 from __future__ import annotations
 
+import csv
 import hmac
+import io
 import json
 import os
 import re
@@ -26,7 +28,7 @@ from functools import wraps
 
 from dotenv import load_dotenv
 from flask import (
-    Flask, abort, redirect, render_template, request, session, url_for,
+    Flask, Response, abort, redirect, render_template, request, session, url_for,
 )
 from flask_babel import gettext as _, ngettext
 from twilio.request_validator import RequestValidator
@@ -767,17 +769,7 @@ def dashboard_report_detail(report_id: int):
         ).mappings().first()
         if row is None:
             abort(404)
-        labelled_readings = conn.execute(
-            text("""
-                SELECT rl.reading_id, rl.rule_description,
-                       sr.recorded_at, sr.ph, sr.turbidity_ntu, sr.temperature_c
-                FROM reading_labels rl
-                JOIN sensor_readings sr ON sr.reading_id = rl.reading_id
-                WHERE rl.report_id = :rid
-                ORDER BY sr.recorded_at DESC
-            """),
-            {"rid": report_id},
-        ).mappings().all()
+        labelled_summary = _labelled_readings_summary(conn, report_id)
         interventions_rows = conn.execute(
             text("""
                 SELECT intervention_id, action_type, triggered_by, triggered_at, notes
@@ -799,7 +791,7 @@ def dashboard_report_detail(report_id: int):
         "dashboard_report_detail.html",
         report=row,
         symptoms_display=symptoms_display,
-        labelled_readings=labelled_readings,
+        labelled_summary=labelled_summary,
         interventions=interventions_rows,
         **tier_block,
     )
@@ -854,6 +846,80 @@ def medical_history():
     )
 
 
+def _labelled_readings_summary(conn, report_id: int) -> dict:
+    """Count + earliest/latest recorded_at for the readings a report
+    labelled. Lets the detail page show a compact summary; the actual
+    rows are served separately via the CSV endpoint below."""
+    row = conn.execute(
+        text("""
+            SELECT COUNT(*) AS n,
+                   MIN(sr.recorded_at) AS earliest,
+                   MAX(sr.recorded_at) AS latest
+            FROM reading_labels rl
+            JOIN sensor_readings sr ON sr.reading_id = rl.reading_id
+            WHERE rl.report_id = :rid
+        """),
+        {"rid": report_id},
+    ).mappings().first()
+    return dict(row) if row else {"n": 0, "earliest": None, "latest": None}
+
+
+def _labelled_readings_csv(report_id: int) -> Response:
+    """Stream the full set of readings labelled by one report as CSV."""
+    with connection() as conn:
+        rows = conn.execute(
+            text("""
+                SELECT rl.reading_id, sr.station_id, sr.recorded_at,
+                       sr.ph, sr.turbidity_ntu, sr.temperature_c, sr.rainfall_mm,
+                       sr.chlorine_mg_l, sr.orp_mv, sr.uv_absorbance,
+                       rl.label, rl.rule_description
+                FROM reading_labels rl
+                JOIN sensor_readings sr ON sr.reading_id = rl.reading_id
+                WHERE rl.report_id = :rid
+                ORDER BY sr.recorded_at ASC
+            """),
+            {"rid": report_id},
+        ).mappings().all()
+
+    buf = io.StringIO()
+    writer = csv.writer(buf)
+    writer.writerow([
+        "reading_id", "station_id", "recorded_at",
+        "ph", "turbidity_ntu", "temperature_c", "rainfall_mm",
+        "chlorine_mg_l", "orp_mv", "uv_absorbance",
+        "label", "rule_description",
+    ])
+    for r in rows:
+        writer.writerow([
+            r["reading_id"], r["station_id"], r["recorded_at"],
+            r["ph"], r["turbidity_ntu"], r["temperature_c"], r["rainfall_mm"],
+            r["chlorine_mg_l"], r["orp_mv"], r["uv_absorbance"],
+            r["label"], r["rule_description"],
+        ])
+
+    return Response(
+        buf.getvalue(),
+        mimetype="text/csv",
+        headers={
+            "Content-Disposition": (
+                f'attachment; filename="report-{report_id}-labelled-readings.csv"'
+            ),
+        },
+    )
+
+
+@app.get("/medical/reports/<int:report_id>/labelled-readings.csv")
+@role_required("medical")
+def medical_labelled_readings_csv(report_id: int):
+    return _labelled_readings_csv(report_id)
+
+
+@app.get("/dashboard/reports/<int:report_id>/labelled-readings.csv")
+@role_required("government")
+def dashboard_labelled_readings_csv(report_id: int):
+    return _labelled_readings_csv(report_id)
+
+
 @app.get("/medical/reports/<int:report_id>")
 @role_required("medical")
 def medical_report_detail(report_id: int):
@@ -869,17 +935,7 @@ def medical_report_detail(report_id: int):
         ).mappings().first()
         if row is None:
             abort(404)
-        labelled_readings = conn.execute(
-            text("""
-                SELECT rl.reading_id, rl.rule_description,
-                       sr.recorded_at, sr.ph, sr.turbidity_ntu, sr.temperature_c
-                FROM reading_labels rl
-                JOIN sensor_readings sr ON sr.reading_id = rl.reading_id
-                WHERE rl.report_id = :rid
-                ORDER BY sr.recorded_at DESC
-            """),
-            {"rid": report_id},
-        ).mappings().all()
+        labelled_summary = _labelled_readings_summary(conn, report_id)
     tier_block = _resolve_tier(dict(row))
     try:
         symptoms_list = json.loads(row["symptoms"] or "[]")
@@ -890,7 +946,7 @@ def medical_report_detail(report_id: int):
         "medical_report_detail.html",
         report=row,
         symptoms_display=symptoms_display,
-        labelled_readings=labelled_readings,
+        labelled_summary=labelled_summary,
         **tier_block,
     )
 
