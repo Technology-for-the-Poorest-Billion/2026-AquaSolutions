@@ -50,4 +50,36 @@
         </dd>
     </dl>
 </section>
+
+<section class="panel">
+    <h4>{{ _("Labelled readings") }} ({{ labelled_readings|length }})</h4>
+    {% if labelled_readings %}
+    <table class="reading-table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>{{ _("Recorded at") }}</th>
+                <th>{{ _("pH") }}</th>
+                <th>{{ _("Turb (NTU)") }}</th>
+                <th>{{ _("Temp (°C)") }}</th>
+                <th>{{ _("Rule") }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for lr in labelled_readings %}
+            <tr>
+                <td>#{{ lr['reading_id'] }}</td>
+                <td>{{ lr['recorded_at'][:19] }}</td>
+                <td>{{ '%.2f'|format(lr['ph']) if lr['ph'] is not none else '—' }}</td>
+                <td>{{ '%.1f'|format(lr['turbidity_ntu']) if lr['turbidity_ntu'] is not none else '—' }}</td>
+                <td>{{ '%.1f'|format(lr['temperature_c']) if lr['temperature_c'] is not none else '—' }}</td>
+                <td style="font-size:11px;color:var(--muted)">{{ lr['rule_description'] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="color:var(--muted);font-size:13px">{{ _("No readings labelled by this report.") }}</p>
+    {% endif %}
+</section>
 {% endblock %}

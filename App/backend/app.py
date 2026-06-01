@@ -869,6 +869,17 @@ def medical_report_detail(report_id: int):
         ).mappings().first()
         if row is None:
             abort(404)
+        labelled_readings = conn.execute(
+            text("""
+                SELECT rl.reading_id, rl.rule_description,
+                       sr.recorded_at, sr.ph, sr.turbidity_ntu, sr.temperature_c
+                FROM reading_labels rl
+                JOIN sensor_readings sr ON sr.reading_id = rl.reading_id
+                WHERE rl.report_id = :rid
+                ORDER BY sr.recorded_at DESC
+            """),
+            {"rid": report_id},
+        ).mappings().all()
     tier_block = _resolve_tier(dict(row))
     try:
         symptoms_list = json.loads(row["symptoms"] or "[]")
@@ -879,6 +890,7 @@ def medical_report_detail(report_id: int):
         "medical_report_detail.html",
         report=row,
         symptoms_display=symptoms_display,
+        labelled_readings=labelled_readings,
         **tier_block,
     )
 
