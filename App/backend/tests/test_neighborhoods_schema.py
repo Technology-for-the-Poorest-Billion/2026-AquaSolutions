@@ -7,12 +7,18 @@ in test_neighborhoods_seed.py — this module is structural only.
 
 from __future__ import annotations
 
+import sys
+
 from sqlalchemy import inspect
 
 from database import connection, init_db
 
 
 def test_neighborhoods_table_exists(tmp_db_path):
+    sys.modules.pop("engine", None)
+    sys.modules.pop("database", None)
+    from database import init_db, connection
+
     init_db()
     with connection() as conn:
         cols = {c["name"] for c in inspect(conn).get_columns("neighborhoods")}
@@ -20,6 +26,10 @@ def test_neighborhoods_table_exists(tmp_db_path):
 
 
 def test_stations_has_neighborhood_id_column(tmp_db_path):
+    sys.modules.pop("engine", None)
+    sys.modules.pop("database", None)
+    from database import init_db, connection
+
     init_db()
     with connection() as conn:
         cols = {c["name"] for c in inspect(conn).get_columns("stations")}
