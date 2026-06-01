@@ -153,6 +153,13 @@ main.app-main { padding: var(--space-4); }
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
 .grid-2-asym { display: grid; grid-template-columns: 2fr 1fr; gap: var(--space-3); }
 
+/* The `.panel + .panel` margin above is meant for vertically-stacked
+   panels in a single column. Inside a grid the columns already have
+   `gap`, and adjacent-sibling margin would push grid items down and
+   make panels look uneven. Cancel it for grid children. */
+.grid-2 > .panel + .panel,
+.grid-2-asym > .panel + .panel { margin-top: 0; }
+
 /* ----- Row patterns ----- */
 .row {
   display: flex;
