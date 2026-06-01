@@ -82,7 +82,7 @@ DEMO_USERS: dict[str, dict[str, str]] = {
 }
 
 ROLE_HOME = {
-    "medical": "medical_report_form",
+    "medical": "medical_history",
     "government": "dashboard",
 }
 
