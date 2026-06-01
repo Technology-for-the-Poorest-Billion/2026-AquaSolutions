@@ -79,6 +79,39 @@
                 </span>
             </div>
         {% endfor %}
+            {% if selected_neighborhood_id %}
+                <form method="POST" action="/dashboard/stations" style="margin-top:var(--space-3);padding-top:var(--space-3);border-top:1px dotted var(--border)">
+                    <div style="display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:var(--space-2);align-items:end">
+                        <div class="field" style="margin:0">
+                            <label for="add-station-name">{{ _("New station name") }}</label>
+                            <input id="add-station-name" type="text" name="name" required>
+                        </div>
+                        <div class="field" style="margin:0">
+                            <label for="add-station-lat">{{ _("Latitude") }}</label>
+                            <input id="add-station-lat" type="number" step="any" min="-90" max="90" name="latitude" required>
+                        </div>
+                        <div class="field" style="margin:0">
+                            <label for="add-station-lon">{{ _("Longitude") }}</label>
+                            <input id="add-station-lon" type="number" step="any" min="-180" max="180" name="longitude" required>
+                        </div>
+                        <input type="hidden" name="neighborhood_id" value="{{ selected_neighborhood_id }}">
+                        <button type="submit" class="btn">{{ _("Add") }}</button>
+                    </div>
+                </form>
+                {% if add_station_error %}
+                    <p style="color:var(--severe-fg);font-size:12px;margin-top:var(--space-2)">
+                        {% if add_station_error == 'invalid_field' %}
+                            {{ _("Please enter a valid station name and lat/lon values.") }}
+                        {% elif add_station_error == 'bad_neighborhood' %}
+                            {{ _("Unknown neighborhood.") }}
+                        {% else %}
+                            {{ _("Could not add the station.") }}
+                        {% endif %}
+                    </p>
+                {% endif %}
+            {% else %}
+                <p style="color:var(--muted);font-size:12px;font-style:italic;margin-top:var(--space-3)">{{ _("Select a neighborhood to add a station.") }}</p>
+            {% endif %}
     </section>
 
     <section class="panel">

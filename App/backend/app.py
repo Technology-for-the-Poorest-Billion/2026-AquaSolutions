@@ -698,6 +698,48 @@ def dashboard():
     )
 
 
+@app.post("/dashboard/stations")
+@role_required("government")
+def add_station():
+    name = (request.form.get("name") or "").strip()
+    lat_raw = request.form.get("latitude") or ""
+    lon_raw = request.form.get("longitude") or ""
+    nid_raw = request.form.get("neighborhood_id") or ""
+
+    try:
+        nid = int(nid_raw)
+    except ValueError:
+        return redirect(url_for("dashboard", station_error="invalid_field"))
+
+    try:
+        lat = float(lat_raw)
+        lon = float(lon_raw)
+    except ValueError:
+        return redirect(url_for("dashboard", neighborhood=nid, station_error="invalid_field"))
+
+    if not name or not (-90 <= lat <= 90) or not (-180 <= lon <= 180):
+        return redirect(url_for("dashboard", neighborhood=nid, station_error="invalid_field"))
+
+    with connection() as conn:
+        with conn.begin():
+            exists = conn.execute(
+                text("SELECT 1 FROM neighborhoods WHERE neighborhood_id = :nid"),
+                {"nid": nid},
+            ).first()
+            if exists is None:
+                return redirect(url_for("dashboard", station_error="bad_neighborhood"))
+
+            conn.execute(
+                text(
+                    "INSERT INTO stations (name, latitude, longitude, neighborhood_id) "
+                    "VALUES (:name, :lat, :lon, :nid)"
+                ),
+                {"name": name, "lat": lat, "lon": lon, "nid": nid},
+            )
+
+    return redirect(url_for("dashboard", neighborhood=nid))
+
+
 @app.post("/actions")
 @role_required("government")
 def post_action():

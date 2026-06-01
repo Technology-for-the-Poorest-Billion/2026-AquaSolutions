@@ -177,3 +177,74 @@ def test_dashboard_filter_persists_selected_option(signed_in_gov):
     # The matching <option value="3" ... selected> should be present.
     assert 'value="3"' in body
     assert 'selected' in body
+
+
+def test_add_station_form_hidden_when_no_neighborhood_filter(signed_in_gov):
+    resp = signed_in_gov.get("/dashboard")
+    body = resp.data
+    # The note that replaces the form should be present...
+    assert b"Select a neighborhood to add a station" in body
+    # ...and the actual form should NOT be present.
+    assert b'action="/dashboard/stations"' not in body
+
+
+def test_add_station_form_visible_when_neighborhood_filter_active(signed_in_gov):
+    resp = signed_in_gov.get("/dashboard?neighborhood=1")
+    body = resp.data
+    assert b'action="/dashboard/stations"' in body
+    assert b'name="latitude"' in body
+    assert b'name="longitude"' in body
+    assert b'name="name"' in body
+    # Hidden neighborhood_id should match the URL filter.
+    assert b'name="neighborhood_id" value="1"' in body
+
+
+def test_post_add_station_creates_row_and_redirects(signed_in_gov):
+    resp = signed_in_gov.post("/dashboard/stations", data={
+        "name": "New test borehole",
+        "latitude": "-17.83",
+        "longitude": "31.05",
+        "neighborhood_id": "1",
+    })
+    assert resp.status_code == 302
+    assert resp.location.endswith("/dashboard?neighborhood=1")
+
+    # Newly-created row should be reachable on the next GET.
+    follow = signed_in_gov.get("/dashboard?neighborhood=1")
+    assert b"New test borehole" in follow.data
+
+
+def test_post_add_station_rejects_invalid_latitude(signed_in_gov):
+    resp = signed_in_gov.post("/dashboard/stations", data={
+        "name": "Bad borehole",
+        "latitude": "999",
+        "longitude": "31.05",
+        "neighborhood_id": "1",
+    })
+    assert resp.status_code == 302
+    assert "station_error=invalid_field" in resp.location
+
+    # No row inserted.
+    follow = signed_in_gov.get("/dashboard?neighborhood=1")
+    assert b"Bad borehole" not in follow.data
+
+
+def test_post_add_station_rejects_unknown_neighborhood(signed_in_gov):
+    resp = signed_in_gov.post("/dashboard/stations", data={
+        "name": "Orphan borehole",
+        "latitude": "-17.83",
+        "longitude": "31.05",
+        "neighborhood_id": "999",
+    })
+    assert resp.status_code == 302
+    assert "station_error=bad_neighborhood" in resp.location
+
+
+def test_post_add_station_requires_government_role(signed_in_med):
+    resp = signed_in_med.post("/dashboard/stations", data={
+        "name": "Medical user attempt",
+        "latitude": "-17.83",
+        "longitude": "31.05",
+        "neighborhood_id": "1",
+    })
+    assert resp.status_code == 403
