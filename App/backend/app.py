@@ -115,7 +115,7 @@ def login_required(view):
     @wraps(view)
     def wrapped(*args, **kwargs):
         if "username" not in session:
-            return redirect(url_for("login", next=request.path))
+            return redirect(url_for("login"))
         return view(*args, **kwargs)
     return wrapped
 
@@ -125,7 +125,7 @@ def role_required(role: str):
         @wraps(view)
         def wrapped(*args, **kwargs):
             if "username" not in session:
-                return redirect(url_for("login", next=request.path))
+                return redirect(url_for("login"))
             if session.get("role") != role:
                 return (_("forbidden — this page requires the "
                           "'{role}' role").format(role=role), 403)
@@ -746,7 +746,7 @@ def post_action():
 @app.get("/dashboard/reports/<int:report_id>")
 def dashboard_report_detail(report_id: int):
     if "username" not in session:
-        return redirect(url_for("login", next=request.path))
+        return redirect(url_for("login"))
     if session.get("role") != "government":
         return (
             _("This page is for government officials. "
