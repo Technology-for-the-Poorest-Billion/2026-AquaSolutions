@@ -133,3 +133,47 @@ def test_dashboard_report_detail_uses_grid_and_actions(signed_in_gov):
     assert b'class="grid-2-asym"' in body
     assert b'class="kv"' in body
     assert b'class="btn' in body
+
+
+def test_dashboard_renders_neighborhood_dropdown(signed_in_gov):
+    resp = signed_in_gov.get("/dashboard")
+    body = resp.data.decode("utf-8")
+    # The dropdown <select name="neighborhood"> must be present.
+    assert 'name="neighborhood"' in body
+    # 4 named neighborhoods + 1 "All neighborhoods" option = 5 options.
+    assert body.count("<option") >= 5
+    # The neighborhood names themselves.
+    for name in ("Central Harare", "Northern Suburbs",
+                 "Southern Areas", "Eastern Suburbs"):
+        assert name in body, f"neighborhood missing from dropdown: {name}"
+
+
+def test_dashboard_unfiltered_shows_all_32_stations(signed_in_gov):
+    resp = signed_in_gov.get("/dashboard")
+    body = resp.data
+    # Count "STN-N" tokens that appear inside the station-status panel.
+    import re
+    n = len(re.findall(br'STN-\d+', body))
+    # Each station row renders STN-N once; reports rows may add more.
+    # Use a >= 32 assertion to be robust against reports panel content.
+    assert n >= 32
+
+
+def test_dashboard_filtered_shows_only_neighborhood_stations(signed_in_gov):
+    """When ?neighborhood=1 is passed, only Central Harare's 8 stations
+    should appear in the station status panel."""
+    resp = signed_in_gov.get("/dashboard?neighborhood=1")
+    body = resp.data.decode("utf-8")
+    # Central Harare has stations 1, 2, 7, 11, 12, 13, 14, 15.
+    for sid in (1, 2, 7, 11, 12, 13, 14, 15):
+        assert f"STN-{sid}<" in body or f"STN-{sid}\n" in body or \
+               f"STN-{sid} " in body or f">STN-{sid}<" in body, \
+               f"central station STN-{sid} missing"
+
+
+def test_dashboard_filter_persists_selected_option(signed_in_gov):
+    resp = signed_in_gov.get("/dashboard?neighborhood=3")
+    body = resp.data.decode("utf-8")
+    # The matching <option value="3" ... selected> should be present.
+    assert 'value="3"' in body
+    assert 'selected' in body

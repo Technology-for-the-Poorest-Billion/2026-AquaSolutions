@@ -10,7 +10,18 @@
 <div class="grid-2-asym">
 
     <section class="panel">
-        <h4>{{ _("Station status") }} · {{ stations|length }} {{ _("stations") }} · {{ status_window_days }}-{{ _("day window") }}</h4>
+        <h4 style="display:flex;justify-content:space-between;align-items:center">
+            <span>{{ _("Station status") }} · {{ stations|length }} {{ _("stations") }} · {{ status_window_days }}-{{ _("day window") }}</span>
+            <form method="GET" action="{{ url_for('dashboard') }}" style="margin:0">
+                <select name="neighborhood" onchange="this.form.submit()"
+                        style="font-size:11px;padding:2px 6px;background:var(--panel);color:var(--ink);border:1px solid var(--border);border-radius:var(--radius-sm)">
+                    <option value="">{{ _("All neighborhoods") }}</option>
+                    {% for n in neighborhoods %}
+                        <option value="{{ n['neighborhood_id'] }}" {% if selected_neighborhood_id == n['neighborhood_id'] %}selected{% endif %}>{{ n['name'] }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+        </h4>
         {% for s in stations %}
             <div class="row">
                 <span>
