@@ -16,7 +16,11 @@
             <h4>{{ _("Report metadata") }}</h4>
             <dl class="kv">
                 <dt>{{ _("Source") }}</dt>
-                <dd>{{ report['report_source']|upper }}</dd>
+                <dd>
+                    {% if report['report_source'] == 'sms' %}{{ _("SMS") }}
+                    {% elif report['report_source'] == 'medical_portal' %}{{ _("MEDICAL PORTAL") }}
+                    {% else %}{{ report['report_source']|upper }}{% endif %}
+                </dd>
 
                 <dt>{{ _("Received") }}</dt>
                 <dd>{{ report['received_at'] }}</dd>
@@ -51,15 +55,21 @@
 
         <section class="panel">
             <h4>{{ _("Risk tier") }}</h4>
+            {% set tier_labels = {
+                'low': _("LOW"),
+                'medium': _("MEDIUM"),
+                'high': _("HIGH"),
+                'severe': _("SEVERE")
+            } %}
             {% if tier_source == 'reporter' %}
-                <span class="pill pill-{{ tier }}">{{ tier|upper }}</span>
+                <span class="pill pill-{{ tier }}">{{ tier_labels.get(tier, tier|upper) }}</span>
                 <span style="color:var(--muted);font-size:12px;margin-left:8px">{{ _("Reporter's clinical assessment") }}</span>
             {% elif tier_source == 'estimated' %}
                 <div style="background:rgba(240,198,116,0.12);color:var(--medium-fg);padding:10px 12px;border-radius:6px;font-size:13px;margin-bottom:12px;line-height:1.4">
                     <strong>{{ _("Estimated by automated heuristic — not medical advice.") }}</strong>
                     {{ _("See rationale below. Pattern-based; clinical assessment overrides.") }}
                 </div>
-                <span class="pill pill-{{ tier }}" style="opacity:0.7">{{ tier|upper }}</span>
+                <span class="pill pill-{{ tier }}" style="opacity:0.7">{{ tier_labels.get(tier, tier|upper) }}</span>
                 <span style="color:var(--muted);font-size:12px;margin-left:8px">{{ _("Estimated risk tier") }}</span>
                 {% if tier_rationale %}
                     <p style="margin-top:12px;font-size:13px">{{ tier_rationale }}</p>

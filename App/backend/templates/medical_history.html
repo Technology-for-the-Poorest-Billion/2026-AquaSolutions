@@ -44,10 +44,16 @@
                 <td>{{ rep['case_count'] or '—' }}</td>
                 <td>{{ rep['symptoms_display'] }}</td>
                 <td>
+                    {% set tier_labels = {
+                        'low': _("LOW"),
+                        'medium': _("MEDIUM"),
+                        'high': _("HIGH"),
+                        'severe': _("SEVERE")
+                    } %}
                     {% if rep['tier_source'] == 'reporter' %}
-                        <span class="pill pill-{{ rep['tier'] }}">{{ rep['tier']|upper }}</span>
+                        <span class="pill pill-{{ rep['tier'] }}">{{ tier_labels.get(rep['tier'], rep['tier']|upper) }}</span>
                     {% elif rep['tier_source'] == 'estimated' %}
-                        <span class="pill pill-{{ rep['tier'] }}" style="opacity:0.7">{{ rep['tier']|upper }}</span>
+                        <span class="pill pill-{{ rep['tier'] }}" style="opacity:0.7">{{ tier_labels.get(rep['tier'], rep['tier']|upper) }}</span>
                     {% else %}
                         <span style="color:var(--muted);font-size:11px">—</span>
                     {% endif %}

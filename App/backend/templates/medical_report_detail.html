@@ -13,7 +13,11 @@
     <h4>{{ _("Report") }}</h4>
     <dl class="kv">
         <dt>{{ _("Source") }}</dt>
-        <dd>{{ report['report_source']|upper }}</dd>
+        <dd>
+            {% if report['report_source'] == 'sms' %}{{ _("SMS") }}
+            {% elif report['report_source'] == 'medical_portal' %}{{ _("MEDICAL PORTAL") }}
+            {% else %}{{ report['report_source']|upper }}{% endif %}
+        </dd>
 
         <dt>{{ _("Submitter") }}</dt>
         <dd>{{ report['submitter'] or '—' }}</dd>
@@ -35,11 +39,17 @@
 
         <dt>{{ _("Risk tier") }}</dt>
         <dd>
+            {% set tier_labels = {
+                'low': _("LOW"),
+                'medium': _("MEDIUM"),
+                'high': _("HIGH"),
+                'severe': _("SEVERE")
+            } %}
             {% if tier_source == 'reporter' %}
-                <span class="pill pill-{{ tier }}">{{ tier|upper }}</span>
+                <span class="pill pill-{{ tier }}">{{ tier_labels.get(tier, tier|upper) }}</span>
                 <span style="color:var(--muted);font-size:12px;margin-left:8px">{{ _("Reporter's clinical assessment") }}</span>
             {% elif tier_source == 'estimated' %}
-                <span class="pill pill-{{ tier }}" style="opacity:0.7">{{ tier|upper }}</span>
+                <span class="pill pill-{{ tier }}" style="opacity:0.7">{{ tier_labels.get(tier, tier|upper) }}</span>
                 <span style="color:var(--muted);font-size:12px;margin-left:8px">{{ _("Estimated risk tier") }}</span>
                 {% if tier_rationale %}
                     <p style="font-size:11px;color:var(--muted);margin-top:var(--space-2)">{{ tier_rationale }}</p>

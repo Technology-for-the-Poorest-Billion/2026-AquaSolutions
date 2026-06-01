@@ -137,10 +137,16 @@
                     </span>
                     <span style="text-align:right">
                         {% set tb = r['tier_block'] %}
+                        {% set tier_labels = {
+                            'low': _("LOW"),
+                            'medium': _("MEDIUM"),
+                            'high': _("HIGH"),
+                            'severe': _("SEVERE")
+                        } %}
                         {% if tb['tier_source'] == 'reporter' %}
-                            <span class="pill pill-{{ tb['tier'] }}">{{ tb['tier']|upper }}</span>
+                            <span class="pill pill-{{ tb['tier'] }}">{{ tier_labels.get(tb['tier'], tb['tier']|upper) }}</span>
                         {% elif tb['tier_source'] == 'estimated' %}
-                            <span class="pill pill-{{ tb['tier'] }}" style="opacity:0.65">{{ tb['tier']|upper }}</span>
+                            <span class="pill pill-{{ tb['tier'] }}" style="opacity:0.65">{{ tier_labels.get(tb['tier'], tb['tier']|upper) }}</span>
                         {% else %}
                             <small style="color:var(--muted);font-size:10px">{{ tb['tier_pending_text'].split(' — ')[0] if tb['tier_pending_text'] else '—' }}</small>
                         {% endif %}

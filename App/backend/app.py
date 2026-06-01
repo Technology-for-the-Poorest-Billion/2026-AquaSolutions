@@ -195,9 +195,9 @@ def _resolve_tier(report) -> dict:
     # SMS, not complete
     state = report.get("dialog_state")
     if state in ("awaiting_case_count", "awaiting_symptoms", "awaiting_onset"):
-        pending = "pending — awaiting reporter follow-up"
+        pending = _("pending — awaiting reporter follow-up")
     else:
-        pending = "incomplete — no structured data available"
+        pending = _("incomplete — no structured data available")
     return {
         "tier_source": "pending",
         "tier": None,
