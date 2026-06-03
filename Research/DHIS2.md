@@ -24,4 +24,5 @@ To be specific, the DHIS2 Android Collector app parameters that make it suitable
 
 ## Using DHIS2 to support HIV reduction for at-risk populations in Zimbabwe
 - Source: https://dhis2.org/zimbabwe-hiv-agyw-tracker/
-- Several entities came together to develop the AGYW HIV Community Health Information System (CHIS) using the DHIS2 Tracker. It can be implemented with Zimbabwe's other HIV trackers and data collection programs to allow for efficient information management. 
+- Several entities came together to develop the AGYW HIV Community Health Information System (CHIS) using the DHIS2 Tracker. It can be implemented with Zimbabwe's other HIV trackers and data collection programs to allow for efficient information management.
+- Impilo also exists in Zimbabwe. They are often used at different levels of the healthcare system. Impilo collects individual data, which is then compiled into DHIS2. Impilo sits in the role of the Tracker and Event configurations for DHIS2.
