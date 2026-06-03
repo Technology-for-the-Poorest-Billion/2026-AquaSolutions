@@ -4,7 +4,7 @@ Greenfield entity, separate from the frozen `App/backend` Railway demo.
 See `docs/superpowers/specs/2026-06-03-dhis2-vhw-water-surveillance-design.md`.
 
 ## Pinned versions
-- DHIS2 image: `dhis2/core:<TAG>`  (set in docker-compose.yml; see Task 2)
+- DHIS2 image: `dhis2/core:42.5.0`  (set in docker-compose.yml; see Task 2)
 - Forked Android Capture App upstream tag: _TBD in Plan 4_
 
 ## Provenance of copied data
