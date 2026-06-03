@@ -1,0 +1,637 @@
+{
+  "organisationUnits": [
+    {
+      "id": "xgFjHQGaG5E",
+      "name": "Zimbabwe",
+      "shortName": "Zimbabwe",
+      "openingDate": "2020-01-01T00:00:00.000",
+      "level": 1
+    },
+    {
+      "id": "eia0k0zCg5Q",
+      "name": "Harare",
+      "shortName": "Harare",
+      "openingDate": "2020-01-01T00:00:00.000",
+      "level": 2,
+      "parent": {
+        "id": "xgFjHQGaG5E"
+      }
+    },
+    {
+      "id": "RaaHDpkQUEV",
+      "name": "Central Harare",
+      "shortName": "Central Harare",
+      "openingDate": "2020-01-01T00:00:00.000",
+      "level": 3,
+      "parent": {
+        "id": "eia0k0zCg5Q"
+      }
+    },
+    {
+      "id": "sNRaNnfcdrQ",
+      "name": "Northern Suburbs",
+      "shortName": "Northern Suburbs",
+      "openingDate": "2020-01-01T00:00:00.000",
+      "level": 3,
+      "parent": {
+        "id": "eia0k0zCg5Q"
+      }
+    },
+    {
+      "id": "JxKDfkzIcUv",
+      "name": "Southern Areas",
+      "shortName": "Southern Areas",
+      "openingDate": "2020-01-01T00:00:00.000",
+      "level": 3,
+      "parent": {
+        "id": "eia0k0zCg5Q"
+      }
+    },
+    {
+      "id": "qCJavVwXiAc",
+      "name": "Eastern Suburbs",
+      "shortName": "Eastern Suburbs",
+      "openingDate": "2020-01-01T00:00:00.000",
+      "level": 3,
+      "parent": {
+        "id": "eia0k0zCg5Q"
+      }
+    },
+    {
+      "id": "ZgwiF3x26QE",
+      "name": "Avenues — central clinic",
+      "shortName": "Avenues — central clinic",
+      "code": "STATION-1",
+      "openingDate": "2020-01-01T00:00:00.000",
+      "level": 4,
+      "parent": {
+        "id": "RaaHDpkQUEV"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          31.05,
+          -17.815
+        ]
+      }
+    },
+    {
+      "id": "krOPfUiHGqu",
+      "name": "Belvedere — community hall",
+      "shortName": "Belvedere — community hall",
+      "code": "STATION-2",
+      "openingDate": "2020-01-01T00:00:00.000",
+      "level": 4,
+      "parent": {
+        "id": "RaaHDpkQUEV"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          31.025,
+          -17.84
+        ]
+      }
+    },
+    {
+      "id": "aYb6fw0Yhjp",
+      "name": "Milton Park — health post",
+      "shortName": "Milton Park — health post",
+      "code": "STATION-7",
+      "openingDate": "2020-01-01T00:00:00.000",
+      "level": 4,
+      "parent": {
+        "id": "RaaHDpkQUEV"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          31.03,
+          -17.832
+        ]
+      }
+    },
+    {
+      "id": "RbVmzaWSi5b",
+      "name": "Causeway — government complex",
+      "shortName": "Causeway — government complex",
+      "code": "STATION-11",
+      "openingDate": "2020-01-01T00:00:00.000",
+      "level": 4,
+      "parent": {
+        "id": "RaaHDpkQUEV"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          31.048,
+          -17.831
+        ]
+      }
+    },
+    {
+      "id": "JBx2UFcnXfH",
+      "name": "Kopje — civic hall",
+      "shortName": "Kopje — civic hall",
+      "code": "STATION-12",
+      "openingDate": "2020-01-01T00:00:00.000",
+      "level": 4,
+      "parent": {
+        "id": "RaaHDpkQUEV"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          31.038,
+          -17.835
+        ]
+      }
+    },
+    {
+      "id": "SqceadH3mzb",
+      "name": "CBD — central market",
+      "shortName": "CBD — central market",
+      "code": "STATION-13",
+      "openingDate": "2020-01-01T00:00:00.000",
+      "level": 4,
+      "parent": {
+        "id": "RaaHDpkQUEV"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          31.052,
+          -17.828
+        ]
+      }
+    },
+    {
+      "id": "LhnxGHlvvcC",
+      "name": "Africa Unity Square — fountain",
+      "shortName": "Africa Unity Square — fountain",
+      "code": "STATION-14",
+      "openingDate": "2020-01-01T00:00:00.000",
+      "level": 4,
+      "parent": {
+        "id": "RaaHDpkQUEV"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          31.054,
+          -17.83
+        ]
+      }
+    },
+    {
+      "id": "T6mlsoUYnLz",
+      "name": "Workington — industrial water",
+      "shortName": "Workington — industrial water",
+      "code": "STATION-15",
+      "openingDate": "2020-01-01T00:00:00.000",
+      "level": 4,
+      "parent": {
+        "id": "RaaHDpkQUEV"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          31.03,
+          -17.84
+        ]
+      }
+    },
+    {
+      "id": "QqOXUQnmSXv",
+      "name": "Newlands — shopping centre",
+      "shortName": "Newlands — shopping centre",
+      "code": "STATION-6",
+      "openingDate": "2020-01-01T00:00:00.000",
+      "level": 4,
+      "parent": {
+        "id": "sNRaNnfcdrQ"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          31.067,
+          -17.81
+        ]
+      }
+    },
+    {
+      "id": "ePmXiIjScb2",
+      "name": "Mt Pleasant — north well",
+      "shortName": "Mt Pleasant — north well",
+      "code": "STATION-9",
+      "openingDate": "2020-01-01T00:00:00.000",
+      "level": 4,
+      "parent": {
+        "id": "sNRaNnfcdrQ"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          31.045,
+          -17.795
+        ]
+      }
+    },
+    {
+      "id": "LDGrRqNM1dP",
+      "name": "Avondale — north clinic",
+      "shortName": "Avondale — north clinic",
+      "code": "STATION-16",
+      "openingDate": "2020-01-01T00:00:00.000",
+      "level": 4,
+      "parent": {
+        "id": "sNRaNnfcdrQ"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          31.038,
+          -17.797
+        ]
+      }
+    },
+    {
+      "id": "X0vAphZLHud",
+      "name": "Belgravia — community well",
+      "shortName": "Belgravia — community well",
+      "code": "STATION-17",
+      "openingDate": "2020-01-01T00:00:00.000",
+      "level": 4,
+      "parent": {
+        "id": "sNRaNnfcdrQ"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          31.038,
+          -17.8
+        ]
+      }
+    },
+    {
+      "id": "vFlT6CjiPow",
+      "name": "Mt Pleasant Heights — school",
+      "shortName": "Mt Pleasant Heights — school",
+      "code": "STATION-18",
+      "openingDate": "2020-01-01T00:00:00.000",
+      "level": 4,
+      "parent": {
+        "id": "sNRaNnfcdrQ"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          31.04,
+          -17.785
+        ]
+      }
+    },
+    {
+      "id": "if1Gmtc2GA7",
+      "name": "Marlborough — clinic",
+      "shortName": "Marlborough — clinic",
+      "code": "STATION-19",
+      "openingDate": "2020-01-01T00:00:00.000",
+      "level": 4,
+      "parent": {
+        "id": "sNRaNnfcdrQ"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          31.025,
+          -17.795
+        ]
+      }
+    },
+    {
+      "id": "TEarpj9oFER",
+      "name": "Strathaven — water point",
+      "shortName": "Strathaven — water point",
+      "code": "STATION-20",
+      "openingDate": "2020-01-01T00:00:00.000",
+      "level": 4,
+      "parent": {
+        "id": "sNRaNnfcdrQ"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          31.045,
+          -17.797
+        ]
+      }
+    },
+    {
+      "id": "ELrQsdMGG6q",
+      "name": "Pomona — north settlement",
+      "shortName": "Pomona — north settlement",
+      "code": "STATION-21",
+      "openingDate": "2020-01-01T00:00:00.000",
+      "level": 4,
+      "parent": {
+        "id": "sNRaNnfcdrQ"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          31.06,
+          -17.787
+        ]
+      }
+    },
+    {
+      "id": "Xnky6QVw0nJ",
+      "name": "Mbare — Musika market",
+      "shortName": "Mbare — Musika market",
+      "code": "STATION-4",
+      "openingDate": "2020-01-01T00:00:00.000",
+      "level": 4,
+      "parent": {
+        "id": "JxKDfkzIcUv"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          31.045,
+          -17.86
+        ]
+      }
+    },
+    {
+      "id": "czQ2MWK27f5",
+      "name": "Hatfield — community borehole",
+      "shortName": "Hatfield — community borehole",
+      "code": "STATION-5",
+      "openingDate": "2020-01-01T00:00:00.000",
+      "level": 4,
+      "parent": {
+        "id": "JxKDfkzIcUv"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          31.072,
+          -17.852
+        ]
+      }
+    },
+    {
+      "id": "sFinMpKciN2",
+      "name": "Waterfalls — south clinic",
+      "shortName": "Waterfalls — south clinic",
+      "code": "STATION-22",
+      "openingDate": "2020-01-01T00:00:00.000",
+      "level": 4,
+      "parent": {
+        "id": "JxKDfkzIcUv"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          31.058,
+          -17.87
+        ]
+      }
+    },
+    {
+      "id": "u7VthgxyXVw",
+      "name": "Sunningdale — water point",
+      "shortName": "Sunningdale — water point",
+      "code": "STATION-23",
+      "openingDate": "2020-01-01T00:00:00.000",
+      "level": 4,
+      "parent": {
+        "id": "JxKDfkzIcUv"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          31.078,
+          -17.875
+        ]
+      }
+    },
+    {
+      "id": "HXBrrdCwuXm",
+      "name": "Lichendale — primary school",
+      "shortName": "Lichendale — primary school",
+      "code": "STATION-24",
+      "openingDate": "2020-01-01T00:00:00.000",
+      "level": 4,
+      "parent": {
+        "id": "JxKDfkzIcUv"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          31.05,
+          -17.875
+        ]
+      }
+    },
+    {
+      "id": "shPmvIMOaZq",
+      "name": "Southerton — community well",
+      "shortName": "Southerton — community well",
+      "code": "STATION-25",
+      "openingDate": "2020-01-01T00:00:00.000",
+      "level": 4,
+      "parent": {
+        "id": "JxKDfkzIcUv"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          31.02,
+          -17.865
+        ]
+      }
+    },
+    {
+      "id": "uXEBjWTMLzY",
+      "name": "Aspindale Park — water point",
+      "shortName": "Aspindale Park — water point",
+      "code": "STATION-26",
+      "openingDate": "2020-01-01T00:00:00.000",
+      "level": 4,
+      "parent": {
+        "id": "JxKDfkzIcUv"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          31.025,
+          -17.87
+        ]
+      }
+    },
+    {
+      "id": "fWrZS33PyYT",
+      "name": "Prospect — health post",
+      "shortName": "Prospect — health post",
+      "code": "STATION-27",
+      "openingDate": "2020-01-01T00:00:00.000",
+      "level": 4,
+      "parent": {
+        "id": "JxKDfkzIcUv"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          31.015,
+          -17.878
+        ]
+      }
+    },
+    {
+      "id": "JVLhcdz8Bgl",
+      "name": "Eastlea — primary school",
+      "shortName": "Eastlea — primary school",
+      "code": "STATION-3",
+      "openingDate": "2020-01-01T00:00:00.000",
+      "level": 4,
+      "parent": {
+        "id": "qCJavVwXiAc"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          31.062,
+          -17.825
+        ]
+      }
+    },
+    {
+      "id": "mFk4hsaRqdr",
+      "name": "Hillside — water point",
+      "shortName": "Hillside — water point",
+      "code": "STATION-8",
+      "openingDate": "2020-01-01T00:00:00.000",
+      "level": 4,
+      "parent": {
+        "id": "qCJavVwXiAc"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          31.058,
+          -17.847
+        ]
+      }
+    },
+    {
+      "id": "dCE68Bfvnaq",
+      "name": "Greendale — east settlement",
+      "shortName": "Greendale — east settlement",
+      "code": "STATION-10",
+      "openingDate": "2020-01-01T00:00:00.000",
+      "level": 4,
+      "parent": {
+        "id": "qCJavVwXiAc"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          31.082,
+          -17.835
+        ]
+      }
+    },
+    {
+      "id": "Duu72uCMPbB",
+      "name": "Highlands — east clinic",
+      "shortName": "Highlands — east clinic",
+      "code": "STATION-28",
+      "openingDate": "2020-01-01T00:00:00.000",
+      "level": 4,
+      "parent": {
+        "id": "qCJavVwXiAc"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          31.075,
+          -17.82
+        ]
+      }
+    },
+    {
+      "id": "L9QCYaoXlTM",
+      "name": "Athlone — primary school",
+      "shortName": "Athlone — primary school",
+      "code": "STATION-29",
+      "openingDate": "2020-01-01T00:00:00.000",
+      "level": 4,
+      "parent": {
+        "id": "qCJavVwXiAc"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          31.085,
+          -17.825
+        ]
+      }
+    },
+    {
+      "id": "tatiTUoWaRQ",
+      "name": "Cranborne — water point",
+      "shortName": "Cranborne — water point",
+      "code": "STATION-30",
+      "openingDate": "2020-01-01T00:00:00.000",
+      "level": 4,
+      "parent": {
+        "id": "qCJavVwXiAc"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          31.075,
+          -17.85
+        ]
+      }
+    },
+    {
+      "id": "LylYzzHtk4o",
+      "name": "Donnybrook — community hall",
+      "shortName": "Donnybrook — community hall",
+      "code": "STATION-31",
+      "openingDate": "2020-01-01T00:00:00.000",
+      "level": 4,
+      "parent": {
+        "id": "qCJavVwXiAc"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          31.085,
+          -17.855
+        ]
+      }
+    },
+    {
+      "id": "Srmxjh47yiG",
+      "name": "Msasa — industrial water point",
+      "shortName": "Msasa — industrial water point",
+      "code": "STATION-32",
+      "openingDate": "2020-01-01T00:00:00.000",
+      "level": 4,
+      "parent": {
+        "id": "qCJavVwXiAc"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          31.09,
+          -17.83
+        ]
+      }
+    }
+  ]
+}
