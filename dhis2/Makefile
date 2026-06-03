@@ -5,4 +5,4 @@ orgunits:
 	PYTHONPATH=. python -m metadata.import_metadata metadata/org_units.json
 
 test:
-	PYTHONPATH=. pytest -v
+	python -m pytest -v

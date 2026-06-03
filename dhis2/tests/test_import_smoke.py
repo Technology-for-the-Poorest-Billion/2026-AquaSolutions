@@ -2,11 +2,15 @@
 Skips automatically when the instance is unreachable so unit tests still run.
 """
 
+from pathlib import Path
+
 import pytest
 import requests
 
 from metadata import import_metadata as im
 from metadata.generate_org_units import build_org_units
+
+ORG_UNITS = str(Path(__file__).resolve().parent.parent / "metadata" / "org_units.json")
 
 
 def _dhis2_up() -> bool:
@@ -32,7 +36,7 @@ def _fetch_units():
 
 
 def test_import_then_hierarchy_present():
-    result = im.import_metadata("metadata/org_units.json")
+    result = im.import_metadata(ORG_UNITS)
     assert result.get("status") in ("OK", "SUCCESS"), result
 
     units = _fetch_units()
@@ -51,7 +55,7 @@ def test_import_then_hierarchy_present():
 
 def test_reimport_is_idempotent():
     # Deterministic UIDs => second import updates in place, no duplicates.
-    im.import_metadata("metadata/org_units.json")
+    im.import_metadata(ORG_UNITS)
     expected = len(build_org_units()["organisationUnits"])
     units = _fetch_units()
     assert len([u for u in units if u["level"] in (1, 2, 3, 4)]) == expected

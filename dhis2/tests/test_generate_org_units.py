@@ -1,6 +1,4 @@
-from metadata.generate_org_units import build_org_units
-
-OPENING_DATE = "2020-01-01T00:00:00.000"
+from metadata.generate_org_units import OPENING_DATE, build_org_units
 
 
 def _by_name(units, name):

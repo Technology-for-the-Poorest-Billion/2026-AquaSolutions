@@ -79,7 +79,7 @@ def build_org_units() -> dict:
 
 def main() -> None:
     payload = build_org_units()
-    OUT_PATH.write_text(json.dumps(payload, indent=2, ensure_ascii=False))
+    OUT_PATH.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n")
     print(f"wrote {len(payload['organisationUnits'])} org units to {OUT_PATH}")
 
 
