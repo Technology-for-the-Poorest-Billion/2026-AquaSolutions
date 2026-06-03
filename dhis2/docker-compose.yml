@@ -7,7 +7,7 @@ services:
   web:
     image: dhis2/core:42.5.0
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8080:8080"
     volumes:
       - ./config/dhis.conf:/opt/dhis2/dhis.conf:ro
     environment:
