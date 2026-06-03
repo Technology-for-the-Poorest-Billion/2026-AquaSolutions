@@ -18,3 +18,10 @@ To be specific, the DHIS2 Android Collector app parameters that make it suitable
 - Event and Tracker programs allow DHIS2 platforms to track individual patients across data.
 - Tracker programs follow a specific person over time (e.g. a child's medical records from birth as they age). Events collect information on individual occurences.
 - DHIS2 has partnered with the WHO. They have developed the DHIS2 Health Data toolkit to align national implementations of digital healthcare programs with international WHO standards while still retaining customisability for specific local needs. 
+
+## Mapping Relationships Using Tracker
+- Tracker can be used to map relationships between different people. This would be a useful feature to disease monitoring as contamination can be modeled using networks and graph theory.
+
+## Using DHIS2 to support HIV reduction for at-risk populations in Zimbabwe
+- Source: https://dhis2.org/zimbabwe-hiv-agyw-tracker/
+- Several entities came together to develop the AGYW HIV Community Health Information System (CHIS) using the DHIS2 Tracker. It can be implemented with Zimbabwe's other HIV trackers and data collection programs to allow for efficient information management. 
