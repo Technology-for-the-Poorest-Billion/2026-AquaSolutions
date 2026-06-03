@@ -16,4 +16,5 @@ To be specific, the DHIS2 Android Collector app parameters that make it suitable
 
 ## Tracker and Events Programmes
 - Event and Tracker programs allow DHIS2 platforms to track individual patients across data.
-- Tracker programs follow a specific person over time (e.g. a child's medical records from birth as they age). Events collect information on individual occurences. 
+- Tracker programs follow a specific person over time (e.g. a child's medical records from birth as they age). Events collect information on individual occurences.
+- DHIS2 has partnered with the WHO. They have developed the DHIS2 Health Data toolkit to align national implementations of digital healthcare programs with international WHO standards while still retaining customisability for specific local needs. 
