@@ -94,7 +94,7 @@ The pilot site is **deliberately not locked** in this document. The Bengal Delta
   before restarting Flask or the change won't take effect. The
   `#, fuzzy` flag means "machine-translated, not yet native-reviewed";
   removing it from a catalog entry promotes that translation to verified.
-  Known caveat: `scripts/translate_po.py` does not yet protect format
+  Known caveat: `App/scripts/translate_po.py` does not yet protect format
   placeholders (`{role}`, `%(station_id)s` etc.) — they get translated
   along with surrounding words and break `.format()` / `%`-substitution
   if not manually restored after a re-translation. See

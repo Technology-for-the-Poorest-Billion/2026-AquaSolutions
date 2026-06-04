@@ -1,4 +1,4 @@
-This folder contains all machine learning work done on existing water quality datasets. The purpose was to test whether sensor-based chemical measurements can classify water safety well enough to be useful, and to identify the best method before collecting our own data.
+This folder contains all machine learning work done on existing water quality datasets. Having worked out that no existing data is good enough to train our sensor, we aimed to test whether sensor-based chemical measurements can classify water safety well enough to be useful and to identify the best method before collecting our own data.
 
 
 Folders
@@ -23,6 +23,6 @@ The honest performance ceiling on full_dataset.csv is low. Under a strict groupe
 
 The bottom line
 
-The method works. XGBoost on sensor-derived chemistry features can classify water safety above a random baseline, and the signal gets stronger with more features. But none of the datasets used here have labels tied to real illness outcomes — they use lab thresholds or aquaculture standards instead. A model trained on these cannot predict disease risk.
+The method works. XGBoost on sensor-derived chemistry features can classify water safety above a random baseline, and the signal gets stronger with more features. But none of the datasets used here have labels tied to real illness outcomes. They use lab thresholds or aquaculture standards instead. A model trained on these cannot predict disease risk.
 
 The next step is to collect field data labelled by actual health reports, which is what the Generation-1 sensor and SMS system is designed to do. Once that data accumulates, the same XGBoost pipeline used here is the starting point for a deployable model.
