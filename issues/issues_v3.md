@@ -71,92 +71,53 @@ Items are ordered roughly by severity.
 - A reply like "drink boiled water" is the wrong advice if the contamination is chemical (e.g. arsenic, fluoride). A reply implying medical diagnosis is regulated speech in many jurisdictions. If the advice is wrong and the person gets ill as a result, we could be liable. 
 - Auto-reply should be **acknowledgement only** ("report received, thank you"), not advice. They are intended to keep users in the loop, not to provide consultation (as was initially the intention in Week 1). 
 
-### C7. Multi-language reply is unsolved
+### C5. Multi-language reply is unsolved
 - Per `App/Ideation.md`, the deployment context needs replies in one of the local languages (e.g. Zimbabwe has 16 official languages. Detecting language from a short SMS is unreliable.
 - We could use regional data to inform the language used. We can also provide an option (e.g. "Reply 1 for English. Reply 2 for Shona...). 
 
 ### C8. SMS cost and deliverability for the reporter
-- **Risk:** Even when receipt is free for the user, the reporter pays per-text in most networks. Some countries block webhook-originated SMS or require registered sender IDs (sender-ID registration in Bangladesh, ZBC in Zimbabwe).
-- **Why it matters:** A reporter who pays to send a report and gets no reply, or whose report is dropped at the carrier, will not report again.
-- **Mitigation:** Investigate per-country sender-ID rules before any pilot. Provide a fallback channel (USSD, WhatsApp Business, a community health worker phoning in) — flagged as out of scope for Gen-1 but on the roadmap.
+- Even when receipt is free for the user, the reporter pays per-text in most networks. Some countries block webhook-originated SMS or require registered sender IDs (ZBC in Zimbabwe). This further harms the incentive structure for people to self-report illness. 
+- Investigate per-country sender-ID rules before any pilot.
+- It is probably easiest to get VHWs registered sender IDs and have them report on illness while they do their rounds. 
 
 ---
 
 ## D. Linkage and governance risks (new and existential)
 
 ### D1. No identified clinical-data linkage partner
-- **Risk:** The entire premise of the eventual ML — pairing sensor readings to clinically-confirmed cases — requires a partner with case-level data and the legal/ethical authority to share it.
-- **Why it matters:** Without a partner, SMS reports are *self-reported symptoms*, not confirmed cases. The label quality drops a tier; the project remains useful but cannot be presented as outbreak prediction.
-- **Mitigation:** Scope this *before* hardware. **icddr,b in Dhaka** is the natural candidate. Reach out early; their letter of intent gates everything downstream. If no partner is secured, reframe the deliverable as a *community-symptom early-warning* system explicitly, not an outbreak predictor.
+- Need a partner to ensure validated healthcare data. 
+- Scope this *before* hardware. Reach out early; first letter of intent gates everything downstream.
+- A partner (e.g. a government) is key to this product's deployment. 
 
 ### D2. IRB / ethics-approval timelines
-- **Risk:** Human-subject health-data research typically requires institutional review board approval that takes weeks-to-months. The project submission is 2026-06-11.
-- **Why it matters:** No live patient-data work happens before the submission date. The deliverable must be defensible *without* linked clinical data.
-- **Mitigation:** Generation 1 deliberately avoids touching patient records — community-reported symptoms via SMS are the user's own data, voluntarily disclosed. Confirm with supervisors whether even this requires consent infrastructure (it likely does, but at a much lower bar than clinical records).
+- Health-data research typically requires institutional review board approval that can take months. 
 
 ### D3. Cross-border data-transfer constraints
-- **Risk:** Bangladesh, Zimbabwe, the EU, and the UK each have data-protection regimes restricting transfer of personally-identifying or health-related data across borders.
-- **Why it matters:** A central server outside the country of collection may be illegal under local law.
-- **Mitigation:** **Federated learning + differential privacy** (per `App/cholera_sensor_ml_approach.md` §4) is the structural answer: institutions train locally and share only gradient updates. Build the pipeline assuming this from the start, even if the demo runs centrally for now.
+- Zimbabwe, the EU, and the UK each have data-protection regimes restricting transfer of personally-identifying or health-related data across borders.
+- A central server outside the country of collection may be illegal under local law. We would need to set up an HQ in Harare. This has several benefits. 
 
 ### D4. Reporter consent and phone-number storage
-- **Risk:** Storing reporter phone numbers without an explicit consent flow may breach data-protection law in the deployment country.
-- **Why it matters:** Phone numbers are personally identifying; linking them to illness reports creates a sensitive record.
-- **Mitigation:** Hash phone numbers at rest (irreversible mapping for de-duplication only); state the data-use policy in the auto-reply ("By texting in you consent to your station and timestamp being recorded; reply STOP to opt out"); offer a working STOP keyword.
+- Storing reporter phone numbers without an explicit consent flow may breach data-protection law in the deployment country.
+- Phone numbers are personally identifying; linking them to illness reports creates a sensitive record.
+- How can we obtain consent over SMS? This would allow us to track the health of individual people. 
 
 ### D5. Case geolocation is heuristic, not precise
-- **Risk:** Clinic records say where a patient *lives*, not where they *drank*. The eventual ML's location label will rely on a heuristic ("nearest water source"), which is wrong sometimes.
-- **Why it matters:** Source-attribution noise propagates into both training labels and downstream alerts.
-- **Mitigation:** Where feasible, the SMS reporting layer *is* the source attribution — the reporter names the station they used. Treat clinic-record geolocation as a fallback / corroborative signal, not the primary source.
+- Clinic records say where a patient *lives*, not where they *drank*. The eventual ML's location label will rely on a heuristic ("nearest water source"), which is wrong sometimes. Part of the product's deployment will be a database of the locations/sources of peoples' drinking water. This must be very accurate for the dataset to be successful. 
+- Where feasible, the SMS reporting layer *is* the source attribution — the reporter names the station they used.
+- Defaulting to clinical records and estimating water drinking locations is the worst-case scenario. 
 
 ---
 
 ## E. ML pipeline risks (when ML eventually runs)
 
-These were specified in `App/cholera_sensor_ml_approach.md` §6 and are reproduced here so they live in the risk register too.
+These were specified in `App/cholera_sensor_ml_approach.md` §6 and are reproduced here so they live in the risk register too. There are many more, but this is a live document and we will build off these ML challenges when we eventually get to that stage in the build. 
 
-### E1. Resampling leakage
-- **Risk:** Oversampling (SMOTE / ADASYN) applied before the train/test split lets synthetic copies of test points leak into training, producing inflated accuracy.
-- **Why it matters:** Published cholera-prediction papers report suspiciously high scores (e.g. 99.6% CORP accuracy) that are almost certainly this artefact.
-- **Mitigation:** Resample on the **training fold only**, inside cross-validation. Outlier removal happens *before* resampling so synthetic samples are not generated around mislabelled points.
-
-### E2. Site / season leakage
+### E1. Site / season leakage
 - **Risk:** Random train/test splits put correlated rows from the same site across the split, inflating accuracy.
-- **Why it matters:** Phase-1 datasets had this problem and it masked the real predictive ceiling for months.
-- **Mitigation:** Grouped + temporal split — by `site_id` AND by date. Honest accuracy, even if it's lower.
+- **Mitigation:** Grouped + temporal split (by `site_id` AND by date). This results in an honest test accuracy. 
 
-### E3. Imbalance-blind evaluation
-- **Risk:** With ~7% positives, "always predict no outbreak" scores ~93% accuracy and is useless.
-- **Mitigation:** Report **balanced accuracy, macro-F1, positive-class recall, and PR-AUC**. Never raw accuracy.
-
-### E4. Quantisation impact on minority recall (carried forward, deferred)
-- **Risk:** If a *future* on-device flavour of this system ever runs (Gen-3+), int8 quantisation can disproportionately hurt minority-class recall.
-- **Mitigation:** Evaluate the *quantised* model specifically; compare float vs int8 confusion matrices. Not relevant in Gen-1 (no on-device inference).
+### E2. Imbalance-blind evaluation
+- Example: With ~7% positives, "always predict no outbreak" scores ~93% accuracy and is useless.
+- We need balanced data and uncertainty values for the outputs. The label structure chosen should favour granularity of output, rather than simplicity of training. 
 
 ---
-
-## F. Process risks
-
-### F1. Demo failure under time pressure
-- **Risk:** Live demo with Twilio + ngrok + Flask + SQLite has multiple network round-trips; any single one failing (rotated ngrok URL, expired Twilio trial credit, wrong webhook config) breaks the demo.
-- **Mitigation:** `App/DEMO.md` documents the failure modes most likely to bite. Have a recorded-screencast fallback ready in case the live demo fails.
-
-### F2. Reproducibility and provenance
-- **Risk:** Ad-hoc cleaning and ad-hoc collection metadata make results impossible to reproduce or audit.
-- **Mitigation:** Versioned pipeline, fixed seeds, dataset checksums, `provenance` column on every collected reading and every illness report.
-
-### F3. Scope creep into the user-facing app
-- **Risk:** `App/Ideation.md` sketches an ambitious multi-language low-literacy UI with treatment recommendations and technician notifications. Most of that is out of scope for Gen-1.
-- **Mitigation:** Treat `Ideation.md` as the *vision*, not the *Gen-1 build*. Gen-1 is the pipeline + a debug dashboard, nothing more.
-
-### F4. Stakeholder expectation drift between deadlines
-- **Risk:** Between 2026-06-01 (interim) and 2026-06-11 (submission), supervisors may push the system back toward the old "deploy a classifier in Zimbabwe" framing.
-- **Mitigation:** The pivot rationale (`App/cholera_sensor_ml_approach.md`) is the rebuttal document. Use it.
-
----
-
-## Resolved items
-
-- Ephemeral Railway filesystem wiping the demo DB on every redeploy.
-  RESOLVED 2026-05-28 by migrating to Railway Postgres. See plan
-  docs/superpowers/plans/2026-05-28-sqlite-to-postgres-migration.md.
