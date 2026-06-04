@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-05-31 12:09+0100\n"
+"POT-Creation-Date: 2026-06-01 13:37+0100\n"
 "PO-Revision-Date: 2026-05-31 11:09+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: nd\n"
@@ -24,42 +24,52 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: app.py:130
+#: app.py:132
 #, fuzzy, python-brace-format
 msgid "forbidden — this page requires the '{role}' role"
 msgstr "akuvunyelwe — leli khasi lidinga indima '{role}'"
 
-#: app.py:251
+#: app.py:198
+#, fuzzy
+msgid "pending — awaiting reporter follow-up"
+msgstr "kulindile — kulindwe ukulandelelwa kwentatheli"
+
+#: app.py:200
+#, fuzzy
+msgid "incomplete — no structured data available"
+msgstr "akuphelele - ayikho idatha ehlelekile etholakalayo"
+
+#: app.py:253
 #, fuzzy
 msgid "Unknown username or wrong password."
 msgstr "Igama lomsebenzisi elingaziwa noma iphasiwedi engalungile."
 
-#: app.py:314
+#: app.py:321
 #, fuzzy
 msgid "Please select a valid station."
 msgstr "Sicela ukhethe isiteshi esivumelekile."
 
-#: app.py:321
+#: app.py:328
 #, fuzzy
 msgid "Case count must be a positive integer."
 msgstr "Isibalo samacala kufanele sibe inombolo ephozithivu."
 
-#: app.py:331
+#: app.py:338
 #, fuzzy
 msgid "Onset date must be YYYY-MM-DD."
 msgstr "Idethi yokuqala kufanele ibe ngu-YYYY-MM-DD."
 
-#: app.py:334
+#: app.py:341
 #, fuzzy
 msgid "Invalid risk tier value."
 msgstr "Inani lesigaba sobungozi elingavumelekile."
 
-#: app.py:353
+#: app.py:360
 #, fuzzy, python-format
 msgid "Station %(station_id)s is not in the system."
 msgstr "Isiteshi %(station_id)s asikho ohlelweni."
 
-#: app.py:385
+#: app.py:392
 #, fuzzy, python-format
 msgid ""
 "Report received for %(name)s (station %(sid)s). %(n)d reading(s) in the "
@@ -68,42 +78,42 @@ msgstr ""
 "Umbiko owamukelwe we-%(name)s (isiteshi %(sid)s). %(n)d ukufunda "
 "efasiteleni elilandelanayo kumakiwe. Ihange: %(anchor)s."
 
-#: app.py:392
+#: app.py:399
 #, fuzzy
 msgid "now"
 msgstr "manje"
 
-#: app.py:682
+#: app.py:752
 #, fuzzy
 msgid "invalid action_type"
 msgstr "uhlobo_lwesenzo olungavumelekile"
 
-#: app.py:687
+#: app.py:757
 #, fuzzy
 msgid "invalid station_id"
 msgstr "ubunikazi_ besiteshi obungavumelekile"
 
-#: app.py:694
+#: app.py:764
 #, fuzzy
 msgid "invalid related_report_id"
 msgstr "ubunikazi_bombiko_ohlobene obungavumelekile"
 
-#: app.py:703
+#: app.py:773
 #, fuzzy, python-format
 msgid "unknown station_id %(station_id)s"
 msgstr "station_id engaziwa %(station_id)s"
 
-#: app.py:706
+#: app.py:776
 #, fuzzy, python-format
 msgid "station %(station_id)s is already closed"
 msgstr "isiteshi %(station_id)s sesivele sivaliwe"
 
-#: app.py:708
+#: app.py:778
 #, fuzzy, python-format
 msgid "station %(station_id)s is already open"
 msgstr "isiteshi %(station_id)s sesivele sivuliwe"
 
-#: app.py:747
+#: app.py:817
 #, fuzzy, python-format
 msgid ""
 "This page is for government officials. Medical staff can view this report"
@@ -148,394 +158,449 @@ msgstr[1] "%(num)d izimpawu ezingaqondile ezibikiwe"
 msgid "no symptoms reported — request clinical assessment regardless"
 msgstr "azikho izimpawu ezibikiwe - cela ukuhlolwa komtholampilo kungakhathaliseki"
 
-#: language.py:149
+#: language.py:178
 #, fuzzy
 msgid "Invalid language code."
 msgstr "Ikhodi yolimi engavumelekile."
 
-#: templates/_base.html:6 templates/dashboard.html:3
-#: templates/dashboard.html:94 templates/login.html:3 templates/login.html:98
+#: templates/_base.html:6 templates/dashboard.html:3 templates/login.html:3
+#: templates/login.html:21 templates/medical_history.html:3
+#: templates/medical_report.html:3 templates/medical_report_detail.html:3
 #, fuzzy
 msgid "Water-safety pipeline"
 msgstr "Ipayipi lokuphepha kwamanzi"
 
-#. shown on every page when the active locale's                catalog still
-#. has unverified (fuzzy) machine-translated entries.
-#: templates/_base.html:64
+#: templates/_base.html:20
+#, fuzzy
+msgid "History"
+msgstr "Umlando"
+
+#: templates/_base.html:22 templates/medical_history.html:16
+#: templates/medical_report.html:3
+#, fuzzy
+msgid "File a report"
+msgstr "Faka umbiko"
+
+#: templates/_base.html:25 templates/dashboard.html:3
+#: templates/dashboard_report_detail.html:3
+#: templates/dashboard_report_detail.html:7
+#, fuzzy
+msgid "Dashboard"
+msgstr "Ideshibhodi"
+
+#: templates/_base.html:34
+#, fuzzy
+msgid "Sign out"
+msgstr "Phuma ngemvume"
+
+#. shown on every page when the active locale's                    catalog
+#. still has unverified (fuzzy) machine-translated entries.
+#: templates/_base.html:43
 msgid ""
 "Machine-translated draft — awaiting native review. Translations of "
 "medical terms may be inaccurate; for clinical decisions, switch to "
 "English."
 msgstr ""
 
-#. aria-label for the language picker dropdown.
+#: templates/_base.html:50
+#, fuzzy
+msgid "NOT a cholera detector — measures contamination indicators only."
+msgstr "HAYI umtshina wekholera — ukala izinkomba zokungcoliswa kuphela."
+
 #: templates/_lang_picker.html:4
 #, fuzzy
 msgid "Language"
 msgstr "Ulimi"
 
-#: templates/dashboard.html:3 templates/dashboard.html:94
-#, fuzzy
-msgid "government dashboard"
-msgstr "ideshibhodi kahulumeni"
-
-#: templates/dashboard.html:97
-#, fuzzy
-msgid "Generated"
-msgstr "Kwenziwe"
-
-#: templates/dashboard.html:97
-#, fuzzy
-msgid "auto-refresh 30s"
-msgstr "vuselela ngokuzenzakalelayo 30s"
-
-#: templates/dashboard.html:99 templates/dashboard_report_detail.html:47
-#: templates/medical_history.html:50 templates/medical_report.html:146
-#: templates/medical_report_detail.html:41
-#, fuzzy
-msgid "Signed in as"
-msgstr "Ungene ngemvume njengo"
-
-#: templates/dashboard.html:100 templates/dashboard_report_detail.html:48
-#: templates/medical_history.html:51 templates/medical_report.html:147
-#: templates/medical_report_detail.html:42
-#, fuzzy
-msgid "Sign out"
-msgstr "Phuma ngemvume"
-
-#: templates/dashboard.html:105 templates/dashboard_report_detail.html:52
-#: templates/login.html:99 templates/medical_history.html:55
-#: templates/medical_report.html:151 templates/medical_report_detail.html:46
-#, fuzzy
-msgid "Faecal-contamination risk + community illness signal."
-msgstr "Ingozi yokungcoliswa kwendle + isignali yokugula komphakathi."
-
-#. This negation is the project's central safety claim.            The sensor
-#. does NOT detect cholera. Preserve the negation when translating.
-#. This negation is the project's central safety claim.        The sensor does
-#. NOT detect cholera. Preserve the negation when translating.
-#. This negation is the project's central safety claim.                The
-#. sensor does NOT detect cholera. Preserve the negation when translating.
-#: templates/dashboard.html:108 templates/dashboard_report_detail.html:55
-#: templates/login.html:102 templates/medical_history.html:58
-#: templates/medical_report.html:154 templates/medical_report_detail.html:49
-#, fuzzy
-msgid "NOT a cholera detector."
-msgstr "AKUWONA umtshina wekholera."
-
-#: templates/dashboard.html:113
+#: templates/dashboard.html:14
 #, fuzzy
 msgid "Station status"
 msgstr "Isimo sesiteshi"
 
-#: templates/dashboard.html:113
+#: templates/dashboard.html:14
 #, fuzzy
 msgid "stations"
 msgstr "iziteshi"
 
-#: templates/dashboard.html:113
+#: templates/dashboard.html:14
 #, fuzzy
 msgid "day window"
 msgstr "iwindi losuku"
 
-#: templates/dashboard.html:117 templates/dashboard.html:186
-#: templates/dashboard_report_detail.html:72 templates/medical_history.html:67
-#: templates/medical_report_detail.html:63
+#: templates/dashboard.html:18
 #, fuzzy
-msgid "Station"
-msgstr "Isiteshi"
+msgid "All neighborhoods"
+msgstr "Zonke izindawo ezingomakhelwane"
 
-#: templates/dashboard.html:118
-#, fuzzy
-msgid "Latest reading"
-msgstr "Ukufunda kwakamuva"
-
-#: templates/dashboard.html:119 templates/dashboard_report_detail.html:107
-#, fuzzy
-msgid "pH"
-msgstr "pH"
-
-#: templates/dashboard.html:120 templates/dashboard_report_detail.html:107
-#, fuzzy
-msgid "Turb (NTU)"
-msgstr "I-Turbo (NTU)"
-
-#: templates/dashboard.html:121 templates/dashboard_report_detail.html:108
-#, fuzzy
-msgid "Temp (°C)"
-msgstr "Izinga lokushisa (°C)"
-
-#: templates/dashboard.html:122
-#, fuzzy
-msgid "Rain (mm)"
-msgstr "Imvula (mm)"
-
-#: templates/dashboard.html:123
-#, fuzzy
-msgid "Status"
-msgstr "Isimo"
-
-#: templates/dashboard.html:124 templates/dashboard_report_detail.html:130
-#, fuzzy
-msgid "Actions"
-msgstr "Izenzo"
-
-#: templates/dashboard.html:133
+#: templates/dashboard.html:43
 #, fuzzy
 msgid "no readings yet"
 msgstr "akukho ukufundwa okwamanje"
 
-#: templates/dashboard.html:140
+#: templates/dashboard.html:48
 #, fuzzy
-msgid "unsafe"
-msgstr "engaphephile"
+msgid "UNSAFE"
+msgstr "AKUPHEPHILE"
 
-#: templates/dashboard.html:142
+#: templates/dashboard.html:50
 #, fuzzy
-msgid "clear"
-msgstr "cacile"
+msgid "CLEAR"
+msgstr "SOLULE"
 
-#: templates/dashboard.html:151
+#: templates/dashboard.html:54
+#, fuzzy
+msgid "Reopen station"
+msgstr "Vula isiteshi futhi"
+
+#: templates/dashboard.html:57
 #, fuzzy
 msgid "Reopen"
 msgstr "Vula futhi"
 
-#: templates/dashboard.html:158
+#: templates/dashboard.html:61
+#, fuzzy
+msgid "Close station"
+msgstr "Vala isiteshi"
+
+#: templates/dashboard.html:64
 #, fuzzy
 msgid "Close"
 msgstr "Vala"
 
-#: templates/dashboard.html:165
+#: templates/dashboard.html:68
+#, fuzzy
+msgid "Dispatch sample team to station"
+msgstr "Thumela isampula yeqembu esiteshini"
+
+#: templates/dashboard.html:71
 #, fuzzy
 msgid "Sample"
 msgstr "Isampula"
 
-#: templates/dashboard.html:171
+#: templates/dashboard.html:74
+#, fuzzy
+msgid "Dispatch medical team to station"
+msgstr "Thumela ithimba lezokwelapha esiteshini"
+
+#: templates/dashboard.html:77
 #, fuzzy
 msgid "Medical"
 msgstr "Ezokwelapha"
 
-#: templates/dashboard.html:181
+#: templates/dashboard.html:86
+#, fuzzy
+msgid "New station name"
+msgstr "Igama lesiteshi esisha"
+
+#: templates/dashboard.html:90
+#, fuzzy
+msgid "Latitude"
+msgstr "I-Latitude"
+
+#: templates/dashboard.html:94
+#, fuzzy
+msgid "Longitude"
+msgstr "Ubude"
+
+#: templates/dashboard.html:98
+#, fuzzy
+msgid "Add"
+msgstr "Engeza"
+
+#: templates/dashboard.html:104
+#, fuzzy
+msgid "Please enter a valid station name and lat/lon values."
+msgstr "Sicela ufake igama lesiteshi elivumelekile kanye namanani e-lat/lon."
+
+#: templates/dashboard.html:106
+#, fuzzy
+msgid "Unknown neighborhood."
+msgstr "Indawo engaziwa."
+
+#: templates/dashboard.html:108
+#, fuzzy
+msgid "Could not add the station."
+msgstr "Ayikwazanga ukwengeza isiteshi."
+
+#: templates/dashboard.html:113
+#, fuzzy
+msgid "Select a neighborhood to add a station."
+msgstr "Khetha indawo yokwengeza isiteshi."
+
+#: templates/dashboard.html:118
 #, fuzzy
 msgid "Recent illness reports"
 msgstr "Imibiko yokugula yakamuva"
 
-#: templates/dashboard.html:185
-#, fuzzy
-msgid "Received"
-msgstr "Kwamukelwe"
-
-#: templates/dashboard.html:187 templates/dashboard_report_detail.html:62
-#: templates/medical_report_detail.html:55
-#, fuzzy
-msgid "Source"
-msgstr "Umthombo"
-
-#: templates/dashboard.html:188 templates/dashboard_report_detail.html:81
-#: templates/medical_history.html:68 templates/medical_report.html:180
-#: templates/medical_report_detail.html:70
+#: templates/dashboard.html:118 templates/dashboard_report_detail.html:57
+#: templates/medical_history.html:34 templates/medical_report.html:46
+#: templates/medical_report_detail.html:40
 #, fuzzy
 msgid "Risk tier"
 msgstr "Isigaba sobungozi"
 
-#: templates/dashboard.html:189
+#: templates/dashboard.html:131
 #, fuzzy
-msgid "Labelled"
-msgstr "Ifakwe ilebula"
+msgid "UNPARSED"
+msgstr "AKUDLULISWE"
 
-#: templates/dashboard.html:201 templates/dashboard_report_detail.html:43
-#: templates/medical_report_detail.html:37
+#: templates/dashboard.html:141 templates/dashboard_report_detail.html:59
+#: templates/medical_history.html:48 templates/medical_report.html:49
+#: templates/medical_report_detail.html:43
 #, fuzzy
-msgid "unparsed"
-msgstr "akuhlukanisiwe"
+msgid "LOW"
+msgstr "PHANSI"
 
-#: templates/dashboard.html:220
+#: templates/dashboard.html:142 templates/dashboard_report_detail.html:60
+#: templates/medical_history.html:49 templates/medical_report.html:50
+#: templates/medical_report_detail.html:44
+#, fuzzy
+msgid "MEDIUM"
+msgstr "OKUPHAKATHI"
+
+#: templates/dashboard.html:143 templates/dashboard_report_detail.html:61
+#: templates/medical_history.html:50 templates/medical_report.html:51
+#: templates/medical_report_detail.html:45
+#, fuzzy
+msgid "HIGH"
+msgstr "PHEZULU"
+
+#: templates/dashboard.html:144 templates/dashboard_report_detail.html:62
+#: templates/medical_history.html:51 templates/medical_report.html:52
+#: templates/medical_report_detail.html:46
+#, fuzzy
+msgid "SEVERE"
+msgstr "KAKHULU"
+
+#: templates/dashboard.html:154
+#, fuzzy
+msgid "labelled"
+msgstr "ilebula"
+
+#: templates/dashboard.html:160
 #, fuzzy
 msgid "No illness reports yet. Text the Twilio number to generate one."
 msgstr "Ayikho imibiko yokugula okwamanje. Thumela umbhalo kunombolo ye-Twilio ukuze wenze eyodwa."
 "Ayikho imibiko yokugula okwamanje. Thumela umbhalo kunombolo ye-Twilio "
-"ukuze wenze eyodwa."
+"ukuze wenze eyodwa.Ayikho imibiko yokugula okwamanje. Thumela umbhalo "
+"kunombolo ye-Twilio ukuze wenze eyodwa."
 
 #: templates/dashboard_report_detail.html:3
-#: templates/dashboard_report_detail.html:43
+#: templates/dashboard_report_detail.html:9
 #: templates/medical_report_detail.html:3
-#: templates/medical_report_detail.html:37
+#: templates/medical_report_detail.html:9
+#: templates/medical_report_detail.html:13
 #, fuzzy
 msgid "Report"
 msgstr "Bika"
 
-#: templates/dashboard_report_detail.html:3
-#, fuzzy
-msgid "government detail"
-msgstr "imininingwane kahulumeni"
-
-#: templates/dashboard_report_detail.html:42
-#, fuzzy
-msgid "Dashboard"
-msgstr "Ideshibhodi"
-
-#: templates/dashboard_report_detail.html:60
-#: templates/medical_report_detail.html:53
+#: templates/dashboard_report_detail.html:16
 #, fuzzy
 msgid "Report metadata"
 msgstr "Bika imethadatha"
 
-#: templates/dashboard_report_detail.html:63
-#: templates/medical_report_detail.html:56
+#: templates/dashboard_report_detail.html:18
+#: templates/medical_report_detail.html:15
 #, fuzzy
-msgid "Received at"
-msgstr "Kutholwe ngo"
+msgid "Source"
+msgstr "Umthombo"
 
-#: templates/dashboard_report_detail.html:64 templates/medical_history.html:67
-#: templates/medical_report_detail.html:57
+#: templates/dashboard_report_detail.html:20
+#: templates/medical_report_detail.html:17
+#, fuzzy
+msgid "SMS"
+msgstr "I-SMS"
+
+#: templates/dashboard_report_detail.html:21
+#: templates/medical_report_detail.html:18
+#, fuzzy
+msgid "MEDICAL PORTAL"
+msgstr "MEDICAL PORTAL"
+
+#: templates/dashboard_report_detail.html:25
+#: templates/medical_report_detail.html:25
+#, fuzzy
+msgid "Received"
+msgstr "Kwamukelwe"
+
+#: templates/dashboard_report_detail.html:28 templates/medical_history.html:30
+#: templates/medical_report_detail.html:22
 #, fuzzy
 msgid "Submitter"
 msgstr "Umhambisi"
 
-#: templates/dashboard_report_detail.html:65
+#: templates/dashboard_report_detail.html:31
 #, fuzzy
 msgid "Parser version"
 msgstr "Inguqulo yomhlahleli"
 
-#: templates/dashboard_report_detail.html:70
-#: templates/medical_report_detail.html:61
+#: templates/dashboard_report_detail.html:37
 #, fuzzy
 msgid "Structured fields"
 msgstr "Izinkambu ezakhiwe"
 
-#: templates/dashboard_report_detail.html:73
-#: templates/medical_report_detail.html:64
+#: templates/dashboard_report_detail.html:39 templates/medical_history.html:31
+#: templates/medical_report.html:16 templates/medical_report_detail.html:28
+#, fuzzy
+msgid "Station"
+msgstr "Isiteshi"
+
+#: templates/dashboard_report_detail.html:42
+#: templates/medical_report_detail.html:31
 #, fuzzy
 msgid "Case count"
 msgstr "Isibalo samacala"
 
-#: templates/dashboard_report_detail.html:74 templates/medical_history.html:68
-#: templates/medical_report_detail.html:65
+#: templates/dashboard_report_detail.html:45 templates/medical_history.html:33
+#: templates/medical_report.html:35 templates/medical_report_detail.html:34
 #, fuzzy
 msgid "Symptoms"
 msgstr "Izimpawu"
 
-#: templates/dashboard_report_detail.html:75
-#: templates/medical_report_detail.html:66
+#: templates/dashboard_report_detail.html:48 templates/medical_report.html:29
 #, fuzzy
 msgid "Onset date"
 msgstr "Idethi yokuqala"
 
-#: templates/dashboard_report_detail.html:76
+#: templates/dashboard_report_detail.html:51
 #, fuzzy
 msgid "Notes / raw"
 msgstr "Amanothi / eluhlaza"
 
-#: templates/dashboard_report_detail.html:85
-#: templates/medical_report_detail.html:74
+#: templates/dashboard_report_detail.html:66
+#: templates/medical_report_detail.html:50
 #, fuzzy
 msgid "Reporter's clinical assessment"
 msgstr "Ukuhlolwa komtholampilo kwentatheli"
 
-#: templates/dashboard_report_detail.html:89
+#: templates/dashboard_report_detail.html:69
 #, fuzzy
 msgid "Estimated by automated heuristic — not medical advice."
 msgstr "Ilinganiselwa nge-automated heuristic — hhayi iseluleko sezokwelapha."
 
-#: templates/dashboard_report_detail.html:90
+#: templates/dashboard_report_detail.html:70
 #, fuzzy
 msgid "See rationale below. Pattern-based; clinical assessment overrides."
 msgstr "Bona isizathu esingezansi. Iphethini-based; ukuhlolwa komtholampilo kuyachitha."
 "Bona isizathu esingezansi. Iphethini-based; ukuhlolwa komtholampilo "
-"kuyachitha."
+"kuyachitha.Bona isizathu esingezansi. Iphethini-based; ukuhlolwa "
+"komtholampilo kuyachitha."
 
-#: templates/dashboard_report_detail.html:94
-#: templates/medical_report_detail.html:79
+#: templates/dashboard_report_detail.html:73
+#: templates/medical_report_detail.html:53
 #, fuzzy
 msgid "Estimated risk tier"
 msgstr "Isigaba sengozi esilinganiselwe"
 
-#: templates/dashboard_report_detail.html:103
+#: templates/dashboard_report_detail.html:83
+#: templates/medical_report_detail.html:65
 #, fuzzy
 msgid "Labelled readings"
 msgstr "Ukufundwa okunelebula"
 
-#: templates/dashboard_report_detail.html:107
+#: templates/dashboard_report_detail.html:86
+#: templates/medical_report_detail.html:68
 #, fuzzy
-msgid "Reading"
-msgstr "Ukufunda"
+msgid "Earliest"
+msgstr "Ekuqaleni"
 
-#: templates/dashboard_report_detail.html:107
+#: templates/dashboard_report_detail.html:88
+#: templates/medical_report_detail.html:70
 #, fuzzy
-msgid "Recorded at"
-msgstr "Kuqoshwe ngo"
+msgid "Latest"
+msgstr "Okwakamuva"
 
-#: templates/dashboard_report_detail.html:108
+#: templates/dashboard_report_detail.html:90
+#: templates/medical_report_detail.html:72
 #, fuzzy
-msgid "Rule"
-msgstr "Ukubusa"
+msgid "Columns"
+msgstr "Amakholomu"
 
-#: templates/dashboard_report_detail.html:124
+#: templates/dashboard_report_detail.html:95
+#: templates/medical_report_detail.html:77
+#, fuzzy
+msgid "Download labelled readings (CSV)"
+msgstr "Landa ukufundwa okunelebula (CSV)"
+
+#: templates/dashboard_report_detail.html:99
+#: templates/medical_report_detail.html:81
 #, fuzzy
 msgid "No readings labelled by this report."
 msgstr "Akukho ukufundwa okulebulwe yilo mbiko."
 
-#: templates/dashboard_report_detail.html:136
+#: templates/dashboard_report_detail.html:106
+#, fuzzy
+msgid "Actions"
+msgstr "Izenzo"
+
+#: templates/dashboard_report_detail.html:112
 #, fuzzy
 msgid "Close borehole"
 msgstr "Vala i-borehole"
 
-#: templates/dashboard_report_detail.html:143
+#: templates/dashboard_report_detail.html:119
 #, fuzzy
 msgid "Send sample team"
 msgstr "Thumela ithimba lesampula"
 
-#: templates/dashboard_report_detail.html:150
+#: templates/dashboard_report_detail.html:126
 #, fuzzy
 msgid "Send medical team"
 msgstr "Thumela ithimba lezokwelapha"
 
-#: templates/dashboard_report_detail.html:155
+#: templates/dashboard_report_detail.html:132
+#: templates/dashboard_report_detail.html:156
 #, fuzzy
 msgid "Interventions linked to this report"
 msgstr "Ukungenelela okuxhumene nalo mbiko"
 
-#: templates/dashboard_report_detail.html:159
+#: templates/dashboard_report_detail.html:136
 #, fuzzy
 msgid "When"
 msgstr "Nini"
 
-#: templates/dashboard_report_detail.html:159
+#: templates/dashboard_report_detail.html:137
 #, fuzzy
 msgid "Action"
 msgstr "Isenzo"
 
-#: templates/dashboard_report_detail.html:159
+#: templates/dashboard_report_detail.html:138
 #, fuzzy
 msgid "Triggered by"
 msgstr "Icushwe ngu"
 
-#: templates/dashboard_report_detail.html:159 templates/medical_report.html:208
+#: templates/dashboard_report_detail.html:139 templates/medical_report.html:57
 #, fuzzy
 msgid "Notes"
 msgstr "Amanothi"
 
-#: templates/dashboard_report_detail.html:173
+#: templates/dashboard_report_detail.html:157
 #, fuzzy
 msgid "No interventions yet."
 msgstr "Akukho ukungenelela okwamanje."
 
-#: templates/login.html:3 templates/login.html:111
+#: templates/login.html:3 templates/login.html:37
 #, fuzzy
 msgid "Sign in"
 msgstr "Ngena ngemvume"
 
-#: templates/login.html:106
+#. tagline under the sign-in title, from the brand.
+#: templates/login.html:23
+#, fuzzy
+msgid "clean water for Africa"
+msgstr "amanzi ahlanzekile e-Afrika"
+
+#: templates/login.html:29
 #, fuzzy
 msgid "Username"
 msgstr "Igama lomsebenzisi"
 
-#: templates/login.html:108
+#: templates/login.html:33
 #, fuzzy
 msgid "Password"
 msgstr "Iphasiwedi"
 
-#: templates/login.html:114
+#: templates/login.html:41
 #, fuzzy
 msgid ""
 "Sign in as a government official to view the station-status dashboard, or"
@@ -545,148 +610,175 @@ msgstr ""
 "sesiteshi, noma njengochwepheshe bezokwelapha ukuze ufake umbiko "
 "wokugula."
 
-#: templates/medical_history.html:3 templates/medical_history.html:46
-#: templates/medical_report.html:142 templates/medical_report_detail.html:36
+#: templates/medical_history.html:3 templates/medical_report_detail.html:7
 #, fuzzy
-msgid "History"
-msgstr "Umlando"
+msgid "Medical history"
+msgstr "Umlando wezokwelapha"
 
-#: templates/medical_history.html:3 templates/medical_report.html:3
+#: templates/medical_history.html:19
 #, fuzzy
-msgid "medical portal"
-msgstr "ingosi yezokwelapha"
+msgid "Stations with medical reports"
+msgstr "Iziteshi ezinemibiko yezokwelapha"
 
-#: templates/medical_history.html:45 templates/medical_report.html:141
-#, fuzzy
-msgid "File a report"
-msgstr "Faka umbiko"
-
-#: templates/medical_history.html:63
+#: templates/medical_history.html:24
 #, fuzzy
 msgid "Reports filed via medical portal"
 msgstr "Imibiko ifakwe ngephothali yezokwelapha"
 
-#: templates/medical_history.html:67
+#: templates/medical_history.html:29
 #, fuzzy
 msgid "Submitted"
 msgstr "Kuthunyelwe"
 
-#: templates/medical_history.html:68
+#: templates/medical_history.html:32 templates/medical_report.html:25
 #, fuzzy
 msgid "Cases"
 msgstr "Amacala"
 
-#: templates/medical_history.html:68
+#: templates/medical_history.html:35 templates/medical_report_detail.html:37
 #, fuzzy
 msgid "Onset"
 msgstr "Qalisa"
 
-#: templates/medical_history.html:93
+#: templates/medical_history.html:67
 #, fuzzy
 msgid "No medical-portal reports yet. File one via \"File a report\" above."
 msgstr "Ayikho imibiko ye-medical-portal okwamanje. Faka eyodwa usebenzisa \\"Faka umbiko\\" ngenhla."
 "Ayikho imibiko ye-medical-portal okwamanje. Faka eyodwa usebenzisa "
-"\\\"Faka umbiko\\\" ngenhla."
+"\\\"Faka umbiko\\\" ngenhla.Ayikho imibiko ye-medical-portal okwamanje. "
+"Faka eyodwa usebenzisa \\\"Faka umbiko\\\" ngenhla."
 
-#: templates/medical_report.html:3
+#: templates/medical_report.html:7
 #, fuzzy
-msgid "File an illness report"
-msgstr "Faka umbiko wokugula"
+msgid "File a community illness report"
+msgstr "Faka umbiko wokugula komphakathi"
 
-#: templates/medical_report.html:159
+#: templates/medical_report.html:18
 #, fuzzy
-msgid "New report"
-msgstr "Umbiko omusha"
+msgid "select"
+msgstr "khetha"
 
-#: templates/medical_report.html:165
+#: templates/medical_report.html:46
 #, fuzzy
-msgid "Water station"
-msgstr "Isiteshi samanzi"
+msgid "clinical assessment, optional"
+msgstr "ukuhlolwa komtholampilo, ozikhethela"
 
-#: templates/medical_report.html:165 templates/medical_report.html:175
+#: templates/medical_report.html:48
 #, fuzzy
-msgid "required"
-msgstr "okudingekayo"
+msgid "Not assessed"
+msgstr "Akuhloliwe"
 
-#: templates/medical_report.html:167
-#, fuzzy
-msgid "Choose a station…"
-msgstr "Khetha isiteshi..."
-
-#: templates/medical_report.html:175
-#, fuzzy
-msgid "Number of suspected cases"
-msgstr "Inombolo yamacala asolwayo"
-
-#: templates/medical_report.html:180
-#, fuzzy
-msgid "your clinical assessment, optional"
-msgstr "ukuhlolwa kwakho komtholampilo, ozikhethela"
-
-#: templates/medical_report.html:182
-#, fuzzy
-msgid "Not yet assessed — estimate on review"
-msgstr "Ayikahlolisiswa - isilinganiso ekubuyekezweni"
-
-#: templates/medical_report.html:183
-#, fuzzy
-msgid "LOW — non-specific symptoms"
-msgstr "EZINGAPHANSI - izimpawu ezingaqondile"
-
-#: templates/medical_report.html:184
-#, fuzzy
-msgid "MEDIUM — possible waterborne illness"
-msgstr "MEDIUM - ukugula okubangelwa amanzi"
-
-#: templates/medical_report.html:185
-#, fuzzy
-msgid "HIGH — likely waterborne illness, clinical workup recommended"
-msgstr "OKUPHEZULU - ukugula okubangelwa amanzi, kunconyiwe ukusebenza komtholampilo"
-"OKUPHEZULU - ukugula okubangelwa amanzi, kunconyiwe ukusebenza "
-"komtholampilo"
-
-#: templates/medical_report.html:186
-#, fuzzy
-msgid "SEVERE — suspected severe cholera, urgent action"
-msgstr "ESINZIMA - ikholera okusolwa ukuthi inzima, isinyathelo esiphuthumayo"
-
-#: templates/medical_report.html:191
-#, fuzzy
-msgid "Symptoms observed"
-msgstr "Izimpawu eziphawuliwe"
-
-#: templates/medical_report.html:191
-#, fuzzy
-msgid "tick all that apply"
-msgstr "phawula konke okusebenzayo"
-
-#: templates/medical_report.html:203
-#, fuzzy
-msgid "Symptom onset date"
-msgstr "Idethi yokuqala yezimpawu"
-
-#: templates/medical_report.html:203
-#, fuzzy
-msgid "optional — anchors the labelling window"
-msgstr "ongakukhetha - iqinisa iwindi lokulebula"
-
-#: templates/medical_report.html:208
+#: templates/medical_report.html:57
 #, fuzzy
 msgid "optional"
 msgstr "ngokuzikhethela"
 
-#: templates/medical_report.html:209
+#: templates/medical_report.html:65
 #, fuzzy
-msgid "Anything else worth flagging…"
-msgstr "Noma yini enye okufanele ihlatshwe umkhosi..."
+msgid "Reviewed by the government dashboard within ~30s of submission."
+msgstr "Ibuyekezwe ideshibhodi kahulumeni phakathi kwama-~30s okuthunyelwa."
 
-#: templates/medical_report.html:212
+#: templates/medical_report.html:67
+#, fuzzy
+msgid "Reset"
+msgstr "Setha kabusha"
+
+#: templates/medical_report.html:68
 #, fuzzy
 msgid "Submit report"
 msgstr "Thumela umbiko"
 
-#: templates/medical_report_detail.html:3
-#, fuzzy
-msgid "medical detail"
-msgstr "imininingwane yezokwelapha"
+#~ msgid "government dashboard"
+#~ msgstr "ideshibhodi kahulumeni"
+
+#~ msgid "Generated"
+#~ msgstr "Kwenziwe"
+
+#~ msgid "auto-refresh 30s"
+#~ msgstr "vuselela ngokuzenzakalelayo 30s"
+
+#~ msgid "Signed in as"
+#~ msgstr "Ungene ngemvume njengo"
+
+#~ msgid "Faecal-contamination risk + community illness signal."
+#~ msgstr "Ingozi yokungcoliswa kwendle + isignali yokugula komphakathi."
+
+#~ msgid "NOT a cholera detector."
+#~ msgstr "AKUWONA umtshina wekholera."
+
+#~ msgid "pH"
+#~ msgstr "pH"
+
+#~ msgid "Turb (NTU)"
+#~ msgstr "I-Turbo (NTU)"
+
+#~ msgid "Temp (°C)"
+#~ msgstr "Izinga lokushisa (°C)"
+
+#~ msgid "Rain (mm)"
+#~ msgstr "Imvula (mm)"
+
+#~ msgid "Status"
+#~ msgstr "Isimo"
+
+#~ msgid "government detail"
+#~ msgstr "imininingwane kahulumeni"
+
+#~ msgid "Received at"
+#~ msgstr "Kutholwe ngo"
+
+#~ msgid "Reading"
+#~ msgstr "Ukufunda"
+
+#~ msgid "Recorded at"
+#~ msgstr "Kuqoshwe ngo"
+
+#~ msgid "Rule"
+#~ msgstr "Ukubusa"
+
+#~ msgid "New report"
+#~ msgstr "Umbiko omusha"
+
+#~ msgid "required"
+#~ msgstr "okudingekayo"
+
+#~ msgid "Number of suspected cases"
+#~ msgstr "Inombolo yamacala asolwayo"
+
+#~ msgid "Not yet assessed — estimate on review"
+#~ msgstr "Ayikahlolisiswa - isilinganiso ekubuyekezweni"
+
+#~ msgid "LOW — non-specific symptoms"
+#~ msgstr "EZINGAPHANSI - izimpawu ezingaqondile"
+
+#~ msgid "MEDIUM — possible waterborne illness"
+#~ msgstr "MEDIUM - ukugula okubangelwa amanzi"
+
+#~ msgid "HIGH — likely waterborne illness, clinical workup recommended"
+#~ msgstr ""
+#~ "OKUPHEZULU - ukugula okubangelwa amanzi, "
+#~ "kunconyiwe ukusebenza komtholampiloOKUPHEZULU - "
+#~ "ukugula okubangelwa amanzi, kunconyiwe "
+#~ "ukusebenza komtholampilo"
+
+#~ msgid "SEVERE — suspected severe cholera, urgent action"
+#~ msgstr "ESINZIMA - ikholera okusolwa ukuthi inzima, isinyathelo esiphuthumayo"
+
+#~ msgid "Symptoms observed"
+#~ msgstr "Izimpawu eziphawuliwe"
+
+#~ msgid "tick all that apply"
+#~ msgstr "phawula konke okusebenzayo"
+
+#~ msgid "Symptom onset date"
+#~ msgstr "Idethi yokuqala yezimpawu"
+
+#~ msgid "optional — anchors the labelling window"
+#~ msgstr "ongakukhetha - iqinisa iwindi lokulebula"
+
+#~ msgid "Anything else worth flagging…"
+#~ msgstr "Noma yini enye okufanele ihlatshwe umkhosi..."
+
+#~ msgid "medical detail"
+#~ msgstr "imininingwane yezokwelapha"
 

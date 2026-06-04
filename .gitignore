@@ -1,3 +1,5 @@
+# The gitignore document contains the files in the repo which Github should ignore when pushing/pulling/syncing. 
+
 # macOS
 .DS_Store
 **/.DS_Store
@@ -28,3 +30,4 @@ App/backend/data/
 # IDE / tooling
 .vscode/
 .claude/
+.superpowers/

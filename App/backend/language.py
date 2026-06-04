@@ -142,6 +142,35 @@ def _safe_redirect_target() -> str:
     return parsed.path or "/dashboard"
 
 
+def save_user_preference(username: str, code: str) -> None:
+    """Upsert a user's language preference. No-op for invalid codes."""
+    if _validate(code) is None:
+        return
+    # Use dynamic lookup so per-test DB rotation is respected
+    # (language.py is not re-imported between tests).
+    db_mod = sys.modules["database"]
+    with db_mod.connection() as conn:
+        with conn.begin():
+            conn.execute(
+                text(
+                    "INSERT INTO user_preferences (username, language) "
+                    "VALUES (:u, :c) "
+                    "ON CONFLICT (username) DO UPDATE SET language = excluded.language"
+                ),
+                {"u": username, "c": code},
+            )
+
+
+def adopt_cookie_preference(username: str) -> None:
+    """Promote the current request's aqua_lang cookie to the user's saved
+    preference. Called on login so a language chosen anonymously on /login
+    survives the sign-in (the DB now holds the cookie's value, which
+    therefore wins the locale-selector precedence on the next request)."""
+    cookie = _validate(request.cookies.get(COOKIE_NAME))
+    if cookie is not None:
+        save_user_preference(username, cookie)
+
+
 @lang_bp.post("/lang")
 def set_lang_view():
     code = _validate(request.form.get("code"))
@@ -153,19 +182,7 @@ def set_lang_view():
 
     username = session.get("username")
     if username is not None:
-        # Use dynamic lookup so per-test DB rotation is respected
-        # (language.py is not re-imported between tests).
-        db_mod = sys.modules["database"]
-        with db_mod.connection() as conn:
-            with conn.begin():
-                conn.execute(
-                    text(
-                        "INSERT INTO user_preferences (username, language) "
-                        "VALUES (:u, :c) "
-                        "ON CONFLICT (username) DO UPDATE SET language = excluded.language"
-                    ),
-                    {"u": username, "c": code},
-                )
+        save_user_preference(username, code)
     return response
 
 
@@ -182,4 +199,16 @@ def init_babel(app: Flask) -> None:
     @app.after_request
     def _stamp_active_locale(response):
         response.headers["X-Active-Locale"] = current_lang()
+        # Prevent browsers from serving a stale HTML page after the picker
+        # flips the cookie. Without this, the picker change has no visible
+        # effect until the user hard-refreshes. Only HTML responses need
+        # the directive — leave static assets alone.
+        content_type = response.headers.get("Content-Type", "")
+        if content_type.startswith("text/html"):
+            response.headers["Cache-Control"] = "no-store"
+            existing_vary = response.headers.get("Vary", "")
+            if "Cookie" not in existing_vary:
+                response.headers["Vary"] = (
+                    f"{existing_vary}, Cookie".lstrip(", ") if existing_vary else "Cookie"
+                )
         return response

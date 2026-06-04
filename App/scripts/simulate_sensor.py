@@ -29,7 +29,15 @@ import json
 
 
 def _reading_for(station_id: int) -> dict:
-    """Generate a plausible reading for one station."""
+    """Generate a plausible reading for one station.
+
+    Includes the three water-quality indicators added 2026-06-01:
+    free chlorine residual (mg/L; WHO recommends >= 0.2), oxidation-
+    reduction potential (mV; effective disinfection typically >= 650),
+    and UV absorbance at 254 nm (proxy for organic matter; clean water
+    < 0.05, contaminated > 0.2). Ranges are loose physical defaults,
+    not calibrated to any borehole.
+    """
     rain = 0.0 if random.random() > 0.15 else round(random.uniform(0.5, 12.0), 1)
     return {
         "station_id": station_id,
@@ -38,7 +46,10 @@ def _reading_for(station_id: int) -> dict:
         "turbidity_ntu": round(max(0.0, random.gauss(8.0, 6.0)), 1),
         "temperature_c": round(random.gauss(23.0, 2.0), 1),
         "rainfall_mm": rain,
-        "provenance": "simulator_v1",
+        "chlorine_mg_l": round(max(0.0, random.gauss(0.5, 0.25)), 2),
+        "orp_mv": round(max(150.0, random.gauss(650.0, 90.0)), 1),
+        "uv_absorbance": round(max(0.0, random.gauss(0.08, 0.05)), 3),
+        "provenance": "simulator_v2",
     }
 
 
@@ -53,12 +64,16 @@ def _post(url: str, secret: str, payload: dict) -> tuple[int, str]:
         method="POST",
     )
     try:
-        with urllib.request.urlopen(req, timeout=5) as resp:
+        with urllib.request.urlopen(req, timeout=10) as resp:
             return resp.status, resp.read().decode("utf-8")
     except urllib.error.HTTPError as e:
         return e.code, e.read().decode("utf-8")
     except urllib.error.URLError as e:
         return 0, str(e)
+    except (TimeoutError, OSError) as e:
+        # Don't crash the simulator on a single slow Railway response;
+        # report and move on to the next station / round.
+        return 0, f"timeout/network: {e}"
 
 
 def main() -> int:

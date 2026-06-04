@@ -16,7 +16,9 @@ POST /ingest          — sensor reading ingest (via sensor_ingest blueprint)
 
 from __future__ import annotations
 
+import csv
 import hmac
+import io
 import json
 import os
 import re
@@ -26,7 +28,7 @@ from functools import wraps
 
 from dotenv import load_dotenv
 from flask import (
-    Flask, abort, redirect, render_template, request, session, url_for,
+    Flask, Response, abort, redirect, render_template, request, session, url_for,
 )
 from flask_babel import gettext as _, ngettext
 from twilio.request_validator import RequestValidator
@@ -37,7 +39,7 @@ from sqlalchemy import text
 from database import connection, init_db
 from labels import label_readings_for_report
 from sensor_ingest import sensor_bp
-from language import init_babel
+from language import init_babel, adopt_cookie_preference
 
 load_dotenv()
 
@@ -46,6 +48,21 @@ app.secret_key = os.environ.get("SECRET_KEY") or secrets.token_hex(32)
 app.register_blueprint(sensor_bp)
 init_babel(app)
 init_db()
+
+
+# Cache-bust app.css with a query string keyed to its mtime. The stylesheet
+# is otherwise cached by the browser, so edits (and redeploys) would keep
+# serving the stale CSS until a manual hard-refresh. Recomputed at startup,
+# which on Railway means once per deploy.
+try:
+    _ASSET_V = str(int(os.path.getmtime(os.path.join(app.static_folder, "app.css"))))
+except OSError:
+    _ASSET_V = "0"
+
+
+@app.context_processor
+def inject_asset_version():
+    return {"asset_v": _ASSET_V}
 
 
 STATION_PARSER_VERSION = "lenient_first_int_v1"
@@ -82,7 +99,7 @@ DEMO_USERS: dict[str, dict[str, str]] = {
 }
 
 ROLE_HOME = {
-    "medical": "medical_report_form",
+    "medical": "medical_history",
     "government": "dashboard",
 }
 
@@ -115,7 +132,7 @@ def login_required(view):
     @wraps(view)
     def wrapped(*args, **kwargs):
         if "username" not in session:
-            return redirect(url_for("login", next=request.path))
+            return redirect(url_for("login"))
         return view(*args, **kwargs)
     return wrapped
 
@@ -125,7 +142,7 @@ def role_required(role: str):
         @wraps(view)
         def wrapped(*args, **kwargs):
             if "username" not in session:
-                return redirect(url_for("login", next=request.path))
+                return redirect(url_for("login"))
             if session.get("role") != role:
                 return (_("forbidden — this page requires the "
                           "'{role}' role").format(role=role), 403)
@@ -193,9 +210,9 @@ def _resolve_tier(report) -> dict:
     # SMS, not complete
     state = report.get("dialog_state")
     if state in ("awaiting_case_count", "awaiting_symptoms", "awaiting_onset"):
-        pending = "pending — awaiting reporter follow-up"
+        pending = _("pending — awaiting reporter follow-up")
     else:
-        pending = "incomplete — no structured data available"
+        pending = _("incomplete — no structured data available")
     return {
         "tier_source": "pending",
         "tier": None,
@@ -255,6 +272,11 @@ def login():
     session["username"] = username
     session["display_name"] = user["display_name"]
     session["role"] = user["role"]
+
+    # If the user chose a language anonymously on /login, promote that
+    # choice to user_preferences so DB-first precedence reflects it after
+    # sign-in. Otherwise the existing saved pref (or NULL) would win.
+    adopt_cookie_preference(username)
 
     next_path = request.args.get("next") or request.form.get("next") or ""
     # only allow internal redirects
@@ -610,9 +632,22 @@ def dashboard():
         datetime.now(timezone.utc) - timedelta(days=STATION_STATUS_WINDOW_DAYS)
     ).isoformat()
 
+    nid_raw = request.args.get("neighborhood", "")
+    selected_neighborhood_id = int(nid_raw) if nid_raw.isdigit() else None
+
     with connection() as conn:
+        neighborhoods = conn.execute(
+            text("SELECT neighborhood_id, name FROM neighborhoods ORDER BY neighborhood_id")
+        ).mappings().all()
+
+        # Build the stations query — neighborhood filter is optional.
+        where_clause = "WHERE s.neighborhood_id = :nid" if selected_neighborhood_id else ""
+        stations_params = {"cutoff": status_cutoff}
+        if selected_neighborhood_id is not None:
+            stations_params["nid"] = selected_neighborhood_id
+
         stations = conn.execute(
-            text("""
+            text(f"""
                 WITH latest AS (
                     SELECT station_id, MAX(recorded_at) AS latest_at
                     FROM sensor_readings
@@ -621,11 +656,15 @@ def dashboard():
                 SELECT s.station_id,
                        s.name,
                        s.is_closed,
+                       s.neighborhood_id,
                        r.recorded_at,
                        r.ph,
                        r.turbidity_ntu,
                        r.temperature_c,
                        r.rainfall_mm,
+                       r.chlorine_mg_l,
+                       r.orp_mv,
+                       r.uv_absorbance,
                        EXISTS (
                            SELECT 1 FROM illness_reports ir
                            WHERE ir.station_id = s.station_id
@@ -636,9 +675,10 @@ def dashboard():
                 LEFT JOIN sensor_readings r
                     ON r.station_id = s.station_id
                    AND r.recorded_at = l.latest_at
+                {where_clause}
                 ORDER BY s.station_id
             """),
-            {"cutoff": status_cutoff},
+            stations_params,
         ).mappings().all()
 
         reports = conn.execute(
@@ -666,8 +706,53 @@ def dashboard():
         stations=stations,
         reports=reports_with_tier,
         status_window_days=STATION_STATUS_WINDOW_DAYS,
+        neighborhoods=neighborhoods,
+        selected_neighborhood_id=selected_neighborhood_id,
+        add_station_error=request.args.get("station_error"),
         generated_at=datetime.now(timezone.utc).isoformat(timespec="seconds"),
     )
+
+
+@app.post("/dashboard/stations")
+@role_required("government")
+def add_station():
+    name = (request.form.get("name") or "").strip()
+    lat_raw = request.form.get("latitude") or ""
+    lon_raw = request.form.get("longitude") or ""
+    nid_raw = request.form.get("neighborhood_id") or ""
+
+    try:
+        nid = int(nid_raw)
+    except ValueError:
+        return redirect(url_for("dashboard", station_error="invalid_field"))
+
+    try:
+        lat = float(lat_raw)
+        lon = float(lon_raw)
+    except ValueError:
+        return redirect(url_for("dashboard", neighborhood=nid, station_error="invalid_field"))
+
+    if not name or not (-90 <= lat <= 90) or not (-180 <= lon <= 180):
+        return redirect(url_for("dashboard", neighborhood=nid, station_error="invalid_field"))
+
+    with connection() as conn:
+        with conn.begin():
+            exists = conn.execute(
+                text("SELECT 1 FROM neighborhoods WHERE neighborhood_id = :nid"),
+                {"nid": nid},
+            ).first()
+            if exists is None:
+                return redirect(url_for("dashboard", neighborhood=nid, station_error="bad_neighborhood"))
+
+            conn.execute(
+                text(
+                    "INSERT INTO stations (name, latitude, longitude, neighborhood_id) "
+                    "VALUES (:name, :lat, :lon, :nid)"
+                ),
+                {"name": name, "lat": lat, "lon": lon, "nid": nid},
+            )
+
+    return redirect(url_for("dashboard", neighborhood=nid))
 
 
 @app.post("/actions")
@@ -741,7 +826,7 @@ def post_action():
 @app.get("/dashboard/reports/<int:report_id>")
 def dashboard_report_detail(report_id: int):
     if "username" not in session:
-        return redirect(url_for("login", next=request.path))
+        return redirect(url_for("login"))
     if session.get("role") != "government":
         return (
             _("This page is for government officials. "
@@ -762,17 +847,7 @@ def dashboard_report_detail(report_id: int):
         ).mappings().first()
         if row is None:
             abort(404)
-        labelled_readings = conn.execute(
-            text("""
-                SELECT rl.reading_id, rl.rule_description,
-                       sr.recorded_at, sr.ph, sr.turbidity_ntu, sr.temperature_c
-                FROM reading_labels rl
-                JOIN sensor_readings sr ON sr.reading_id = rl.reading_id
-                WHERE rl.report_id = :rid
-                ORDER BY sr.recorded_at DESC
-            """),
-            {"rid": report_id},
-        ).mappings().all()
+        labelled_summary = _labelled_readings_summary(conn, report_id)
         interventions_rows = conn.execute(
             text("""
                 SELECT intervention_id, action_type, triggered_by, triggered_at, notes
@@ -794,7 +869,7 @@ def dashboard_report_detail(report_id: int):
         "dashboard_report_detail.html",
         report=row,
         symptoms_display=symptoms_display,
-        labelled_readings=labelled_readings,
+        labelled_summary=labelled_summary,
         interventions=interventions_rows,
         **tier_block,
     )
@@ -849,6 +924,80 @@ def medical_history():
     )
 
 
+def _labelled_readings_summary(conn, report_id: int) -> dict:
+    """Count + earliest/latest recorded_at for the readings a report
+    labelled. Lets the detail page show a compact summary; the actual
+    rows are served separately via the CSV endpoint below."""
+    row = conn.execute(
+        text("""
+            SELECT COUNT(*) AS n,
+                   MIN(sr.recorded_at) AS earliest,
+                   MAX(sr.recorded_at) AS latest
+            FROM reading_labels rl
+            JOIN sensor_readings sr ON sr.reading_id = rl.reading_id
+            WHERE rl.report_id = :rid
+        """),
+        {"rid": report_id},
+    ).mappings().first()
+    return dict(row) if row else {"n": 0, "earliest": None, "latest": None}
+
+
+def _labelled_readings_csv(report_id: int) -> Response:
+    """Stream the full set of readings labelled by one report as CSV."""
+    with connection() as conn:
+        rows = conn.execute(
+            text("""
+                SELECT rl.reading_id, sr.station_id, sr.recorded_at,
+                       sr.ph, sr.turbidity_ntu, sr.temperature_c, sr.rainfall_mm,
+                       sr.chlorine_mg_l, sr.orp_mv, sr.uv_absorbance,
+                       rl.label, rl.rule_description
+                FROM reading_labels rl
+                JOIN sensor_readings sr ON sr.reading_id = rl.reading_id
+                WHERE rl.report_id = :rid
+                ORDER BY sr.recorded_at ASC
+            """),
+            {"rid": report_id},
+        ).mappings().all()
+
+    buf = io.StringIO()
+    writer = csv.writer(buf)
+    writer.writerow([
+        "reading_id", "station_id", "recorded_at",
+        "ph", "turbidity_ntu", "temperature_c", "rainfall_mm",
+        "chlorine_mg_l", "orp_mv", "uv_absorbance",
+        "label", "rule_description",
+    ])
+    for r in rows:
+        writer.writerow([
+            r["reading_id"], r["station_id"], r["recorded_at"],
+            r["ph"], r["turbidity_ntu"], r["temperature_c"], r["rainfall_mm"],
+            r["chlorine_mg_l"], r["orp_mv"], r["uv_absorbance"],
+            r["label"], r["rule_description"],
+        ])
+
+    return Response(
+        buf.getvalue(),
+        mimetype="text/csv",
+        headers={
+            "Content-Disposition": (
+                f'attachment; filename="report-{report_id}-labelled-readings.csv"'
+            ),
+        },
+    )
+
+
+@app.get("/medical/reports/<int:report_id>/labelled-readings.csv")
+@role_required("medical")
+def medical_labelled_readings_csv(report_id: int):
+    return _labelled_readings_csv(report_id)
+
+
+@app.get("/dashboard/reports/<int:report_id>/labelled-readings.csv")
+@role_required("government")
+def dashboard_labelled_readings_csv(report_id: int):
+    return _labelled_readings_csv(report_id)
+
+
 @app.get("/medical/reports/<int:report_id>")
 @role_required("medical")
 def medical_report_detail(report_id: int):
@@ -864,6 +1013,7 @@ def medical_report_detail(report_id: int):
         ).mappings().first()
         if row is None:
             abort(404)
+        labelled_summary = _labelled_readings_summary(conn, report_id)
     tier_block = _resolve_tier(dict(row))
     try:
         symptoms_list = json.loads(row["symptoms"] or "[]")
@@ -874,6 +1024,7 @@ def medical_report_detail(report_id: int):
         "medical_report_detail.html",
         report=row,
         symptoms_display=symptoms_display,
+        labelled_summary=labelled_summary,
         **tier_block,
     )
 

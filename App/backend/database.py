@@ -3,8 +3,8 @@
 Schema is declared as SQLAlchemy MetaData/Table objects so the same code
 emits SQLite DDL locally and Postgres DDL on Railway. init_db() is
 idempotent: it creates any missing tables, adds any newly-added columns
-on existing tables, and seeds the 10 stations row by row with
-ON CONFLICT DO NOTHING.
+on existing tables, and seeds the 32 stations row by row with
+ON CONFLICT DO UPDATE.
 """
 
 from __future__ import annotations
@@ -31,6 +31,7 @@ stations = Table(
     Column("latitude", Float),
     Column("longitude", Float),
     Column("is_closed", Integer, nullable=False, server_default=text("0")),
+    Column("neighborhood_id", Integer, ForeignKey("neighborhoods.neighborhood_id")),
     Column("created_at", Text, nullable=False, server_default=func.current_timestamp()),
 )
 
@@ -44,6 +45,11 @@ sensor_readings = Table(
     Column("turbidity_ntu", Float),
     Column("temperature_c", Float),
     Column("rainfall_mm", Float),
+    # Additional water-quality indicators (added 2026-06-01). All nullable
+    # so older readings remain valid.
+    Column("chlorine_mg_l", Float),     # free chlorine residual, mg/L
+    Column("orp_mv", Float),            # oxidation-reduction potential, mV
+    Column("uv_absorbance", Float),     # UV absorbance at 254 nm (organic-matter proxy)
     Column("provenance", Text, nullable=False, server_default=text("'unknown'")),
     Column("received_at", Text, nullable=False, server_default=func.current_timestamp()),
     Index("idx_readings_station_time", "station_id", "recorded_at"),
@@ -122,17 +128,64 @@ user_preferences = Table(
 )
 
 
+neighborhoods = Table(
+    "neighborhoods", metadata,
+    Column("neighborhood_id", Integer, primary_key=True, autoincrement=False),
+    Column("name", Text, unique=True, nullable=False),
+)
+
+
+SEED_NEIGHBORHOODS = [
+    (1, "Central Harare"),
+    (2, "Northern Suburbs"),
+    (3, "Southern Areas"),
+    (4, "Eastern Suburbs"),
+]
+
+
+# 32 demo stations across 4 Harare neighborhoods (spec §4). All
+# coordinates sit inside the dashboard's Leaflet zoom-12 view.
+# Each tuple is (station_id, name, lat, lon, neighborhood_id).
 SEED_STATIONS = [
-    (1,  "Borehole A — village centre",   -17.829, 31.052),
-    (2,  "Borehole B — clinic",           -17.831, 31.057),
-    (3,  "Borehole C — school",           -17.828, 31.049),
-    (4,  "Borehole D — market",           -17.833, 31.054),
-    (5,  "Borehole E — north well",       -17.820, 31.060),
-    (6,  "Borehole F — east settlement",  -17.836, 31.069),
-    (7,  "Borehole G — south farm",       -17.847, 31.055),
-    (8,  "Borehole H — west outpost",     -17.838, 31.041),
-    (9,  "Borehole I — river crossing",   -17.826, 31.073),
-    (10, "Borehole J — bus station",      -17.842, 31.062),
+    # Central Harare (neighborhood 1)
+    (1,  "Avenues — central clinic",          -17.815, 31.050, 1),
+    (2,  "Belvedere — community hall",        -17.840, 31.025, 1),
+    (7,  "Milton Park — health post",         -17.832, 31.030, 1),
+    (11, "Causeway — government complex",     -17.831, 31.048, 1),
+    (12, "Kopje — civic hall",                -17.835, 31.038, 1),
+    (13, "CBD — central market",              -17.828, 31.052, 1),
+    (14, "Africa Unity Square — fountain",    -17.830, 31.054, 1),
+    (15, "Workington — industrial water",     -17.840, 31.030, 1),
+
+    # Northern Suburbs (neighborhood 2)
+    (6,  "Newlands — shopping centre",        -17.810, 31.067, 2),
+    (9,  "Mt Pleasant — north well",          -17.795, 31.045, 2),
+    (16, "Avondale — north clinic",           -17.797, 31.038, 2),
+    (17, "Belgravia — community well",        -17.800, 31.038, 2),
+    (18, "Mt Pleasant Heights — school",      -17.785, 31.040, 2),
+    (19, "Marlborough — clinic",              -17.795, 31.025, 2),
+    (20, "Strathaven — water point",          -17.797, 31.045, 2),
+    (21, "Pomona — north settlement",         -17.787, 31.060, 2),
+
+    # Southern Areas (neighborhood 3)
+    (4,  "Mbare — Musika market",             -17.860, 31.045, 3),
+    (5,  "Hatfield — community borehole",     -17.852, 31.072, 3),
+    (22, "Waterfalls — south clinic",         -17.870, 31.058, 3),
+    (23, "Sunningdale — water point",         -17.875, 31.078, 3),
+    (24, "Lichendale — primary school",       -17.875, 31.050, 3),
+    (25, "Southerton — community well",       -17.865, 31.020, 3),
+    (26, "Aspindale Park — water point",      -17.870, 31.025, 3),
+    (27, "Prospect — health post",            -17.878, 31.015, 3),
+
+    # Eastern Suburbs (neighborhood 4)
+    (3,  "Eastlea — primary school",          -17.825, 31.062, 4),
+    (8,  "Hillside — water point",            -17.847, 31.058, 4),
+    (10, "Greendale — east settlement",       -17.835, 31.082, 4),
+    (28, "Highlands — east clinic",           -17.820, 31.075, 4),
+    (29, "Athlone — primary school",          -17.825, 31.085, 4),
+    (30, "Cranborne — water point",           -17.850, 31.075, 4),
+    (31, "Donnybrook — community hall",       -17.855, 31.085, 4),
+    (32, "Msasa — industrial water point",    -17.830, 31.090, 4),
 ]
 
 
@@ -191,6 +244,48 @@ def _migrate(conn: Connection) -> None:
             "ALTER TABLE stations ADD COLUMN is_closed INTEGER NOT NULL DEFAULT 0"
         ))
 
+    if "neighborhood_id" not in existing_station_cols:
+        conn.execute(text(
+            "ALTER TABLE stations ADD COLUMN neighborhood_id INTEGER "
+            "REFERENCES neighborhoods(neighborhood_id)"
+        ))
+
+    # Sensor-readings backfill: the three water-quality indicators added
+    # 2026-06-01 may be missing from a pre-existing table.
+    existing_reading_cols = {c["name"] for c in insp.get_columns("sensor_readings")}
+    for col_name in ("chlorine_mg_l", "orp_mv", "uv_absorbance"):
+        if col_name not in existing_reading_cols:
+            conn.execute(text(
+                f"ALTER TABLE sensor_readings ADD COLUMN {col_name} REAL"
+            ))
+
+    # Postgres-only: stations.station_id was created with autoincrement=False,
+    # so there is no sequence. New rows inserted via the dashboard's Add
+    # Station POST need an auto-assigned id. Create the sequence if missing,
+    # wire it as the column's DEFAULT, and advance it past the highest
+    # currently-seeded id.
+    if conn.engine.dialect.name == "postgresql":
+        conn.execute(text("""
+            DO $$
+            BEGIN
+                IF NOT EXISTS (
+                    SELECT 1 FROM pg_sequences WHERE sequencename = 'stations_station_id_seq'
+                ) THEN
+                    CREATE SEQUENCE stations_station_id_seq;
+                    ALTER TABLE stations
+                        ALTER COLUMN station_id SET DEFAULT nextval('stations_station_id_seq');
+                END IF;
+                PERFORM setval(
+                    'stations_station_id_seq',
+                    GREATEST(
+                        (SELECT COALESCE(MAX(station_id), 0) FROM stations),
+                        32
+                    )
+                );
+            END;
+            $$;
+        """))
+
 
 def init_db() -> None:
     """Create all tables, run any needed column-level migrations, and seed stations.
@@ -203,15 +298,35 @@ def init_db() -> None:
     with engine.begin() as conn:
         metadata.create_all(conn)
         _migrate(conn)
-        for sid, name, lat, lon in SEED_STATIONS:
+
+        # Seed neighborhoods first — stations FK depends on them.
+        for nid, name in SEED_NEIGHBORHOODS:
             conn.execute(
                 text(
-                    "INSERT INTO stations (station_id, name, latitude, longitude) "
-                    "VALUES (:sid, :name, :lat, :lon) "
-                    "ON CONFLICT (station_id) DO NOTHING"
+                    "INSERT INTO neighborhoods (neighborhood_id, name) "
+                    "VALUES (:nid, :name) "
+                    "ON CONFLICT (neighborhood_id) DO UPDATE SET "
+                    "    name = excluded.name"
                 ),
-                {"sid": sid, "name": name, "lat": lat, "lon": lon},
+                {"nid": nid, "name": name},
             )
+
+        # Seed stations, including the new neighborhood_id assignment.
+        for sid, name, lat, lon, nid in SEED_STATIONS:
+            conn.execute(
+                text(
+                    "INSERT INTO stations "
+                    "(station_id, name, latitude, longitude, neighborhood_id) "
+                    "VALUES (:sid, :name, :lat, :lon, :nid) "
+                    "ON CONFLICT (station_id) DO UPDATE SET "
+                    "    name = excluded.name, "
+                    "    latitude = excluded.latitude, "
+                    "    longitude = excluded.longitude, "
+                    "    neighborhood_id = excluded.neighborhood_id"
+                ),
+                {"sid": sid, "name": name, "lat": lat, "lon": lon, "nid": nid},
+            )
+
 
 
 if __name__ == "__main__":

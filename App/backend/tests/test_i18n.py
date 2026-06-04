@@ -224,6 +224,60 @@ def test_banner_does_not_render_for_english(med_session):
     assert b'class="unverified-banner"' not in resp.data
 
 
+def test_login_adopts_anonymous_cookie_into_user_preferences(client):
+    """A language chosen on /login (anonymous, cookie only) carries over
+    to the user's saved preference once they sign in, so DB-first
+    precedence reflects it on the next request."""
+    # Anonymous: set picker to Shona on the login page.
+    client.set_cookie("aqua_lang", "sn")
+    # Confirm no DB row exists yet.
+    with _db_connection() as conn:
+        rows = conn.execute(sql_text("SELECT * FROM user_preferences")).fetchall()
+    assert rows == []
+    # Sign in.
+    resp = client.post(
+        "/login",
+        data={"username": "dr.smith", "password": "med-pw"},
+    )
+    assert resp.status_code in (302, 303)
+    # user_preferences now has the Shona pref keyed on the signed-in user.
+    with _db_connection() as conn:
+        rows = conn.execute(
+            sql_text("SELECT username, language FROM user_preferences")
+        ).fetchall()
+    assert rows == [("dr.smith", "sn")]
+    # Hitting a signed-in page picks up sn from the DB even if we now
+    # remove the cookie — DB-first precedence is in effect.
+    client.delete_cookie("aqua_lang")
+    resp = client.get("/medical/report")
+    assert resp.headers.get("X-Active-Locale") == "sn"
+
+
+def test_login_without_cookie_leaves_user_preferences_alone(client):
+    """No cookie at sign-in time → no implicit DB write."""
+    resp = client.post(
+        "/login",
+        data={"username": "dr.smith", "password": "med-pw"},
+    )
+    assert resp.status_code in (302, 303)
+    with _db_connection() as conn:
+        rows = conn.execute(sql_text("SELECT * FROM user_preferences")).fetchall()
+    assert rows == []
+
+
+def test_login_page_suppresses_banner_even_for_unverified_locale(client):
+    """The login page is the unauthenticated front door and intentionally
+    skips the machine-translated draft banner — no clinical content there.
+    The banner reappears on every signed-in page."""
+    for lang in ("sn", "nd"):
+        resp = client.get(f"/login?lang={lang}")
+        assert resp.status_code == 200
+        # Picker is still present (so the user can switch language).
+        assert b'class="lang-picker"' in resp.data
+        # Banner is suppressed even though the locale is unverified.
+        assert b'class="unverified-banner"' not in resp.data
+
+
 def test_messages_pot_contains_login_button(tmp_path):
     """After running pybabel extract, the catalog must contain known strings."""
     import subprocess
@@ -242,3 +296,23 @@ def test_messages_pot_contains_login_button(tmp_path):
     assert 'msgid "Sign in"' in pot
     assert 'msgid "Username"' in pot
     assert 'msgid "Password"' in pot
+
+
+def test_app_css_is_served_with_design_tokens(client):
+    """The new shared stylesheet must be reachable and must carry the
+    full token set the rest of the redesign depends on."""
+    resp = client.get("/static/app.css")
+    assert resp.status_code == 200, "app.css must be served by Flask's static handler"
+    body = resp.data.decode("utf-8")
+    for token in (
+        "--ink", "--accent", "--teal", "--blue",
+        "--bg", "--panel", "--border", "--muted",
+        "--clear-bg", "--clear-fg",
+        "--medium-bg", "--medium-fg",
+        "--high-bg", "--high-fg",
+        "--severe-bg", "--severe-fg",
+        "--font-sans", "--font-mono",
+        "--space-1", "--space-2", "--space-3", "--space-4", "--space-6",
+        "--radius-sm", "--radius-md", "--radius-lg",
+    ):
+        assert token in body, f"missing token: {token}"

@@ -48,7 +48,7 @@ def test_illness_reports_has_all_columns(tmp_db_path):
 
 
 def test_stations_seeded_idempotently(tmp_db_path):
-    """init_db() seeds 10 stations and re-running does not duplicate them."""
+    """init_db() seeds 32 stations and re-running does not duplicate them."""
     sys.modules.pop("engine", None)
     sys.modules.pop("database", None)
     from database import init_db
@@ -59,4 +59,4 @@ def test_stations_seeded_idempotently(tmp_db_path):
     init_db()  # second call should be a no-op for seed
     with get_engine().connect() as conn:
         n = conn.execute(text("SELECT COUNT(*) FROM stations")).scalar_one()
-    assert n == 10
+    assert n == 32

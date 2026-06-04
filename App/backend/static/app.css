@@ -1,0 +1,474 @@
+/* Design tokens + component primitives — see
+   docs/superpowers/specs/2026-05-31-ui-upgrade-design.md §§3-4 */
+
+:root {
+  /* Brand */
+  --ink: #1a2b47;
+  --accent: #3eb1e8;
+  --teal: #5fb5a8;
+  --blue: #3b8fd1;
+
+  /* Surfaces */
+  --bg: #f1f3f5;
+  --panel: #ffffff;
+  --border: #d6dce3;
+  --muted: #6b7280;
+
+  /* Status pills */
+  --clear-bg: #d6efe2;   --clear-fg: #0f5b3a;
+  --medium-bg: #fff1cc;  --medium-fg: #8a5b00;
+  --high-bg: #ffd7b3;    --high-fg: #8a3a00;
+  --severe-bg: #fad9d9;  --severe-fg: #7a1c1c;
+
+  /* Typography */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  /* Scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --radius-sm: 3px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+}
+
+/* Reset + base */
+*, *::before, *::after { box-sizing: border-box; }
+body.app {
+  margin: 0;
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+}
+
+/* ----- Topbar + brand mark ----- */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-2) var(--space-4);
+  background: var(--ink);
+  color: #fff;
+  font-size: 12px;
+}
+.topbar .right {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  color: rgba(255,255,255,0.75);
+}
+.topbar .right .lang-picker { margin: 0; }
+.topbar .right select {
+  background: #142035;
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius-sm);
+  padding: 3px 6px;
+  font-size: 11px;
+}
+.topbar .user-meta {
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+.topbar a { color: rgba(255,255,255,0.85); text-decoration: none; }
+.topbar a:hover { color: #fff; text-decoration: underline; }
+
+.topnav {
+  display: flex;
+  gap: var(--space-4);
+  margin-left: var(--space-6);
+  flex: 1;
+}
+.topbar .topnav a {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 6px 0;
+  border-bottom: 2px solid transparent;
+  color: rgba(255,255,255,0.7);
+  text-decoration: none;
+}
+.topbar .topnav a:hover { color: #fff; border-bottom-color: rgba(62,177,232,0.4); text-decoration: none; }
+.topbar .topnav a.active { color: #fff; border-bottom-color: var(--accent); }
+
+.brand-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  line-height: 1;
+}
+.brand-mark img.drop { display: block; height: 28px; width: auto; }
+.brand-mark .wordmark {
+  font-weight: 800;
+  font-size: 16px;
+  letter-spacing: 0.01em;
+}
+.brand-mark .wordmark .aqua { color: var(--ink); }
+.brand-mark .wordmark .solutions { color: var(--accent); }
+.topbar .brand-mark .wordmark .aqua { color: #ffffff; }
+
+/* ----- Disclaimer strip ----- */
+.disclaim {
+  background: var(--severe-bg);
+  color: var(--severe-fg);
+  padding: 6px var(--space-4);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid #f3d9d9;
+}
+
+/* ----- Layout containers ----- */
+main.app-main { padding: var(--space-4); }
+.crumb {
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: var(--space-3);
+}
+.crumb a { color: var(--accent); text-decoration: none; }
+.crumb .mono { font-family: var(--font-mono); }
+
+/* ----- Panel card ----- */
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  padding: var(--space-3) var(--space-4);
+}
+.panel + .panel { margin-top: var(--space-3); }
+.panel h4 {
+  margin: 0 0 var(--space-2);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 2px solid var(--accent);
+  padding-bottom: 4px;
+}
+
+/* Two-column page grid (dashboard, detail pages) */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+.grid-2-asym { display: grid; grid-template-columns: 2fr 1fr; gap: var(--space-3); }
+
+/* The `.panel + .panel` margin above is meant for vertically-stacked
+   panels in a single column. Inside a grid the columns already have
+   `gap`, and adjacent-sibling margin would push grid items down and
+   make panels look uneven. Cancel it for grid children. */
+.grid-2 > .panel + .panel,
+.grid-2-asym > .panel + .panel { margin-top: 0; }
+
+/* ----- Row patterns ----- */
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+  border-bottom: 1px dotted var(--border);
+  font-size: 12px;
+}
+.row:last-child { border-bottom: none; }
+.row:hover { background: var(--bg); }
+
+/* ----- Pills ----- */
+.pill {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.pill-clear  { background: var(--clear-bg);  color: var(--clear-fg);  }
+.pill-low    { background: var(--clear-bg);  color: var(--clear-fg);  }
+.pill-medium { background: var(--medium-bg); color: var(--medium-fg); }
+.pill-high   { background: var(--high-bg);   color: var(--high-fg);   }
+.pill-severe { background: var(--severe-bg); color: var(--severe-fg); }
+
+/* ----- Buttons ----- */
+.btn {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px var(--space-3);
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: #fff;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.btn:hover { filter: brightness(1.05); }
+.btn-light { background: var(--panel); color: var(--ink); }
+.btn-danger { background: var(--severe-fg); border-color: var(--severe-fg); }
+.btn-row { display: flex; gap: var(--space-2); }
+
+/* ----- Form fields ----- */
+.field { margin-bottom: var(--space-3); }
+.field label {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  padding: 6px var(--space-2);
+  border: 1px solid #c1c8d0;
+  border-radius: var(--radius-sm);
+  background: var(--panel);
+  color: var(--ink);
+}
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(62,177,232,0.18);
+}
+
+/* ----- Chip toggles (multi-select) ----- */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px var(--space-3);
+  border: 1px solid #c1c8d0;
+  background: var(--panel);
+  font-size: 12px;
+  cursor: pointer;
+  user-select: none;
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+}
+.chip.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+.chip .check { font-size: 10px; opacity: 0.7; }
+
+/* ----- Segmented control (single-pick) ----- */
+.segmented {
+  display: inline-flex;
+  border: 1px solid #c1c8d0;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.segmented .seg {
+  padding: 5px var(--space-3);
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--panel);
+  color: var(--ink);
+  border-right: 1px solid #c1c8d0;
+  cursor: pointer;
+}
+.segmented .seg:last-child { border-right: none; }
+.segmented .seg.on { background: var(--ink); color: #fff; }
+.segmented .seg.on.tier-low    { background: var(--clear-fg);  }
+.segmented .seg.on.tier-medium { background: var(--medium-fg); }
+.segmented .seg.on.tier-high   { background: var(--high-fg);   }
+.segmented .seg.on.tier-severe { background: var(--severe-fg); }
+
+/* ----- Key-value list ----- */
+.kv {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 6px var(--space-3);
+  font-size: 12px;
+  margin: 0;
+}
+.kv dt {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  font-weight: 700;
+  padding-top: 1px;
+}
+.kv dd { margin: 0; font-family: var(--font-mono); }
+
+/* ----- Reading table ----- */
+.reading-table {
+  width: 100%;
+  font-size: 11px;
+  border-collapse: collapse;
+}
+.reading-table th {
+  text-align: left;
+  padding: 5px 6px;
+  background: var(--bg);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 700;
+  border-bottom: 1px solid var(--border);
+}
+.reading-table td {
+  padding: 4px 6px;
+  font-family: var(--font-mono);
+  border-bottom: 1px dotted var(--border);
+}
+/* Whole-row link (e.g. medical history). Must stay a real table row —
+   never apply .row here: .row is display:flex and would break the cells
+   out of their columns, misaligning them from the header. */
+.reading-table tbody tr.clickable { cursor: pointer; }
+.reading-table tbody tr.clickable:hover { background: var(--bg); }
+
+/* ----- Inline form layout helpers ----- */
+.form-grid-3 {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: var(--space-3);
+}
+.field-row {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: var(--space-2);
+  align-items: center;
+  margin-bottom: var(--space-3);
+}
+.field-row label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+}
+.inline-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: var(--space-3);
+}
+
+/* ----- Login card centring (one truly page-specific layout that lives here
+        because it's brand-mark-shaped, not page-shaped) ----- */
+body.app.app-login {
+  display: flex;
+  flex-direction: column;
+}
+.login-body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+}
+.login-card {
+  width: 320px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  padding: var(--space-6);
+}
+.login-card .brand-mark { display: flex; justify-content: center; margin-bottom: var(--space-3); }
+.login-card .brand-mark img.drop { height: 40px; }
+.login-card .brand-mark .wordmark { font-size: 18px; }
+.login-card h3 {
+  margin: var(--space-2) 0 4px;
+  font-size: 14px;
+  text-align: center;
+  color: var(--ink);
+  font-weight: 600;
+}
+.login-card p.sub {
+  margin: 0 0 var(--space-4);
+  font-size: 11px;
+  color: var(--muted);
+  text-align: center;
+  font-style: italic;
+}
+.login-card .error {
+  background: var(--severe-bg);
+  color: var(--severe-fg);
+  padding: 8px var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  margin-bottom: var(--space-3);
+}
+.login-card .footer {
+  margin-top: var(--space-3);
+  font-size: 11px;
+  color: var(--muted);
+  text-align: center;
+  line-height: 1.5;
+}
+
+/* ----- Utilities + small primitives -----
+   These absorb inline styles that had drifted across the templates so the
+   design system stays the single source of truth (spec §4: "templates use
+   primitives by class name with zero per-page customisation"). */
+
+/* Monospace data anywhere (promoted from the crumb-scoped rule). */
+.mono { font-family: var(--font-mono); }
+
+/* Muted helper / caption / empty-state text. Modifiers compose:
+   class="note sm italic block". Collapses the previous 10/11/12/13px soup
+   to a two-size scale. */
+.note { color: var(--muted); font-size: 12px; }
+.note.sm { font-size: 10px; }
+.note.italic { font-style: italic; }
+.note.block { display: block; }
+.note.err { color: var(--severe-fg); }
+
+/* The "optional / clinical-assessment" qualifier inside an uppercase field
+   label — overrides the label's weight + casing. */
+.opt { font-weight: 500; text-transform: none; color: var(--muted); }
+
+/* Inline advisory callout (e.g. the automated-heuristic disclaimer). Reuses
+   the MEDIUM amber pair instead of a one-off rgba. */
+.callout {
+  background: var(--medium-bg);
+  color: var(--medium-fg);
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  line-height: 1.4;
+  margin-bottom: var(--space-3);
+}
+
+/* Block submit-feedback message (success / error). Previously these abused
+   .pill with a display:block override. */
+.flash {
+  display: block;
+  padding: 8px var(--space-3);
+  font-size: 12px;
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-3);
+}
+.flash-ok  { background: var(--clear-bg);  color: var(--clear-fg);  }
+.flash-err { background: var(--severe-bg); color: var(--severe-fg); }
+
+/* Composable bits for the repeated form/button shapes. */
+.btn-block { width: 100%; }
+.form-inline { display: inline; margin: 0; }
+.pill.dim { opacity: 0.7; }
+.m-0 { margin: 0; }
+.mt-2 { margin-top: var(--space-2); }
+.mt-3 { margin-top: var(--space-3); }
+.mb-2 { margin-bottom: var(--space-2); }
+.ml-2 { margin-left: var(--space-2); }
+
+/* ----- Unverified-translation banner (from the i18n work) -----
+   Reuses the MEDIUM-tier amber pair so the "unverified" warning reads as
+   a real warning on the light theme. The previous pale-gold-on-near-white
+   colours were a dark-theme orphan left behind by the light re-skin and
+   were effectively illegible (~1.3:1 contrast). */
+.unverified-banner {
+  background: #ffd633;          /* solid amber — reads instantly as a warning */
+  color: var(--ink);           /* navy text on amber ≈ 8.9:1 contrast */
+  border-bottom: 1px solid #e6b800;
+  padding: 8px var(--space-4);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+}

@@ -55,7 +55,7 @@ def test_gov_user_sees_report(gov_session):
     assert f"Report #{rid}" in body
     assert "diarrhoea" in body
     assert "dehydration" in body
-    assert "Borehole A" in body  # station 1 name
+    assert "Avenues" in body  # station 1 name
 
 
 def test_unknown_report_returns_404(gov_session):
