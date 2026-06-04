@@ -10,4 +10,3 @@ Combined Dataset - Takes sensor data and calculates the WQI. Any ML would just f
 WQD - Fish-pond aquaculture dataset. The label is pond suitability, not human water safety, so it has no relevance to disease risk prediction. Left unanalysed — XGBoost had already been validated on the other datasets and nothing new would be learned from running it here.
 
 
-The other files in this folder are technical documents written for AI. They record the exact steps followed to build each analysis and are intended for rebuilding or adapting the work, not for reading as a summary.

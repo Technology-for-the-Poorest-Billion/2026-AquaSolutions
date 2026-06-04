@@ -8,12 +8,11 @@ This repository was created by Aidan O'Donnell (ao565) and Tristan Martin (tjfm4
   - issues: Resolved, live, and forecasted challenges with both the technical and implementation complexities of deploying this product.
   - Meetings: Notes on meetings with Allen Chafa and supervisors (Dr.Allen, Dr.Bashford, and Dr.Smith).
   - Plans: Plans for our approach to each objective. Each time we pivot or define a new objective, we create a new document to outline what we want to do and how we plan to get there. 
-- ML:
-  - ML Full Dataset: Code and results for ML methods run on "Data/full_dataset.csv". 
-  - ML Combined Dataset: Code and results for ML methods run on "Data/Combined_dataset.csv". 
-  - Plans and Specs: Decisions made on ML algorithms and datasets. 
 - App: 
-- Data: Four publicly available datasets (the best we could find). 
+- Data:
+  - Datasets: Four publicly available water quality datasets.
+  - ML: All machine learning work — XGBoost and logistic regression analyses across the datasets, with findings and methodology documented.
+  - plan.md: Decisions on which datasets to analyse and why.
 - Research: Documents, papers, and case studies used to understand current ML techniques for water quality tasks and the digital healthcare systems in place in Zimbabwe. 
 
 ## Allen Chafa: 

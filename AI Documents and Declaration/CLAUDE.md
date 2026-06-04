@@ -84,7 +84,7 @@ The pilot site is **deliberately not locked** in this document. The Bengal Delta
 
 ## Working notes
 
-- The repo uses Git LFS for specific large datasets (see `.gitattributes`). The currently-tracked LFS files are `Data/Combined_dataset.csv` and `Data/GFQA_v3.zip`. Do not commit large CSVs without confirming LFS handling.
+- The repo uses Git LFS for specific large datasets (see `.gitattributes`). The currently-tracked LFS files are `Data/Datasets/Combined_dataset.csv` and `Data/Datasets/GFQA_v3.zip`. Do not commit large CSVs without confirming LFS handling.
 - `WNTR/` is a vendored copy of EPA's Water Network Tool for Resilience, earmarked as a pre-hardware network simulator. Not yet integrated; treat as a library, not project code.
 - `.venv/` is the local Python environment. Do not commit changes to it.
 - Phase-1 ML notebooks live in `ML/`. They are evidence for the predictive-ceiling finding, not the deliverable.

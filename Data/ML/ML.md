@@ -3,11 +3,9 @@ This folder contains all machine learning work done on existing water quality da
 
 Folders
 
-ML Full dataset — primary analysis. Runs XGBoost and Logistic Regression on full_dataset.csv, which has three sensor features (pH, turbidity, temperature) and an E. coli risk label. Two versions: V1 explores the baseline and adds temporal features; V2 tightens the validation and adds a deployment guardrail that flags when the model should defer to a lab.
+ML Full dataset — primary analysis. Runs XGBoost and Logistic Regression on ../Datasets/full_dataset.csv, which has three sensor features (pH, turbidity, temperature) and an E. coli risk label. Two versions: V1 explores the baseline and adds temporal features; V2 tightens the validation and adds a deployment guardrail that flags when the model should defer to a lab.
 
-ML water potability — secondary analysis on a Kaggle dataset with nine chemistry features and a binary potability label. Used to test whether more features lift performance above the ceiling seen on the full dataset.
-
-plans and specs — technical documents written for AI. Records the decisions made and the steps followed to build each analysis. Not intended for reading as a summary.
+ML water potability — secondary analysis on ../Datasets/water_potability.csv, a Kaggle dataset with nine chemistry features and a binary potability label. Used to test whether more features lift performance above the ceiling seen on the full dataset.
 
 
 Key findings

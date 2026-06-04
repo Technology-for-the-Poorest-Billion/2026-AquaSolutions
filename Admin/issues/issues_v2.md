@@ -6,10 +6,10 @@ A briefing document of **dataset-only** issues for the GM2 TinyML water-quality 
 
 | File | Rows × Cols | Target column | Target type | Origin |
 |---|---|---|---|---|
-| `Data/full_dataset.csv` | 25,625 × 15 | `risk_drinking_no_treatment` (also `_limited_treatment`, `_contact`, `_irrigation_raw`) + raw `ecoli_per_100ml`, `faecal_coliforms_per_100ml` | Ordinal {low, Med, HIGH} + raw microbial counts | DWS South Africa (WMA monitoring) |
-| `Data/water_potability (1).csv` | ~3,276 × 10 | `Potability` | Binary {0, 1} | Kaggle (Aditya Kadiwal) |
-| `Data/Combined_dataset.csv` | very large (~320 MB) × 14 | `CCME_WQI`, `CCME_Values` | Continuous + ordinal {Excellent, …, Poor} | Figshare 1940–2023 scrape |
-| `Data/WQD.csv` | small (~kB) × 15 | `Water Quality` | Ordinal | Mendeley (fish-pond aquaculture) |
+| `Data/Datasets/full_dataset.csv` | 25,625 × 15 | `risk_drinking_no_treatment` (also `_limited_treatment`, `_contact`, `_irrigation_raw`) + raw `ecoli_per_100ml`, `faecal_coliforms_per_100ml` | Ordinal {low, Med, HIGH} + raw microbial counts | DWS South Africa (WMA monitoring) |
+| `Data/Datasets/water_potability (1).csv` | ~3,276 × 10 | `Potability` | Binary {0, 1} | Kaggle (Aditya Kadiwal) |
+| `Data/Datasets/Combined_dataset.csv` | very large (~320 MB) × 14 | `CCME_WQI`, `CCME_Values` | Continuous + ordinal {Excellent, …, Poor} | Figshare 1940–2023 scrape |
+| `Data/Datasets/WQD.csv` | small (~kB) × 15 | `Water Quality` | Ordinal | Mendeley (fish-pond aquaculture) |
 
 ## 1. Cross-dataset issues
 
