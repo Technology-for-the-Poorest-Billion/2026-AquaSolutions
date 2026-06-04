@@ -1,6 +1,6 @@
 # issues_v2.md — Dataset-Level Technical Issues
 
-A briefing document of **dataset-only** issues for the GM2 TinyML water-quality project. Modelling-, deployment-, and toolchain-level issues are intentionally excluded (see `ISSUES.md` for those). Every claim below is verifiable from the raw files in `Data/`.
+A briefing document of **dataset-only** issues for the GM2 TinyML water-quality project. Implementation difficulties are outlined in "issues_v3.md". The issues described here refer to the four datasets in the "Data" folder. 
 
 ## 0. Inventory
 
@@ -14,26 +14,21 @@ A briefing document of **dataset-only** issues for the GM2 TinyML water-quality 
 ## 1. Cross-dataset issues
 
 ### 1.1 Only one dataset has a microbial label
-- `full_dataset.csv` is the **only** file with E. coli or faecal-coliform counts.
-- None of the four files measure *Vibrio cholerae*.
-- Implication: pathogen-track modelling can only draw labels from `full_dataset.csv`. The other three cannot be used as pathogen-label sources, only as feature pre-training / domain-shift signal.
+- `full_dataset.csv` is the **only** file with E. coli or faecal-coliform counts. None of the four files measure *Vibrio cholerae*.
+- As such, only one of our datasets is useful for detecting bacterial quantities. However, even then, we cannot predict the cholera quantity as it is not included in any datasets we could find. 
 
 ### 1.2 The four datasets share almost no features
-- **pH is the only column present in all four.**
-- Turbidity + Temperature appear in three of four (potability has Turbidity but no Temperature; potability has no microbial measurement).
+- **pH is the only column present in all four.** Turbidity & Temperature appear in three of four. 
 - DO / BOD / Ammonia appear in two of four (`WQD.csv`, `Combined_dataset.csv`).
-- Implication: a naive `pd.concat` produces a table that is mostly NaN. Any model trained on the union will learn **dataset identity** from missingness patterns instead of water chemistry. This is not theoretical — see §5.
+- Combining the tables would result in many missing rows. Additionally, the datasets are of different sizes, weighting some measurements more heavily than others. 
 
 ### 1.3 The four labels are not the same quantity
 Even if features lined up, the labels do not:
 - `full_dataset.csv` → risk band derived from E. coli counts (faecal contamination).
 - `water_potability (1).csv` → binary "potable" against an unspecified composite rule.
-- `Combined_dataset.csv` → CCME WQI, a Canadian regulatory composite of ten parameters scored vs jurisdiction-specific thresholds.
-- `WQD.csv` → fish-pond suitability classes.
-You cannot stack these and call the result "water safety". Each is a different rubric on a different population.
-
-### 1.4 No `provenance` column survives a naive concat
-None of the four files carry a `source` / `dataset` column. Once concatenated, the row's origin is unrecoverable unless added explicitly at load time. Without it, dataset-identity leakage (§5) is invisible to validation.
+- `Combined_dataset.csv` → CCME WQI, a Canadian regulatory composite of ten parameters scored vs jurisdiction-specific thresholds (same standards do not apply to other countries).
+- `WQD.csv` → fish-pond suitability classes. Fish-ponds do not have the same contamination mechanisms as boreholes. 
+We could combine these, but they measure fundamentally different things. If we choose one label, we limit our training data significantly. 
 
 ## 2. `full_dataset.csv` — DWS South Africa
 
@@ -41,17 +36,19 @@ The **only viable pathogen-label source**, but with three structural problems:
 
 ### 2.1 Extreme target skew
 - Distribution of `risk_drinking_no_treatment`: **HIGH 24,283 / Med 943 / low 399** (≈ 95% / 4% / 1%).
-- A constant-predict-HIGH classifier scores ~91% accuracy on a held-out test set (empirically observed in `ML/FirstGradBooster_v2.ipynb`).
-- E. coli counts span **0 – 50,000,000 per 100 mL**, eight orders of magnitude, median 678. Regression on the raw count is unstable on any model, doubly so on an MCU.
+- A constant-predict-HIGH classifier scores ~91% accuracy. This is useless as it would result in the unnecessary closure of a borehole. 
+- E. coli counts span **0 – 50,000,000 per 100 mL**, eight orders of magnitude, median 678. 
 
 ### 2.2 Heavy missingness in the only useful predictor besides pH
 - `temperature_c`: **45% missing** (11,531 / 25,625 rows).
 - `faecal_coliforms_per_100ml`: largely empty.
 - 17.7% of `ecoli_per_100ml` rows are blank — those rows cannot be label-imputed without fabricating the target.
+- Our model actually states that missing temperature data is a strong indicator of water quality, but we do not know why a temperature reading might have been missed. This also has no physical interpretation. 
 
 ### 2.3 Repeated readings per site over time
 - 188 sites, dates 1990-01-02 to 2024-12-19.
 - Multiple observations per site over decades → a random train/test split correlates rows across the split (data leakage). The split must be both **grouped by `site_id` AND temporally ordered**.
+- On an annual scale, it was however found that incorporating the month/season provides a useful additional parameter for contamination prediction due to increased sewage propagation under rain. 
 
 ## 3. `WQD.csv` — Mendeley fish-pond dataset
 
