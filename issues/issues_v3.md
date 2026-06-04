@@ -1,4 +1,4 @@
-# issues_v3.md — Phase-2 Risk Register
+# issues_v3.md — Risk Register
 
 This is a live document of the risks associated with the implementation of the data collection and management system (Week 2 onward). 
 
