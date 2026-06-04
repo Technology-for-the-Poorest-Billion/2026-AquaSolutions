@@ -1,10 +1,10 @@
 # PLAN.md — v2: Data-Collection Apparatus + Server-Side ML (deferred)
 
-> v1 (the 10-day on-device TinyML plan) is archived in [`PLAN_v1.md`](PLAN_v1.md). The pivot rationale lives in [`App/cholera_sensor_ml_approach.md`](App/cholera_sensor_ml_approach.md). Read those two if any decision below seems to come out of nowhere.
+> v1 (the 10-day on-device TinyML plan) is archived in "Plan_v1.md". The pivot rationale lives in "App/cholera_sensor_ml_approach.md". Read those two if any decision below seems to come out of nowhere. This document provides the outline for the steps taken under the new pivoted objective (reliable data collection). 
 
 ## 0. Where we are and what we're building
 
-The project is no longer "ship an on-device classifier trained on the existing datasets." After grouped + temporal evaluation, three-sensor classification on `full_dataset.csv` was indistinguishable from a majority-class dummy (macro-F1 ≈ 0.32, `issues_v2.md` §6.2). That ceiling is in the *labels*, not the *model* — none of the four phase-1 datasets pair sensor measurements with health outcomes.
+The project is no longer "ship an on-device classifier trained on the existing datasets." After grouped + temporal evaluation, three-sensor classification on `full_dataset.csv` was indistinguishable from a majority-class dummy (macro-F1 ≈ 0.32, "issues/issues_v2.md" §6.2). That ceiling is in the *labels*, not the *model* — none of the four phase-1 datasets pair sensor measurements with health outcomes.
 
 The current build is a **two-leg data-collection system**:
 
