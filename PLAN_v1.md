@@ -50,68 +50,11 @@ The plan front-loads data reconciliation, because if the "issues/issues_v1.md" d
 - **Tasks:** Profile every dataset (row counts, missing values, ranges, target distributions). Only "full_dataset.csv" carries a microbial quantity. Quantify E. coli skew and risk-class imbalance.
 - **Output:** "data_audit.md" + the explicit revised objective (E. coli risk-band proxy, not literal cholera detection).
 
-### Day 2 — Canonical schema and unit standardisation
-- **Tasks:** Define one canonical schema (snake_case names, SI-ish units, explicit per-100 mL vs per-L convention). Build a unit registry. Write per-dataset loaders that map raw → canonical, flagging un-mappable columns (e.g. turbidity-cm vs NTU) rather than coercing them. Record provenance (source dataset) as a column.
-- **Output:** `schema.yaml`, `loaders.py`, a reconciled `canonical_*.parquet` per dataset.
-- **Decision:** Final common-feature tiers (minimal vs rich) locked.
-
-### Day 3 — Cleaning, imputation, and label engineering
-- **Tasks:** Handle missingness (17.7% of E. coli rows are blank; potability pH has gaps). Decide drop-vs-impute per column (recommend: drop rows missing the *label*; median/KNN-impute predictors with missingness flags). Engineer the ordinal E. coli risk-band target from `ecoli_per_100ml` using WHO-aligned cut points; derive the auxiliary general-quality target from the other datasets. Log-transform skewed predictors and the count.
-- **Output:** `clean.py`, labelled modelling table for the pathogen head, separate table for the auxiliary head.
-- **Gate:** Final target encoding agreed and frozen.
-
-### Day 4 — EDA and dimensionality reduction
-- **Tasks:** Correlation matrix, mutual information and ANOVA F-scores between predictors and the risk band, tree-based importances, and PCA *for visualisation only*. Identify the 3–6 most informative field-measurable parameters. Cross-check against domain literature (pH, temperature, turbidity, DO, BOD, ammonia are the physically plausible indicators of conditions favouring faecal bacteria).
-- **Output:** `feature_analysis.md` with ranked features and the agreed shipped feature set.
-- **Decision:** Final feature set for the minimal-tier (TinyML) model.
-
-### Day 5 — Baseline models and the validation harness
-- **Tasks:** Build the grouped/temporal CV harness (split by `site_id` + time). Train baselines: majority-class floor, logistic/ordinal regression, single decision tree. Establish honest baseline metrics (per-class recall, macro-F1, confusion matrix, **not** accuracy alone).
-- **Output:** `baselines/` with reproducible metrics; the metric dashboard.
+### Day 2 — Baseline models and the validation harness
+- **Tasks:** Build the grouped/temporal CV harness (split by `site_id` + time). Train baselines: majority-class floor, logistic/ordinal regression, single decision tree. Establish honest baseline metrics (per-class recall, macro-F1, confusion matrix, **not** accuracy alone). Train an XGBoost model on "full_dataset.csv" and evaluate its performance. 
+- **Output:** `baselines/` with reproducible metrics; the metric dashboard. A trained XGBoost classifier and its resulting performance on the "full_dataset.csv" test split. 
 - **Gate:** Confirm models beat the majority-class floor on minority (unsafe-band) recall — if not, revisit features/targets.
 
-### Day 6 — Primary model development
-- **Tasks:** Train and tune the candidate TinyML models on the minimal feature tier: depth-limited tree, gradient-boosted trees, tiny MLP. Apply imbalance handling (class weights / focal loss), tune decision thresholds toward high recall on unsafe bands. Optionally train the rich-tier stretch model.
-- **Output:** Trained candidate models + comparison table (accuracy is reported but ranking is by macro-F1 and unsafe-band recall under the budget).
-- **Decision:** Select the winning model family.
+## Pivot: From ML prediction to data collection
 
-### Day 7 — Compression and TinyML conversion
-- **Tasks:** Apply the matching toolchain — int8 post-training quantisation (TFLite-Micro) for the MLP, or `emlearn`/`m2cgen` C export for the tree. Prune/limit depth to fit the flash/RAM budget. Measure footprint and inference latency on the target MCU class (or an emulator).
-- **Output:** Quantised model artifact + generated C, plus a footprint/latency report.
-- **Gate:** Model fits the Day-1 hardware budget. If not, iterate on depth/width or feature count.
-
-### Day 8 — On-device validation and accuracy-vs-size trade-off
-- **Tasks:** Evaluate the *quantised* model (quantisation can shift minority-class recall). Compare float vs int8 confusion matrices. Run on the actual board if available; otherwise a faithful emulator. Profile worst-case latency and memory.
-- **Output:** `deployment_eval.md` documenting the accuracy lost to quantisation and the final operating thresholds.
-- **Decision:** Accept the trade-off or roll back to a larger-but-still-feasible config.
-
-### Day 9 — Robustness, calibration, and field-condition stress tests
-- **Tasks:** Sensor-noise injection (simulate cheap-sensor error on pH/turbidity/temp), out-of-distribution checks (inputs outside training ranges → must abstain/flag, not silently extrapolate), probability calibration, and a clear "uncertain / send sample to lab" output state. Sanity-check the per-litre quantity estimates (band midpoint × 10) against physical plausibility.
-- **Output:** robustness report; abstention/uncertainty logic specified.
-- **Gate:** Model degrades gracefully under realistic sensor noise.
-
-### Day 10 — Packaging, documentation, and handover
-- **Tasks:** Freeze the model, write the model card (intended use, the cholera-proxy limitation stated prominently, performance per class, known failure modes), reproducible training pipeline, and the firmware integration notes. Final demo.
-- **Output:** `model_card.md`, packaged artifact, reproducible pipeline, README, and a short "what we'd do with more time / more data" section.
-- **Gate:** Handover review.
-
----
-
-## 3. Standardisation strategy (the specific concern raised)
-
-The team correctly identified three reconciliation problems. The plan handles each as follows:
-
-- **Different columns.** Map all sources into one canonical schema (Day 2). Where a predictor exists in only some datasets, it stays available for the rich-tier model but is excluded from the minimal TinyML feature set. Provenance is tracked so multi-dataset training never hides which rows could carry a real label.
-- **Different units.** A unit registry performs explicit, documented conversions (e.g. temperature already in °C everywhere; concentrations normalised to a stated per-100 mL or per-L convention). **Non-convertible** quantities — notably Turbidity in cm (transparency/Secchi-style) vs NTU (nephelometric) — are *not* force-converted; they are kept as distinct features or dropped, with the decision logged. This avoids manufacturing a false equivalence.
-- **Different quality measures (the target mismatch).** This is the deepest issue and is handled by the **multi-target / multi-head framing**: the *pathogen* target comes only from `full_dataset.csv`'s E. coli counts (banded); the other datasets' targets (potability, fish-pond class, CCME_WQI) are *not* harmonised into one number — instead they feed a separate auxiliary "general quality" task and unsupervised pre-training. We explicitly **do not** invent a single synthetic "water quality" label spanning all four datasets, because their definitions are physically different and merging them would inject label noise.
-
-## 4. Dimensionality reduction strategy (the specific concern raised)
-
-Use a *consensus of methods* (Day 4) rather than one technique: correlation pruning, mutual information / ANOVA F-test, tree-based importance, and PCA. **For the shipped model, prefer feature *selection* over feature *projection* (PCA):** on a microcontroller, a PCA component still requires every raw input to be sensed, so it does not reduce the sensor cost or the on-device compute the way dropping a feature does. PCA is therefore used for understanding structure and visualising redundancy, while the final 3–6 features are chosen by selection so the deployed node only has to carry the cheapest, most informative sensors.
-
-## 5. Definition of done
-
-- A quantised TinyML model running within the agreed flash/RAM/latency budget, predicting E. coli risk bands (with banded per-litre estimates) from minimal field-measurable inputs.
-- Honest, per-class metrics (macro-F1 and unsafe-band recall foregrounded; raw accuracy de-emphasised), reported on a leakage-free grouped/temporal split.
-- A model card stating the cholera-proxy limitation and out-of-distribution behaviour prominently.
-- A fully reproducible pipeline from raw CSVs to deployed C/TFLite artifact.
+It is a good thing we frontloaded the data evaluation and model performance. After these initial steps, we realised that there were no publicly available datasets of sufficient quality and parametric measurement to train an appropriate algorithm for our objective. As such, we now seek to deploy a product which will compile water sensor data and illness reports to enable future ML approaches. See "Plan_v2" for our next steps. 
