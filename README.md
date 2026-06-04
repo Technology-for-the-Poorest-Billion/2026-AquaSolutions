@@ -4,12 +4,17 @@ This repository was created by Aidan O'Donnell (ao565) and Tristan Martin (tjfm4
 
 ## Repository Structure
 - AI Documents and Declaration: Documentation of the guided use of Claude for software deployment. 
-- Admin: 
-- ML: Dataset validation and choice, testing various models, results of the various models. 
-- App:
+- Admin:
+  - issues: Resolved, live, and forecasted challenges with both the technical and implementation complexities of deploying this product.
+  - Meetings: Notes on meetings with Allen Chafa and supervisors (Dr.Allen, Dr.Bashford, and Dr.Smith).
+  - Plans: Plans for our approach to each objective. Each time we pivot or define a new objective, we create a new document to outline what we want to do and how we plan to get there. 
+- ML:
+  - ML Full Dataset: Code and results for ML methods run on "Data/full_dataset.csv". 
+  - ML Combined Dataset: Code and results for ML methods run on "Data/Combined_dataset.csv". 
+  - Plans and Specs: Decisions made on ML algorithms and datasets. 
+- App: 
 - Data: Four publicly available datasets (the best we could find). 
 - Research: Documents, papers, and case studies used to understand current ML techniques for water quality tasks and the digital healthcare systems in place in Zimbabwe. 
-- issues: Documentation of the challenges forecasted and identified at each stage of the process. These are technical and community-based problems which are useful to consider, both for design decisions and in validating future product performance. 
 
 ## Allen Chafa: 
 https://reports.raeng.org.uk/africa-prize-2023-interactive-showcase/allen-chafa.html
