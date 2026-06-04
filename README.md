@@ -2,6 +2,15 @@
 
 This repository was created by Aidan O'Donnell (ao565) and Tristan Martin (tjfm4) in conjunction with Allen Chafa, founder of Aqua Solutions, as a part of the four-week GM2 IIA CUED project. This was the first year students from GM2 collaborated with Aqua Solutions. 
 
+## Repository Structure
+- AI Documents and Declaration: Documentation of the guided use of Claude for software deployment. 
+- Admin: 
+- ML: Dataset validation and choice, testing various models, results of the various models. 
+- App:
+- Data: Four publicly available datasets (the best we could find). 
+- Research: Documents, papers, and case studies used to understand current ML techniques for water quality tasks and the digital healthcare systems in place in Zimbabwe. 
+- issues: Documentation of the challenges forecasted and identified at each stage of the process. These are technical and community-based problems which are useful to consider, both for design decisions and in validating future product performance. 
+
 ## Allen Chafa: 
 https://reports.raeng.org.uk/africa-prize-2023-interactive-showcase/allen-chafa.html
 
