@@ -1,15 +1,15 @@
 # PLAN_v1.md — Archived (phase 1)
 
-> **Archived 2026-05-27.** This is the original 10-day plan for an on-device TinyML classifier trained on the four pre-existing datasets. It was superseded after grouped + temporal evaluation showed the three-sensor classifier was at its predictive ceiling (macro-F1 ≈ 0.32 vs a 0.32 dummy — see `issues_v2.md` §6.2).
+> **Week 1, Archived 2026-05-27.** This is the original 10-day plan for an on-device TinyML classifier trained on the four pre-existing datasets. It was archived after the team documented the shortcomings of the datasets described in "issues/issues_v2.md". 
 >
-> The current plan lives in [`PLAN.md`](PLAN.md). The pivot rationale lives in [`App/cholera_sensor_ml_approach.md`](App/cholera_sensor_ml_approach.md).
+> The current plan lives in "PLAN.md_v1". The pivot rationale lives in "App/cholera_sensor_ml_approach.md"
 >
 > Material still load-bearing from this document:
-> - The four-dataset audit (§0 table) and the honest-framing block — both folded into [CLAUDE.md](CLAUDE.md) "Key facts" and "Non-negotiable framing."
-> - The validation protocol (grouped + temporal split by `site_id` and date) — carried into [`issues_v3.md`](issues_v3.md) §E2.
-> - The ML pipeline discipline (imbalance-aware metrics, no PCA for the shipped model, abstain state on OOD inputs) — carried into [CLAUDE.md](CLAUDE.md) "ML pipeline discipline."
+> - The four-dataset audit (§0 table) and the honest-framing block — both folded into "Claude.md" - "Key facts" and "Non-negotiable framing."
+> - The validation protocol (grouped + temporal split by `site_id` and date) — carried into "issues_v3.md".
+> - The ML pipeline discipline (imbalance-aware metrics, no PCA for the shipped model, abstain state on OOD inputs) — carried into "Claude.md" - "ML pipeline discipline."
 >
-> Everything specifically about on-device TinyML deployment (Day 7 toolchain choice, int8 quantisation, Cortex-M0+ budgets) no longer applies — the sensor is now a data-collection node, not an inference node.
+> Everything specifically about on-device TinyML deployment (Day 7 toolchain choice, int8 quantisation, Cortex-M0+ budgets) no longer applies — the sensor is now a data-collection node, not an inference node. However, this document could still prove to be very useful if Aqua Solutions returns to an ML approach after appropriate data collection. 
 
 ---
 
@@ -17,54 +17,38 @@
 
 ## 0. Goal and honest framing
 
-**Stated objective:** Train a TinyML classification model that predicts the *presence and quantity (per litre)* of *E. coli* or *Cholera* (*Vibrio cholerae*) from low-cost, sensor-measurable water-quality parameters, such that it can run on a microcontroller in the field.
+**Objective:** Train a TinyML classification model that predicts the *presence and quantity (per litre)* of *E. coli* or *Cholera* (*Vibrio cholerae*) from low-cost, sensor-measurable water-quality parameters, such that it can run on a microcontroller in the field.
 
-**What the data actually supports.** Before committing to the objective above, the plan must reckon with what the four datasets contain. A quick audit (done up front, see Day 1) shows:
-
-| Dataset | Rows | Pathogen label? | Native target | Shared predictors |
-|---|---|---|---|---|
-| `full_dataset.csv` | 25,625 | **Yes** — `ecoli_per_100ml` + faecal coliforms | E. coli count + risk bands | pH, temperature, turbidity |
-| `Combined_dataset.csv` | ~1M+ (2.82M source) | No | CCME_WQI (index) | pH, temp, BOD, DO, N, NO₃, NH₃ |
-| `WQD.csv` | 4,300 | No | Water Quality (ordinal, fish-pond) | pH, temp, turbidity, DO, BOD, NH₃ |
-| `water_potability_1.csv` | 3,276 | No | Potability (binary) | pH, hardness, turbidity |
-
-Two facts dominate every downstream decision:
-
-1. **Only `full_dataset.csv` contains a direct microbial measurement.** The other three measure *general* water quality (a potability flag, a fish-pond quality class, a chemical index). None contains E. coli, faecal coliforms, or any *Vibrio*/cholera measurement. They therefore **cannot supply supervised labels for a pathogen classifier** — they can only contribute to *unsupervised* structure learning, transfer/pre-training, or as a separate "general quality" auxiliary task.
-2. **No dataset measures cholera at all.** *V. cholerae* is not present in any file. Cholera prediction can only be approached *indirectly* — E. coli / faecal coliforms are the standard faecal-contamination indicator organisms, and WHO treats E. coli as the primary indicator of faecal pollution and hence of the conditions under which enteric pathogens including *V. cholerae* may be present. The deliverable should therefore be scoped honestly as a **faecal-contamination / E. coli risk classifier used as a cholera-*risk* proxy**, not a cholera detector. This framing is recorded in ISSUES.md as the single biggest project risk.
-
-The E. coli counts in `full_dataset.csv` span **0 to 50,000,000 per 100 mL** (median 678), i.e. roughly eight orders of magnitude, and ~95% of the risk labels are "HIGH". This makes the realistic target a **log-scaled, banded classification** (WHO-style risk tiers) rather than precise per-litre regression, and forces explicit attention to class imbalance.
+**What the data actually supports.** Before committing to the objective above, the plan must reckon with what the four datasets contain. A quick audit returns the forecasted challenges outlined under "issues/issues_v1.md".
 
 **Revised, defensible objective for the 10 days:** a TinyML model that ingests the field-measurable parameters available on cheap sensors (pH, temperature, turbidity, and where a richer sensor stack exists, DO/BOD/ammonia) and predicts an **E. coli risk band** (a WHO-aligned ordinal scale, e.g. <1, 1–10, 11–100, 101–1000, >1000 per 100 mL) as a proxy for faecal contamination and waterborne-disease risk. Per-litre quantity is reported as the band midpoint (×10 to convert /100 mL → /L) with an explicit uncertainty caveat. A second, optional output head provides a coarse "general water quality" classification trained on the other datasets.
 
 ---
 
-## 1. Decisions that must be made (and recommended defaults)
+## 1. Decisions to be made
 
-These are flagged here because they should be settled *early* — most are hard to reverse late in a 10-day sprint.
+These are flagged here because they should be settled *early*. Documenting such decisions also allows future contributors to this project to revise potential shortcomings in the product's deployment and propose improvements. 
 
 1. **Target definition.** Per-litre regression vs. ordinal risk bands vs. binary safe/unsafe.
-   *Recommendation:* ordinal risk bands aligned to WHO E. coli categories (the dataset's own `risk_*` columns are derived from these), with per-litre quantity reported as a banded estimate. Rationale: the eight-order-of-magnitude spread and heavy right-skew make point regression unreliable on an MCU, and bands map directly to public-health action.
-2. **Which datasets supply labels.** Pathogen classifier can *only* be supervised by `full_dataset.csv`. *Recommendation:* train the pathogen head on `full_dataset.csv`; use the other three for (a) an auxiliary general-quality head, (b) unsupervised representation learning, and/or (c) feature-distribution sanity checks — never as silent label sources.
-3. **Common feature set.** The intersection across *all* datasets is essentially **pH only** (turbidity and temperature appear in three of four). *Recommendation:* define **two feature tiers** — a *minimal tier* (pH, temperature, turbidity) that every cheap sensor node can supply and that `full_dataset.csv` supports directly, and a *rich tier* (adds DO, BOD, ammonia/nitrogen, nitrate) for nodes with a fuller sensor stack. Train and ship the minimal-tier model as the primary TinyML target; treat the rich tier as a stretch model.
-4. **Unit and schema standardisation.** Differing column names, units (Turbidity in cm vs NTU; concentrations /100 mL vs /L), and conventions. *Recommendation:* a single canonical schema + unit registry defined Day 2, with all loaders mapping into it. Turbidity-in-cm (Secchi-style) is **not** linearly convertible to NTU and must be handled as a separate feature or dropped — do not fabricate a conversion.
-5. **Dimensionality reduction method.** PCA vs. tree-based feature importance vs. mutual information vs. L1/embedded selection. *Recommendation:* run several (correlation filter → mutual information / ANOVA F → tree importance → optionally PCA for visualisation only), then select a small (3–6) feature set by consensus. PCA components are poor for TinyML because every raw input still has to be measured to compute them, so prefer *feature selection* over *feature projection* for the shipped model; use PCA only for analysis/EDA.
-6. **Model family for TinyML.** Decision tree / gradient-boosted trees vs. tiny MLP vs. logistic/linear. *Recommendation:* start with a small gradient-boosted tree or a depth-limited decision tree (interpretable, quantises well, tiny footprint), benchmark a 1–2 hidden-layer MLP. Keep logistic regression as the floor baseline.
-7. **Imbalance handling.** ~95% HIGH risk. *Recommendation:* class weights and/or focal loss, threshold tuning, and report per-class recall (especially recall on the *unsafe* classes) — not raw accuracy, which a majority-class predictor would inflate to ~95%.
-8. **Deployment toolchain.** TensorFlow Lite for Microcontrollers vs. micromlgen/emlearn (for trees) vs. Edge Impulse. *Recommendation:* if a tree model wins, `emlearn`/`m2cgen` produce trivial C; if the MLP wins, TFLite-Micro with int8 quantisation. Decide by Day 7 based on which model wins, not before.
-9. **Target hardware budget.** Flash/RAM/latency ceiling. *Recommendation:* fix a concrete budget on Day 1 (e.g. ≤32 KB model flash, ≤8 KB RAM, Cortex-M0+/ESP32 class) so model selection is constrained from the start rather than retrofitted.
-10. **Validation protocol.** Random split vs. grouped/temporal split. *Recommendation:* **grouped split by `site_id` and time** in `full_dataset.csv` to avoid leakage from repeated measurements at the same monitoring station; a random row split here would massively overstate accuracy.
+   *Decision:* ordinal risk bands aligned to WHO E. coli categories (the dataset's own `risk_*` columns are derived from these), with per-litre quantity reported as a banded estimate. Rationale: the eight-order-of-magnitude spread and heavy right-skew make point regression unreliable on an MCU, and bands map directly to public-health action.
+2. **Which datasets supply labels.** Pathogen classifier can *only* be supervised by `full_dataset.csv`. *Decision:* train the pathogen head on `full_dataset.csv`; use the other three to learn more about the relationships between proxies, to predict other water quality parameters (e.g. CCME_WQI), and to validate the obtained results. 
+3. **Common feature set.** The intersection across *all* datasets is essentially **pH only** (turbidity and temperature appear in three of four). *Decision:* define **two feature tiers** — a *minimal tier* (pH, temperature, turbidity) that every cheap sensor node can supply and that `full_dataset.csv` supports directly, and a *rich tier* (adds DO, BOD, ammonia/nitrogen, nitrate) for nodes with a fuller sensor stack. While these parameters are part of some of the datasets, we still need to determine whether they can be cheaply measured. 
+4. **Unit and schema standardisation.** Differing column names, units (Turbidity in cm vs NTU; concentrations /100 mL vs /L), and conventions. *Decision:* a single canonical schema, with all loaders mapping into it. Turbidity-in-cm (Secchi-style) is **not** linearly convertible to NTU and must be handled as a separate feature. 
+5. **Model family for TinyML.** Decision tree / gradient-boosted trees vs. tiny MLP vs. logistic/linear. *Decision:* start with a small gradient-boosted tree or a depth-limited decision tree (interpretable, quantises well, tiny footprint), benchmark a 1–2 hidden-layer MLP. Keep logistic regression as the floor baseline. Need to test a variety of algorithms to define the most per
+6. **Imbalance handling.** ~95% HIGH risk. *Decision:* class weights and/or focal loss, threshold tuning, and report per-class recall. These are more advanced ML techniques for dealing with the dataset's skewness. However, we need to research them further to understand how they work. 
+7. **Deployment toolchain.** TensorFlow Lite for Microcontrollers vs. micromlgen/emlearn (for trees) vs. Edge Impulse. *Decision:* if a tree model wins, `emlearn`/`m2cgen` produce trivial C; if the MLP wins, TFLite-Micro with int8 quantisation. Decide which library to go with only after having tested various approaches. 
+8. **Target hardware budget.** Flash/RAM/latency ceiling. *Decision:* fix a concrete budget after having validated the ML approach. If it turns out a bigger model is needed, the device can be configured to this task. However, it would affect the cost of the device and how it is deployed. 
+9. **Validation protocol.** Random split vs. grouped/temporal split. *Decision:* **grouped split by `site_id` and time** in `full_dataset.csv` to avoid leakage from repeated measurements at the same monitoring station. A random row split here would overstate accuracy due to correlation between data points.
 
 ---
 
 ## 2. Ten-day plan
 
-The plan front-loads data reconciliation and the go/no-go scoping decision, because if the pathogen-label scarcity is not confronted on Day 1 the team can waste the whole sprint training on the wrong targets. Each day lists **objective → tasks → output → decision/gate**.
+The plan front-loads data reconciliation, because if the "issues/issues_v1.md" dilemmas are real, a decision needs to be made quickly on the future of this approach. Each day lists **objective → tasks → output → decision/gate** (if there are any).
 
 ### Day 1 — Audit, scoping, and the honest-target decision
-- **Tasks:** Profile every dataset (row counts, missingness, ranges, target distributions). Confirm which files carry a microbial label (only `full_dataset.csv`). Quantify E. coli skew and risk-class imbalance. Fix the hardware budget and the validation protocol.
-- **Output:** `data_audit.md` + the explicit revised objective (E. coli risk-band proxy, not literal cholera detection).
-- **Gate:** Stakeholder sign-off on the revised objective and the "indicator-organism proxy" framing. **No modelling proceeds until this is agreed.**
+- **Tasks:** Profile every dataset (row counts, missing values, ranges, target distributions). Only "full_dataset.csv" carries a microbial quantity. Quantify E. coli skew and risk-class imbalance.
+- **Output:** "data_audit.md" + the explicit revised objective (E. coli risk-band proxy, not literal cholera detection).
 
 ### Day 2 — Canonical schema and unit standardisation
 - **Tasks:** Define one canonical schema (snake_case names, SI-ish units, explicit per-100 mL vs per-L convention). Build a unit registry. Write per-dataset loaders that map raw → canonical, flagging un-mappable columns (e.g. turbidity-cm vs NTU) rather than coercing them. Record provenance (source dataset) as a column.
