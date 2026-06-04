@@ -1,7 +1,7 @@
-These files contain code for running our first gradient boosting algorithm on water potability data
+This folder contain code for running a gradient boosting method on water quality data - full_dataset.csv
 
 
-FirstGradBooster.ipynb
+full_dataset_V1.ipynb
 
 Loads full_dataset.csv and preps three sensor features: pH, turbidity, temperature (with median imputation and missingness indicator for the 45% missing temperature readings)
 Splits data 80/20 by site using GroupShuffleSplit — no site appears in both train and test
@@ -12,7 +12,7 @@ Also runs an XGBoost regressor on raw E. coli counts (log-transformed), plus a T
 Adds temporal features (month, wet season flag, year) and re-trains to see if they improve macro-F1
 
 
-FirstGradBooster_v2.ipynb — additions
+full_dataset_V2.ipynb — additions
 
 Stricter train/test split: grouped by site AND temporal cutoff at 2015, so test genuinely represents future unseen sites
 Adds an always-HIGH dummy baseline — any real model must beat its macro-F1 (~0.32) to be worth using

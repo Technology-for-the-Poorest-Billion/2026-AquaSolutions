@@ -93,7 +93,7 @@ Smallest file; largest number of file-level defects.
 
 ## 6. Cross-cutting issues *that v2 of the model just confirmed*
 
-These are reported here because the v2 notebook (`ML/FirstGradBooster_v2.ipynb`, commit `9a6ed8c`) made them visible — but the **root cause is in the data**, not the model.
+These are reported here because the v2 notebook (`ML/ML Full dataset/full_dataset_V2.ipynb`, commit `9a6ed8c`) made them visible — but the **root cause is in the data**, not the model.
 
 ### 6.1 Missingness leaks site/era identity
 - v2 added a `temperature_missing` indicator to handle the 45% NaN rate in `full_dataset.csv`.

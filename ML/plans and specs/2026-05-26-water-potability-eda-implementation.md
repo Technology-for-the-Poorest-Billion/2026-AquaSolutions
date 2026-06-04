@@ -2,16 +2,16 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Produce `ML/water_potability_eda.ipynb` — an EDA + binary classifier on `Data/water_potability (1).csv` whose headline finding is a cross-notebook macro-F1 comparison against `FirstGradBooster_v2.ipynb`.
+**Goal:** Produce `ML/water_potability_eda.ipynb` — an EDA + binary classifier on `Data/water_potability (1).csv` whose headline finding is a cross-notebook macro-F1 comparison against `full_dataset_V2.ipynb`. 
 
-**Architecture:** Single Jupyter notebook (no `src/` package). Mirrors `FirstGradBooster_v2.ipynb` structure where possible so the cross-notebook comparison is mechanical: identical model hyperparameters, identical metric reporting style. The split protocol differs (random stratified, not grouped+temporal) because the dataset lacks `site_id` / `date`.
+**Architecture:** Single Jupyter notebook (no `src/` package). Mirrors `full_dataset_V2.ipynb` structure where possible so the cross-notebook comparison is mechanical: identical model hyperparameters, identical metric reporting style. The split protocol differs (random stratified, not grouped+temporal) because the dataset lacks `site_id` / `date`. 
 
 **Tech Stack:** Python 3.13.1 (`.venv` kernel), pandas, scikit-learn, xgboost, matplotlib. No new dependencies.
 
-**Spec:** `ML/specs/2026-05-26-water-potability-eda-design.md`
+**Spec:** `2026-05-26-water-potability-eda-design.md`
 
 **Conventions:**
-- Each task ends with a `git commit`. Per-section commits are intentional — matches the granularity of `ML/plans/2026-05-25-ccme-wqi-poc-implementation.md`.
+- Each task ends with a `git commit`. Per-section commits are intentional — matches the granularity of `ML/plans and specs/plan.md`.
 - "Run cell" + "verify expected output" replaces classical pytest TDD. The expected-output block in each task is the test.
 - Notebook is hand-edited (open in VS Code / Jupyter, add cells via UI). Each task says which cells to add or modify.
 
@@ -35,7 +35,7 @@ In VS Code: `File → New Jupyter Notebook` → save as `ML/water_potability_eda
 
 EDA and binary classifier on `Data/water_potability (1).csv` (Kaggle, ~3,276 rows, 9 chemistry features + binary `Potability` label).
 
-The strategic question this notebook answers: does adding 6 more chemistry features beyond pH/turbidity/temperature meaningfully lift macro-F1 above the ~0.45 plateau observed in `FirstGradBooster_v2.ipynb`?
+The strategic question this notebook answers: does adding 6 more chemistry features beyond pH/turbidity/temperature meaningfully lift macro-F1 above the ~0.45 plateau observed in `full_dataset_V2.ipynb`?
 
 **Spec:** `ML/specs/2026-05-26-water-potability-eda-design.md`
 ```
@@ -288,7 +288,7 @@ git commit -m "Add distributions + correlation matrix to water_potability_eda"
 ```markdown
 ## Step 6: Feature prep
 
-For any feature with >5% missingness, add a `<feature>_missing` indicator column **before** imputing. Then median-impute the original column. Same protocol Aidan used on `temperature_c` in `FirstGradBooster.ipynb` — keeps the missingness signal available to tree-based models.
+For any feature with >5% missingness, add a `<feature>_missing` indicator column **before** imputing. Then median-impute the original column. Same protocol Aidan used on `temperature_c` in `full_dataset_V1.ipynb` — keeps the missingness signal available to tree-based models.
 ```
 
 - [ ] **Step 2: Add code cell**
@@ -346,7 +346,7 @@ git commit -m "Add feature prep (missingness indicators + median impute) to wate
 ```markdown
 ## Step 7: Random 80/20 stratified split
 
-**Important caveat:** `water_potability (1).csv` has no `site_id` and no `date` column. The grouped + temporal protocol used in `FirstGradBooster_v2.ipynb` is *impossible* here. We fall back to random stratified split.
+**Important caveat:** `water_potability (1).csv` has no `site_id` and no `date` column. The grouped + temporal protocol used in `full_dataset_V2.ipynb` is *impossible* here. We fall back to random stratified split.
 
 This means: any macro-F1 the models score here is an **optimistic upper bound** — repeated readings from the same physical source (if any exist in this Kaggle dataset) will leak across train/test. The cross-notebook comparison in Step 13 must account for this.
 ```
@@ -428,14 +428,14 @@ git commit -m "Add dummy baseline to water_potability_eda"
 **Files:**
 - Modify: `ML/water_potability_eda.ipynb` (append 2 cells)
 
-**Goal:** LogReg with StandardScaler + balanced class weights. Same hyperparameters as `FirstGradBooster_v2.ipynb`.
+**Goal:** LogReg with StandardScaler + balanced class weights. Same hyperparameters as `full_dataset_V2.ipynb`. 
 
 - [ ] **Step 1: Add markdown cell**
 
 ```markdown
 ## Step 9: Logistic regression baseline
 
-Same hyperparameters as `FirstGradBooster_v2.ipynb` Step 6: `StandardScaler` → `LogisticRegression(class_weight='balanced', max_iter=1000)`. Identical config makes the cross-notebook comparison in Step 13 valid.
+Same hyperparameters as `full_dataset_V2.ipynb` Step 6: `StandardScaler` → `LogisticRegression(class_weight='balanced', max_iter=1000)`. Identical config makes the cross-notebook comparison in Step 13 valid.
 ```
 
 - [ ] **Step 2: Add code cell**
@@ -479,7 +479,7 @@ git commit -m "Add logistic regression baseline to water_potability_eda"
 ```markdown
 ## Step 10: XGBoost
 
-Hyperparameters identical to `FirstGradBooster_v2.ipynb` Step 5: 300 trees, depth 4, learning rate 0.1, subsample 0.8, colsample 0.8. Sample weights via `compute_sample_weight('balanced', ...)`.
+Hyperparameters identical to `full_dataset_V2.ipynb` Step 5: 300 trees, depth 4, learning rate 0.1, subsample 0.8, colsample 0.8. Sample weights via `compute_sample_weight('balanced', ...)`. 
 ```
 
 - [ ] **Step 2: Add code cell**
@@ -611,7 +611,7 @@ Expected from Step 4:
 - Top feature by gain is typically `Chloramines` or `Sulfate` (both signal water treatment), but the exact dominant feature is unpredictable — this is what the experiment measures.
 - The auto-printed "Dominant feature" block is the cell's user-facing output.
 
-If any of the `<feature>_missing` indicators dominates by gain, that is the **same leakage-via-metadata pattern** noticed in `FirstGradBooster_v2.ipynb` (`temperature_missing` dominating). Flag explicitly in Section 14.
+If any of the `<feature>_missing` indicators dominates by gain, that is the **same leakage-via-metadata pattern** noticed in `full_dataset_V2.ipynb` (`temperature_missing` dominating). Flag explicitly in Section 14.
 
 - [ ] **Step 6: Commit**
 
@@ -634,7 +634,7 @@ git commit -m "Add 3-model comparison + feature importance to water_potability_e
 ```markdown
 ## Step 13: Cross-notebook comparison — does more features help?
 
-This is the strategic finding for the project. The 3-sensor classifier in `FirstGradBooster_v2.ipynb` plateaus around macro-F1 ≈ 0.45 (Aidan's v1 expansion: 0.449 with temporal features added). This notebook's 9-feature classifier scores `best_macro_f1` (computed above in Step 11).
+This is the strategic finding for the project. The 3-sensor classifier in `full_dataset_V2.ipynb` plateaus around macro-F1 ≈ 0.45 (Aidan's v1 expansion: 0.449 with temporal features added). This notebook's 9-feature classifier scores `best_macro_f1` (computed above in Step 11).
 
 **Important framing:** The split protocols differ. The 3-sensor classifier uses a grouped + temporal split (honest, pessimistic). This notebook uses random stratified (optimistic, leak-tolerant). So a *favourable* Δ here must be large enough to clear the protocol gap before it can be called real evidence that more features help.
 ```
@@ -643,10 +643,10 @@ This is the strategic finding for the project. The 3-sensor classifier in `First
 
 ```python
 # Hardcoded reference numbers from prior runs. Update by hand when the source notebooks are re-run.
-# Source: FirstGradBooster.ipynb commit 923a34f (Aidan's expansion, 2026-05-25).
-# If FirstGradBooster_v2.ipynb has been run, use its XGBoost macro-F1 from that notebook's Step 7 instead.
+# Source: full_dataset_V1.ipynb commit 923a34f (Aidan's expansion, 2026-05-25).
+# If full_dataset_V2.ipynb has been run, use its XGBoost macro-F1 from that notebook's Step 7 instead.
 V2_BEST_MACRO_F1 = 0.449  # XGBoost with temporal features, grouped+temporal split (honest)
-V2_SOURCE = 'FirstGradBooster.ipynb @ 923a34f (Aidan v1.5, temporal-features XGB)'
+V2_SOURCE = 'full_dataset_V1.ipynb @ 923a34f (Aidan v1.5, temporal-features XGB)'
 
 delta = best_macro_f1 - V2_BEST_MACRO_F1
 print(f"This notebook  (9 features, random split):    macro-F1 = {best_macro_f1:.3f}")
@@ -702,12 +702,12 @@ git commit -m "Add cross-notebook comparison (strategic deliverable) to water_po
 
 ### Caveats
 - Random split, not grouped+temporal — reported metrics are an *optimistic upper bound*.
-- The `<feature>_missing` indicators may carry more signal than the features themselves (same pattern observed in `FirstGradBooster.ipynb`'s `temperature_missing`). If feature importance ranks them top by gain, the model is partly learning *which rows had missing values*, which is a dataset artefact, not a chemistry signal.
+- The `<feature>_missing` indicators may carry more signal than the features themselves (same pattern observed in `full_dataset_V1.ipynb`'s `temperature_missing`). If feature importance ranks them top by gain, the model is partly learning *which rows had missing values*, which is a dataset artefact, not a chemistry signal.
 - Kaggle water_potability has documented quality concerns and likely contains synthetic or imputed rows. Treat as a sandbox dataset, not a substrate for production model decisions.
 
 ### Open questions
 - If the Step 13 verdict is **STRONG**, what is the minimum subset of the 9 features that recovers most of the macro-F1 lift? A small ablation (drop one feature at a time, retrain) would inform a BOM-vs-utility conversation with Allen Chafa.
-- If the Step 13 verdict is **NULL**, the bottleneck is not feature count. The follow-up experiment is: run `FirstGradBooster_v2.ipynb`'s exact pipeline on the `pH + Turbidity` subset of `water_potability` only, to isolate whether the difference is dataset character (Kaggle artefact) vs feature physics.
+- If the Step 13 verdict is **NULL**, the bottleneck is not feature count. The follow-up experiment is: run `full_dataset_V2.ipynb`'s exact pipeline on the `pH + Turbidity` subset of `water_potability` only, to isolate whether the difference is dataset character (Kaggle artefact) vs feature physics.
 - Should `Potability` ∈ {0, 1} be treated as a noisy proxy for an underlying continuous quality score? Out of scope for this notebook.
 ```
 
@@ -789,4 +789,4 @@ After completing all 13 tasks, the engineer should have:
 | §5 Step 14: Summary | Task 12 |
 | §6 Success criterion 5 (reproducibility) | Task 13 |
 
-All spec sections covered. No placeholders in task steps. All file paths absolute. All hyperparameters explicit and identical to `FirstGradBooster_v2.ipynb`. No unreferenced types or functions.
+All spec sections covered. No placeholders in task steps. All file paths absolute. All hyperparameters explicit and identical to `full_dataset_V2.ipynb`. No unreferenced types or functions.

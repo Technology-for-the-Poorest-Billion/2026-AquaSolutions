@@ -6,7 +6,7 @@
 
 ## 1. Goal
 
-Characterise the Kaggle water-potability dataset and train a binary classifier (potable / not potable) using its full 9-feature set. The **strategic purpose** is to test whether more features break through the macro-F1 ≈ 0.45 plateau observed on `FirstGradBooster_v2.ipynb` with only three sensors (pH, turbidity, temperature). The notebook is the deliverable; the model's per-class metrics, compared cross-notebook against v2, are the experimental output.
+Characterise the Kaggle water-potability dataset and train a binary classifier (potable / not potable) using its full 9-feature set. The **strategic purpose** is to test whether more features break through the macro-F1 ≈ 0.45 plateau observed on `full_dataset_V2.ipynb` with only three sensors (pH, turbidity, temperature). The notebook is the deliverable; the model's per-class metrics, compared cross-notebook against v2, are the experimental output.
 
 ## 2. Non-goals (explicit)
 
@@ -45,14 +45,19 @@ Characterise the Kaggle water-potability dataset and train a binary classifier (
 ```
 GM2_Aqua_Solutions/
 ├── ML/
-│   ├── water_potability_eda.ipynb         ← the new notebook
-│   └── specs/
-│       └── 2026-05-26-water-potability-eda-design.md   ← this file
+│   ├── ML water potability/
+│   │   ├── 2026-05-26-water-potability-eda-design.md   ← this file
+│   │   ├── 2026-05-26-water-potability-eda-implementation.md
+│   │   └── water potability.md
+│   ├── ML Full dataset/
+│   │   ├── full_dataset_V1.ipynb
+│   │   │   ├── full_dataset_V2.ipynb
+│   │   │   └── ML Full dataset.md
 └── Data/
     └── water_potability (1).csv           ← unchanged
 ```
 
-Single notebook, no `src/` package. Matches the convention set by `FirstGradBooster_v2.ipynb` and the CCME WQI POC plan.
+Single notebook, no `src/` package. Matches the convention set by `full_dataset_V2.ipynb` and the CCME WQI POC plan.
 
 ## 5. Notebook structure
 
@@ -70,7 +75,7 @@ Single notebook, no `src/` package. Matches the convention set by `FirstGradBoos
 | 10 | XGBoost | `XGBClassifier(n_estimators=300, max_depth=4, learning_rate=0.1, subsample=0.8, colsample_bytree=0.8, random_state=42)`. Sample weights via `compute_sample_weight('balanced', ...)`. Same config as v2. |
 | 11 | Comparison table | 3-model DataFrame with columns `macro_F1`, `recall_0`, `recall_1`, `accuracy`. Same shape as v2 Step 7. |
 | 12 | Feature importance | XGBoost gain/weight/cover. Three-panel bar chart + auto-print top feature per metric (same pattern as v2 Step 8). |
-| 13 | **Cross-notebook comparison** | Side-by-side comparison: this 9-feature problem's best macro-F1 vs the 3-feature problem's macro-F1 from the pathogen-track notebooks. Numbers are hard-coded constants pulled from the most recent run of `FirstGradBooster_v2.ipynb` if it has been executed; otherwise fall back to `FirstGradBooster.ipynb` (Aidan's expanded v1, commit 923a34f: macro-F1 0.449 with temporal features). The markdown above the cell records which source was used. |
+| 13 | **Cross-notebook comparison** | Side-by-side comparison: this 9-feature problem's best macro-F1 vs the 3-feature problem's macro-F1 from the pathogen-track notebooks. Numbers are hard-coded constants pulled from the most recent run of `full_dataset_V2.ipynb` if it has been executed; otherwise fall back to `full_dataset_V1.ipynb` (Aidan's expanded v1, commit 923a34f: macro-F1 0.449 with temporal features). The markdown above the cell records which source was used. |
 | 14 | Summary + open questions | What we learned about the dataset, caveats (Kaggle quality, no grouping, no abstain), and a recommendation for whether to invest more time in `water_potability` as a project asset. |
 
 ## 6. Success criteria
