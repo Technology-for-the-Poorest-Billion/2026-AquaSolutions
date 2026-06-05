@@ -1,0 +1,745 @@
+{
+  "system": {
+    "id": "2eb9cd0e-6803-4d07-ab57-3f12b4140da5",
+    "rev": "9fc9c1d",
+    "version": "2.42.5",
+    "date": "2026-06-05T14:57:49.253+0000"
+  },
+  "programStages": [
+    {
+      "name": "Community Illness Reports",
+      "created": "2026-06-05T14:41:34.946",
+      "lastUpdated": "2026-06-05T14:50:48.631",
+      "translations": [],
+      "createdBy": {
+        "id": "M5zQapPyTZI",
+        "code": "admin",
+        "name": "admin admin",
+        "displayName": "admin admin",
+        "username": "admin"
+      },
+      "lastUpdatedBy": {
+        "id": "M5zQapPyTZI",
+        "code": "admin",
+        "name": "admin admin",
+        "displayName": "admin admin",
+        "username": "admin"
+      },
+      "sharing": {
+        "owner": "M5zQapPyTZI",
+        "external": false,
+        "users": {},
+        "userGroups": {},
+        "public": "rw------"
+      },
+      "minDaysFromStart": 0,
+      "program": {
+        "id": "eWh8gc8ubdW"
+      },
+      "programStageDataElements": [
+        {
+          "created": "2026-06-05T14:46:02.644",
+          "lastUpdated": "2026-06-05T14:46:02.644",
+          "translations": [],
+          "favorites": [],
+          "sharing": {
+            "external": false,
+            "users": {},
+            "userGroups": {}
+          },
+          "programStage": {
+            "id": "YqZtPyx49bi"
+          },
+          "dataElement": {
+            "id": "bmDyMcNkc5D"
+          },
+          "compulsory": true,
+          "allowProvidedElsewhere": false,
+          "sortOrder": 1,
+          "displayInReports": false,
+          "allowFutureDate": false,
+          "renderOptionsAsRadio": false,
+          "skipSynchronization": false,
+          "skipAnalytics": false,
+          "access": {
+            "manage": true,
+            "externalize": true,
+            "write": true,
+            "read": true,
+            "update": true,
+            "delete": true
+          },
+          "favorite": false,
+          "id": "Q6P8ZjOODuI",
+          "attributeValues": []
+        },
+        {
+          "created": "2026-06-05T14:46:02.644",
+          "lastUpdated": "2026-06-05T14:46:02.644",
+          "translations": [],
+          "favorites": [],
+          "sharing": {
+            "external": false,
+            "users": {},
+            "userGroups": {}
+          },
+          "programStage": {
+            "id": "YqZtPyx49bi"
+          },
+          "dataElement": {
+            "id": "PiM1xDK6Ida"
+          },
+          "compulsory": true,
+          "allowProvidedElsewhere": false,
+          "sortOrder": 2,
+          "displayInReports": false,
+          "allowFutureDate": false,
+          "renderOptionsAsRadio": false,
+          "skipSynchronization": false,
+          "skipAnalytics": false,
+          "access": {
+            "manage": true,
+            "externalize": true,
+            "write": true,
+            "read": true,
+            "update": true,
+            "delete": true
+          },
+          "favorite": false,
+          "id": "xfkHB5aeBjm",
+          "attributeValues": []
+        },
+        {
+          "created": "2026-06-05T14:46:02.644",
+          "lastUpdated": "2026-06-05T14:46:02.644",
+          "translations": [],
+          "favorites": [],
+          "sharing": {
+            "external": false,
+            "users": {},
+            "userGroups": {}
+          },
+          "programStage": {
+            "id": "YqZtPyx49bi"
+          },
+          "dataElement": {
+            "id": "zxXRkoGZiQh"
+          },
+          "compulsory": true,
+          "allowProvidedElsewhere": false,
+          "sortOrder": 3,
+          "displayInReports": false,
+          "allowFutureDate": false,
+          "renderOptionsAsRadio": false,
+          "skipSynchronization": false,
+          "skipAnalytics": false,
+          "access": {
+            "manage": true,
+            "externalize": true,
+            "write": true,
+            "read": true,
+            "update": true,
+            "delete": true
+          },
+          "favorite": false,
+          "id": "koBFIjTGcVr",
+          "attributeValues": []
+        }
+      ],
+      "autoGenerateEvent": true,
+      "validationStrategy": "ON_UPDATE_AND_INSERT",
+      "displayGenerateEventBox": true,
+      "blockEntryForm": false,
+      "preGenerateUID": false,
+      "remindCompleted": false,
+      "generatedByEnrollmentDate": false,
+      "allowGenerateNextVisit": false,
+      "openAfterEnrollment": false,
+      "hideDueDate": false,
+      "enableUserAssignment": false,
+      "referral": false,
+      "id": "YqZtPyx49bi",
+      "attributeValues": [],
+      "repeatable": false,
+      "programStageSections": [],
+      "notificationTemplates": []
+    }
+  ],
+  "categories": [
+    {
+      "code": "default",
+      "name": "default",
+      "created": "2026-06-03T19:42:06.857",
+      "lastUpdated": "2026-06-05T13:41:01.362",
+      "translations": [],
+      "sharing": {
+        "owner": "XXXXXSystem",
+        "external": false,
+        "users": {},
+        "userGroups": {},
+        "public": "rw------"
+      },
+      "shortName": "default",
+      "dataDimensionType": "DISAGGREGATION",
+      "dataDimension": false,
+      "categoryOptions": [
+        {
+          "id": "xYerKDKCefk"
+        }
+      ],
+      "id": "GLevLNI9wkl",
+      "attributeValues": []
+    }
+  ],
+  "options": [
+    {
+      "code": "MUSCLE_CRAMPS",
+      "name": "Muscle Cramps",
+      "created": "2026-06-05T14:56:27.710",
+      "lastUpdated": "2026-06-05T14:56:27.729",
+      "translations": [],
+      "optionSet": {
+        "id": "kVUzxRsUDec"
+      },
+      "sortOrder": 5,
+      "style": {
+        "color": "#101010"
+      },
+      "id": "FhQLvnOgv6f",
+      "attributeValues": []
+    },
+    {
+      "code": "FEVER",
+      "name": "Fever",
+      "created": "2026-06-05T14:35:19.118",
+      "lastUpdated": "2026-06-05T14:35:19.153",
+      "translations": [],
+      "optionSet": {
+        "id": "kVUzxRsUDec"
+      },
+      "sortOrder": 4,
+      "style": {
+        "color": "#b100ff"
+      },
+      "id": "aiZWiFCvRdQ",
+      "attributeValues": []
+    },
+    {
+      "code": "DEHYDRATION",
+      "name": "Dehydration",
+      "created": "2026-06-05T14:30:48.997",
+      "lastUpdated": "2026-06-05T14:30:49.045",
+      "translations": [],
+      "optionSet": {
+        "id": "kVUzxRsUDec"
+      },
+      "sortOrder": 0,
+      "style": {
+        "color": "#170303"
+      },
+      "id": "xMWCMXxxHlA",
+      "attributeValues": []
+    },
+    {
+      "code": "WEIGHT_LOSS",
+      "name": "Weight Loss",
+      "created": "2026-06-05T14:56:59.682",
+      "lastUpdated": "2026-06-05T14:56:59.719",
+      "translations": [],
+      "optionSet": {
+        "id": "kVUzxRsUDec"
+      },
+      "sortOrder": 6,
+      "style": {
+        "color": "#0c0c0c"
+      },
+      "id": "YLOtr8hFppE",
+      "attributeValues": []
+    },
+    {
+      "code": "SHOCK",
+      "name": "Shock",
+      "created": "2026-06-05T14:57:12.133",
+      "lastUpdated": "2026-06-05T14:57:12.160",
+      "translations": [],
+      "optionSet": {
+        "id": "kVUzxRsUDec"
+      },
+      "sortOrder": 7,
+      "style": {
+        "color": "#0e0e0e"
+      },
+      "id": "YDLHKqUd8sQ",
+      "attributeValues": []
+    },
+    {
+      "code": "DIARRHOEA",
+      "name": "Diarrhoea",
+      "created": "2026-06-05T14:34:46.400",
+      "lastUpdated": "2026-06-05T14:34:46.453",
+      "translations": [],
+      "optionSet": {
+        "id": "kVUzxRsUDec"
+      },
+      "sortOrder": 2,
+      "id": "EicSL3di7aP",
+      "attributeValues": []
+    },
+    {
+      "code": "STOMACH",
+      "name": "Upset Stomach",
+      "created": "2026-06-05T14:31:14.644",
+      "lastUpdated": "2026-06-05T14:31:14.700",
+      "translations": [],
+      "optionSet": {
+        "id": "kVUzxRsUDec"
+      },
+      "sortOrder": 1,
+      "style": {
+        "color": "#02380b"
+      },
+      "id": "xbjDhV3ByKb",
+      "attributeValues": []
+    },
+    {
+      "code": "VOMITING",
+      "name": "Vomiting",
+      "created": "2026-06-05T14:35:07.450",
+      "lastUpdated": "2026-06-05T14:35:07.526",
+      "translations": [],
+      "optionSet": {
+        "id": "kVUzxRsUDec"
+      },
+      "sortOrder": 3,
+      "style": {
+        "color": "#ff1300"
+      },
+      "id": "P3erty1P0eg",
+      "attributeValues": []
+    }
+  ],
+  "dataElements": [
+    {
+      "code": "CASE COUNT",
+      "name": "Illness - Case Count",
+      "created": "2026-06-05T14:37:21.173",
+      "lastUpdated": "2026-06-05T14:55:48.274",
+      "translations": [],
+      "createdBy": {
+        "id": "M5zQapPyTZI",
+        "code": "admin",
+        "name": "admin admin",
+        "displayName": "admin admin",
+        "username": "admin"
+      },
+      "lastUpdatedBy": {
+        "id": "M5zQapPyTZI",
+        "code": "admin",
+        "name": "admin admin",
+        "displayName": "admin admin",
+        "username": "admin"
+      },
+      "sharing": {
+        "owner": "M5zQapPyTZI",
+        "external": false,
+        "users": {},
+        "userGroups": {},
+        "public": "rw------"
+      },
+      "shortName": "Case Count",
+      "description": "The number of suspected cases for a given illness.",
+      "legendSets": [],
+      "aggregationType": "NONE",
+      "valueType": "INTEGER_POSITIVE",
+      "domainType": "TRACKER",
+      "aggregationLevels": [],
+      "zeroIsSignificant": false,
+      "style": {
+        "color": "#cfd8dc"
+      },
+      "id": "zxXRkoGZiQh",
+      "attributeValues": [],
+      "categoryCombo": {
+        "id": "bjDvmb4bfuf"
+      }
+    },
+    {
+      "code": "SYMPTOMS",
+      "name": "Illness - Symptoms",
+      "created": "2026-06-05T14:38:41.158",
+      "lastUpdated": "2026-06-05T14:38:41.158",
+      "translations": [],
+      "createdBy": {
+        "id": "M5zQapPyTZI",
+        "code": "admin",
+        "name": "admin admin",
+        "displayName": "admin admin",
+        "username": "admin"
+      },
+      "lastUpdatedBy": {
+        "id": "M5zQapPyTZI",
+        "code": "admin",
+        "name": "admin admin",
+        "displayName": "admin admin",
+        "username": "admin"
+      },
+      "sharing": {
+        "owner": "M5zQapPyTZI",
+        "external": false,
+        "users": {},
+        "userGroups": {},
+        "public": "rw------"
+      },
+      "shortName": "Symptoms",
+      "description": "This data type contains the symptom data for an individual. ",
+      "legendSets": [],
+      "aggregationType": "NONE",
+      "valueType": "TEXT",
+      "domainType": "TRACKER",
+      "aggregationLevels": [],
+      "zeroIsSignificant": false,
+      "optionSet": {
+        "id": "kVUzxRsUDec"
+      },
+      "style": {
+        "color": "#ffcdd2"
+      },
+      "id": "bmDyMcNkc5D",
+      "attributeValues": [],
+      "categoryCombo": {
+        "id": "bjDvmb4bfuf"
+      }
+    },
+    {
+      "code": "ONSET DATE",
+      "name": "Illness - Onset Date",
+      "created": "2026-06-05T14:39:38.607",
+      "lastUpdated": "2026-06-05T14:39:38.607",
+      "translations": [],
+      "createdBy": {
+        "id": "M5zQapPyTZI",
+        "code": "admin",
+        "name": "admin admin",
+        "displayName": "admin admin",
+        "username": "admin"
+      },
+      "lastUpdatedBy": {
+        "id": "M5zQapPyTZI",
+        "code": "admin",
+        "name": "admin admin",
+        "displayName": "admin admin",
+        "username": "admin"
+      },
+      "sharing": {
+        "owner": "M5zQapPyTZI",
+        "external": false,
+        "users": {},
+        "userGroups": {},
+        "public": "rw------"
+      },
+      "shortName": "Onset Date",
+      "description": "The estimated date at which symptoms began. ",
+      "legendSets": [],
+      "aggregationType": "NONE",
+      "valueType": "DATE",
+      "domainType": "TRACKER",
+      "aggregationLevels": [],
+      "zeroIsSignificant": false,
+      "style": {
+        "color": "#e1bee7"
+      },
+      "id": "PiM1xDK6Ida",
+      "attributeValues": [],
+      "categoryCombo": {
+        "id": "bjDvmb4bfuf"
+      }
+    }
+  ],
+  "categoryOptions": [
+    {
+      "code": "default",
+      "name": "default",
+      "created": "2026-06-03T19:42:06.856",
+      "lastUpdated": "2026-06-03T19:42:06.859",
+      "translations": [],
+      "sharing": {
+        "owner": "XXXXXSystem",
+        "external": false,
+        "users": {},
+        "userGroups": {},
+        "public": "rwrw----"
+      },
+      "shortName": "default",
+      "organisationUnits": [],
+      "id": "xYerKDKCefk",
+      "attributeValues": []
+    }
+  ],
+  "optionSets": [
+    {
+      "code": "SYMPTOMS",
+      "name": "Symptoms",
+      "created": "2026-06-05T14:29:33.760",
+      "lastUpdated": "2026-06-05T14:57:12.210",
+      "translations": [],
+      "createdBy": {
+        "id": "M5zQapPyTZI",
+        "code": "admin",
+        "name": "admin admin",
+        "displayName": "admin admin",
+        "username": "admin"
+      },
+      "lastUpdatedBy": {
+        "id": "M5zQapPyTZI",
+        "code": "admin",
+        "name": "admin admin",
+        "displayName": "admin admin",
+        "username": "admin"
+      },
+      "sharing": {
+        "owner": "M5zQapPyTZI",
+        "external": false,
+        "users": {},
+        "userGroups": {},
+        "public": "rw------"
+      },
+      "options": [
+        {
+          "id": "xMWCMXxxHlA"
+        },
+        {
+          "id": "xbjDhV3ByKb"
+        },
+        {
+          "id": "EicSL3di7aP"
+        },
+        {
+          "id": "P3erty1P0eg"
+        },
+        {
+          "id": "aiZWiFCvRdQ"
+        },
+        {
+          "id": "FhQLvnOgv6f"
+        },
+        {
+          "id": "YLOtr8hFppE"
+        },
+        {
+          "id": "YDLHKqUd8sQ"
+        }
+      ],
+      "valueType": "TEXT",
+      "version": 14,
+      "id": "kVUzxRsUDec",
+      "attributeValues": []
+    }
+  ],
+  "categoryOptionCombos": [
+    {
+      "code": "default",
+      "name": "default",
+      "created": "2026-06-03T19:42:06.858",
+      "lastUpdated": "2026-06-03T19:42:06.859",
+      "translations": [],
+      "categoryCombo": {
+        "id": "bjDvmb4bfuf"
+      },
+      "categoryOptions": [
+        {
+          "id": "xYerKDKCefk"
+        }
+      ],
+      "ignoreApproval": false,
+      "id": "HllvX50cXC0",
+      "attributeValues": []
+    }
+  ],
+  "categoryCombos": [
+    {
+      "code": "default",
+      "name": "default",
+      "created": "2026-06-03T19:42:06.857",
+      "lastUpdated": "2026-06-03T19:42:06.859",
+      "translations": [],
+      "sharing": {
+        "owner": "XXXXXSystem",
+        "external": false,
+        "users": {},
+        "userGroups": {},
+        "public": "rw------"
+      },
+      "categories": [
+        {
+          "id": "GLevLNI9wkl"
+        }
+      ],
+      "dataDimensionType": "DISAGGREGATION",
+      "skipTotal": false,
+      "id": "bjDvmb4bfuf"
+    }
+  ],
+  "programs": [
+    {
+      "code": "ILLNESS REPORTS",
+      "name": "Community Illness Reports",
+      "created": "2026-06-05T14:41:34.951",
+      "lastUpdated": "2026-06-05T14:50:48.616",
+      "translations": [],
+      "createdBy": {
+        "id": "M5zQapPyTZI",
+        "code": "admin",
+        "name": "admin admin",
+        "displayName": "admin admin",
+        "username": "admin"
+      },
+      "lastUpdatedBy": {
+        "id": "M5zQapPyTZI",
+        "code": "admin",
+        "name": "admin admin",
+        "displayName": "admin admin",
+        "username": "admin"
+      },
+      "sharing": {
+        "owner": "M5zQapPyTZI",
+        "external": false,
+        "users": {},
+        "userGroups": {},
+        "public": "rw------"
+      },
+      "shortName": "Illness Reports",
+      "description": "This program contains all the relevant information on documented illness reports",
+      "version": 2,
+      "programType": "WITHOUT_REGISTRATION",
+      "displayIncidentDate": true,
+      "ignoreOverdueEvents": false,
+      "onlyEnrollOnce": false,
+      "notificationTemplates": [],
+      "selectEnrollmentDatesInFuture": false,
+      "selectIncidentDatesInFuture": false,
+      "style": {
+        "color": "#e3f2fd"
+      },
+      "categoryCombo": {
+        "id": "bjDvmb4bfuf"
+      },
+      "skipOffline": false,
+      "displayFrontPageList": false,
+      "useFirstStageDuringRegistration": false,
+      "expiryDays": 0,
+      "completeEventsExpiryDays": 0,
+      "openDaysAfterCoEndDate": 0,
+      "minAttributesRequiredToSearch": 1,
+      "maxTeiCountToReturn": 0,
+      "accessLevel": "OPEN",
+      "id": "eWh8gc8ubdW",
+      "attributeValues": [],
+      "organisationUnits": [
+        {
+          "id": "krOPfUiHGqu"
+        },
+        {
+          "id": "LylYzzHtk4o"
+        },
+        {
+          "id": "Duu72uCMPbB"
+        },
+        {
+          "id": "mFk4hsaRqdr"
+        },
+        {
+          "id": "if1Gmtc2GA7"
+        },
+        {
+          "id": "HXBrrdCwuXm"
+        },
+        {
+          "id": "fWrZS33PyYT"
+        },
+        {
+          "id": "TEarpj9oFER"
+        },
+        {
+          "id": "L9QCYaoXlTM"
+        },
+        {
+          "id": "u7VthgxyXVw"
+        },
+        {
+          "id": "JBx2UFcnXfH"
+        },
+        {
+          "id": "LhnxGHlvvcC"
+        },
+        {
+          "id": "tatiTUoWaRQ"
+        },
+        {
+          "id": "dCE68Bfvnaq"
+        },
+        {
+          "id": "T6mlsoUYnLz"
+        },
+        {
+          "id": "Srmxjh47yiG"
+        },
+        {
+          "id": "aYb6fw0Yhjp"
+        },
+        {
+          "id": "RbVmzaWSi5b"
+        },
+        {
+          "id": "vFlT6CjiPow"
+        },
+        {
+          "id": "czQ2MWK27f5"
+        },
+        {
+          "id": "uXEBjWTMLzY"
+        },
+        {
+          "id": "QqOXUQnmSXv"
+        },
+        {
+          "id": "sFinMpKciN2"
+        },
+        {
+          "id": "Xnky6QVw0nJ"
+        },
+        {
+          "id": "SqceadH3mzb"
+        },
+        {
+          "id": "X0vAphZLHud"
+        },
+        {
+          "id": "ELrQsdMGG6q"
+        },
+        {
+          "id": "shPmvIMOaZq"
+        },
+        {
+          "id": "ZgwiF3x26QE"
+        },
+        {
+          "id": "ePmXiIjScb2"
+        },
+        {
+          "id": "JVLhcdz8Bgl"
+        },
+        {
+          "id": "LDGrRqNM1dP"
+        }
+      ],
+      "programStages": [
+        {
+          "id": "YqZtPyx49bi"
+        }
+      ],
+      "programSections": [],
+      "programTrackedEntityAttributes": [],
+      "categoryMappings": []
+    }
+  ]
+}
