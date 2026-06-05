@@ -169,8 +169,8 @@ concepts are invented.
 
 | Data element | Type | Mirrors |
 |--------------|------|---------|
-| Case count | integer 1–200 | `parse_case_count` |
-| Symptoms | multi-select: diarrhoea/vomiting/fever/dehydration | `SYMPTOMS` / `parse_symptoms` |
+| Case count | positive integer | `parse_case_count` |
+| Symptoms | single-select Text + `Symptoms` option set — **8 options** as built 2026-06-05: diarrhoea, vomiting, fever, dehydration, weight loss, muscle cramps, shock, upset stomach (expanded from the original 4 SMS symptoms) | `SYMPTOMS` / `parse_symptoms` |
 | Onset date | date | `parse_onset` |
 | (event date = report date; org unit = borehole) | — | the SMS "station number" |
 
