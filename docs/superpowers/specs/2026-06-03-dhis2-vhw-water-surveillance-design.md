@@ -170,7 +170,7 @@ concepts are invented.
 | Data element | Type | Mirrors |
 |--------------|------|---------|
 | Case count | positive integer | `parse_case_count` |
-| Symptoms | **8 TRUE_ONLY (yes/no checkbox) data elements**, one per symptom (`Symptom: Diarrhoea`, `…Vomiting`, `…Fever`, `…Dehydration`, `…Weight Loss`, `…Muscle Cramps`, `…Shock`, `…Upset Stomach`) — a checklist allowing multiple symptoms per report. Chosen 2026-06-05 because this build's Capture app does not render `MULTI_TEXT`; booleans render everywhere and are simpler for analytics + the partner's labelling logic. Codes `SYMPTOM_<NAME>`. (Supersedes the original single multi-select option-set field.) | `SYMPTOM_*` / `parse_symptoms` |
+| Symptoms | **18 TRUE_ONLY (yes/no checkbox) data elements**, one per symptom (`Symptom: <name>`, codes `SYMPTOM_<NAME>`): diarrhoea, vomiting, fever, dehydration, weight loss, muscle cramps, shock, upset stomach, bloody diarrhoea, chills, headache, constipation, bloody urine, fatigue, nausea, jaundice, muscle aches, rashes. A checklist allowing multiple symptoms per report. Chosen 2026-06-05 because this build's Capture app does not render `MULTI_TEXT`; booleans render everywhere and are simpler for analytics + the partner's labelling logic. The `Symptoms` option set (18 options) is the **master list** the checkboxes are synced from; the original multi-text DE is orphaned/unused. | `SYMPTOM_*` / `parse_symptoms` |
 | Onset date | date | `parse_onset` |
 | (event date = report date; org unit = borehole) | — | the SMS "station number" |
 
