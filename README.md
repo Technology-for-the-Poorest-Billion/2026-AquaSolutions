@@ -3,7 +3,6 @@
 This repository was created by Aidan O'Donnell (ao565) and Tristan Martin (tjfm4) in conjunction with Allen Chafa, founder of Aqua Solutions, as a part of the four-week GM2 IIA CUED project. This was the first year students from GM2 collaborated with Aqua Solutions. 
 
 ## Repository Structure
-- AI Documents and Declaration: Documentation of the guided use of Claude for software deployment. 
 - Admin:
   - issues: Resolved, live, and forecasted challenges with both the technical and implementation complexities of deploying this product.
   - Meetings: Notes on meetings with Allen Chafa and supervisors (Dr.Allen, Dr.Bashford, and Dr.Smith).
