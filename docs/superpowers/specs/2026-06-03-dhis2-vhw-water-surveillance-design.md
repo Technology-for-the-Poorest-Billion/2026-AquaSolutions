@@ -1,8 +1,39 @@
 # DHIS2 VHW + Water Surveillance — Design
 
 **Date:** 2026-06-03
-**Status:** Design approved; pending spec review before planning.
+**Status:** Design approved. Plan 1 (instance + org units) implemented. Scope
+refined 2026-06-05 — see Revision below.
 **Author:** Brainstormed with Claude.
+
+## Revision — 2026-06-05 (demo scope, "Path A")
+
+Clarified the immediate goal: **a class demo that uses real DHIS2 software and
+can be driven by a simulator**, distinct from the 2026-06-11 submission (the
+frozen Railway demo still covers that). We chose **Path A — the centralised
+demo**, which refines several earlier decisions:
+
+- **D10 — Stock Capture App for the demo; the fork (D9) is deferred.** Health is
+  collected with the unmodified DHIS2 Capture App (or DHIS2 web Capture for
+  reliability on stage). The forked app (community-facing status/advice screen)
+  remains the post-demo stretch goal, not demo scope. Plan 4 is therefore
+  deferred.
+- **D11 — Water stays on the centralised side.** Borehole sensors → Flask
+  gateway → *Water Quality Summary* events → **DHIS2 dashboards + GIS**. Water is
+  NOT surfaced in the mobile app (that would need the fork). The app stays
+  health-focused.
+- **D12 — ML runs server-side and pushes decisions to DHIS2.** A server-side
+  XGBoost step reads water summaries and writes a **Risk/Decision** output back
+  into DHIS2 (new data element/event, displayed on dashboards). For the demo this
+  is **illustrative** (trained on simulated/old data — no real labelled windows
+  exist yet; Gen-1 is still label-generation, not live inference per `CLAUDE.md`).
+  Output framing: contamination/outbreak-risk, **never "cholera detection"**, with
+  an **abstain → "send a sample to the lab"** state for out-of-range inputs.
+- **D13 — A simulator drives the pipeline on stage.** Injects fake sensor
+  readings (and optionally a report or two) so the sensor → summary → risk → label
+  flow animates on demand, no field hardware or live phones required.
+
+Plan impact: Plan 2 adds the Risk/Decision output element; Plan 3 adds the
+simulator and the server-side XGBoost step; Plan 4 (fork) is deferred.
 
 ## 1. Problem and goal
 
