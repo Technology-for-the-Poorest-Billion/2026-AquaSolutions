@@ -32,8 +32,23 @@ demo**, which refines several earlier decisions:
   readings (and optionally a report or two) so the sensor → summary → risk → label
   flow animates on demand, no field hardware or live phones required.
 
-Plan impact: Plan 2 adds the Risk/Decision output element; Plan 3 adds the
-simulator and the server-side XGBoost step; Plan 4 (fork) is deferred.
+- **D14 — ML algorithm deferred (2026-06-05).** Not developing the ML model for
+  now. The server-side XGBoost step and the Risk/Decision output element (D12) are
+  **paused** — not built until further notice.
+- **D15 — Labelling scheme logic is PARTNER-OWNED (2026-06-05).** A project
+  partner is writing the labelling-scheme logic (the rule that decides which
+  readings/windows are labelled unsafe). Claude must **NOT** implement labelling:
+  no `labelling.py`, no label rule, no label-program wiring. Integrate against the
+  partner's logic only once its repo location is provided. Until then, treat
+  anything labelling-related as off-limits to avoid colliding with the partner's
+  work. (Supersedes the planned port of `labels.py` into the gateway.)
+
+Plan impact (revised): **Plan 2** = DHIS2 event programs for illness + water
+summary (+ roles); the label program and Risk/Decision element are DEFERRED.
+**Plan 3** = gateway (ingest → aggregate → push water summaries) + simulator;
+the labelling job (partner) and XGBoost step are DEFERRED. **Plan 4** (fork)
+deferred. Net buildable-now scope: illness + water programs, the gateway, and the
+simulator.
 
 ## 1. Problem and goal
 
