@@ -1,6 +1,6 @@
 # DHIS2 VHW + Water Surveillance (parallel track)
 
-Greenfield entity, separate from the frozen `App/backend` Railway demo.
+Lives at `App/dhis2/`, separate from the frozen `App/backend` Railway demo.
 See `docs/superpowers/specs/2026-06-03-dhis2-vhw-water-surveillance-design.md`.
 
 ## Pinned versions
@@ -13,8 +13,8 @@ See `docs/superpowers/specs/2026-06-03-dhis2-vhw-water-surveillance-design.md`.
   separate; this copy is intentional, not shared code.
 
 ## Local dev
-    cd dhis2
+    cd App/dhis2
     docker compose up -d            # boots DHIS2 (slow first run; see Task 2)
     python -m venv .venv && . .venv/bin/activate && pip install -r requirements.txt
     make orgunits                   # generate + import org units
-    pytest                          # unit + API smoke tests
+    make test                       # unit + API smoke tests

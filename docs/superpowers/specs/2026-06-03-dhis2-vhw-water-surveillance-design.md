@@ -70,7 +70,7 @@ Each row is a decision taken during brainstorming, with the rationale.
 | D5 | Sensor data enters via a **Flask gateway pushing daily summaries** | Devices can't speak DHIS2; raw telemetry must not bloat DHIS2. Gateway buffers raw, aggregates per-(station,day), pushes summaries. |
 | D6 | **Borehole = leaf org unit** in the DHIS2 hierarchy | Native linkage (health + water events share the org unit); per-borehole GIS; matches the existing "name a station" flow. |
 | D7 | **DHIS2 now; Impilo parked** | Impilo has no public dev API/SDK and needs MoHCC governance; DHIS2 is the open, self-hostable layer Impilo already feeds. No FHIR/Impilo work in scope now (see §9). |
-| D8 | New project lives in a **new top-level `dhis2/` directory in this repo** | Shares docs/research/history; deploys as its own Railway service; low friction. |
+| D8 | New project lives in a dedicated **`App/dhis2/` directory** (a sub-folder of `App/`, alongside `App/backend`) | Shares docs/research/history; deploys as its own Railway service; low friction. (Originally placed at top-level `dhis2/`; moved under `App/` on 2026-06-05.) |
 | D9 | **Fork the full DHIS2 Android Capture App** (not the SDK route, not config-only) | User goals require custom code: user-facing status/advice, low-literacy UI, branding, and demonstrating an app build. Costs (APK bloat, upstream drift) accepted and managed (§7). |
 
 ### Impilo vs DHIS2 (research summary, supports D7)
@@ -224,7 +224,7 @@ advice in a low-literacy, multilingual screen.
 ## 6. Project layout
 
 ```
-dhis2/
+App/dhis2/
 ├── README.md                   # records pinned upstream Capture App tag/commit
 ├── docker-compose.yml          # local DHIS2 + Postgres + gateway for dev
 ├── gateway/                    # new Flask service (own Railway deploy)

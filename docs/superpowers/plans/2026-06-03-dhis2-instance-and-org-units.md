@@ -1,5 +1,9 @@
 # DHIS2 Instance + Org-Unit Tree Implementation Plan
 
+> **Status (2026-06-05):** IMPLEMENTED and merged. The project was subsequently
+> moved from top-level `dhis2/` to **`App/dhis2/`** — paths below read `dhis2/`
+> for historical accuracy; the live location is `App/dhis2/`.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Stand up a local, empty, self-hosted DHIS2 instance and load the project's 4-neighbourhood / 32-borehole geography into it as a version-controlled organisation-unit tree, verified through the DHIS2 Web API.
