@@ -1,2 +1,4 @@
-Data/Combined_dataset.csv filter=lfs diff=lfs merge=lfs -text
-Data/GFQA_v3.zip filter=lfs diff=lfs merge=lfs -text
+# This file is used to condense the Combined_dataset.csv (2 million+ rows) when pushing to GitHub.
+
+Data/Datasets/Combined_dataset.csv filter=lfs diff=lfs merge=lfs -text
+Data/Datasets/GFQA_v3.zip filter=lfs diff=lfs merge=lfs -text

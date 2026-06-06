@@ -15,14 +15,14 @@ Generation 1 is therefore **plumbing + label generation, not live inference.** T
 
 Read these in this order. Each supersedes the older docs it points back to.
 
-- `PLAN.md` — the current v2 plan for the application-layer + comms build, against the 2026-06-01 interim presentation and 2026-06-11 submission. Reference by section; do not re-derive strategy.
+- `Admin/Plans/PLAN_v2.md` — the current v2 plan for the application-layer + comms build, against the 2026-06-01 interim presentation and 2026-06-11 submission. Reference by section; do not re-derive strategy.
 - `App/cholera_sensor_ml_approach.md` — the pivot rationale. Read this if the user's request seems to assume the old TinyML approach.
 - `App/sms_to_sqlite_plan.pdf` — backend implementation spec for the Generation-1 SMS-to-SQLite pipeline.
 - `App/Ideation.md` — early sketch of the user-facing application layer (multi-language, low-literacy UI, treatment recommendations, technician notification). Aspirational; not yet implemented.
-- `issues_v3.md` — **current** risk register for the application + communications + linkage phase.
-- `issues_v2.md` — *dataset-level* issues from phase 1. Still valid as the explanation of why the original approach hit a predictive ceiling.
-- `ISSUES_v1.md` — archived risk register from phase 1. Read only for historical context.
-- `PLAN_v1.md` — archived 10-day TinyML plan. Read only for historical context.
+- `Admin/Issues/issues_v3.md` — **current** risk register for the application + communications + linkage phase.
+- `Admin/Issues/issues_v2.md` — *dataset-level* issues from phase 1. Still valid as the explanation of why the original approach hit a predictive ceiling.
+- `Admin/Issues/issues_v1.md` — archived risk register from phase 1. Read only for historical context.
+- `Admin/Plans/PLAN_v1.md` — archived 10-day TinyML plan. Read only for historical context.
 - `Meetings/` — stakeholder context from Chafa, Allen, Bashford.
 - `Research/Notes.md` — literature digest including Chafa's prior fuzzy-logic architecture.
 
@@ -84,17 +84,17 @@ The pilot site is **deliberately not locked** in this document. The Bengal Delta
 
 ## Working notes
 
-- The repo uses Git LFS for specific large datasets (see `.gitattributes`). The currently-tracked LFS files are `Data/Combined_dataset.csv` and `Data/GFQA_v3.zip`. Do not commit large CSVs without confirming LFS handling.
+- The repo uses Git LFS for specific large datasets (see `.gitattributes`). The currently-tracked LFS files are `Data/Datasets/Combined_dataset.csv` and `Data/Datasets/GFQA_v3.zip`. Do not commit large CSVs without confirming LFS handling.
 - `WNTR/` is a vendored copy of EPA's Water Network Tool for Resilience, earmarked as a pre-hardware network simulator. Not yet integrated; treat as a library, not project code.
 - `.venv/` is the local Python environment. Do not commit changes to it.
-- Phase-1 ML notebooks live in `ML/`. They are evidence for the predictive-ceiling finding, not the deliverable.
+- Phase-1 ML notebooks live in `Data/ML/`. They are evidence for the predictive-ceiling finding, not the deliverable.
 - The Flask app's UI is internationalised (en/sn/nd, framework supports
   all 16). Translation catalogs live in `App/backend/translations/`. If
   you edit a `.po` file, run `make i18n-compile` from `App/backend/`
   before restarting Flask or the change won't take effect. The
   `#, fuzzy` flag means "machine-translated, not yet native-reviewed";
   removing it from a catalog entry promotes that translation to verified.
-  Known caveat: `scripts/translate_po.py` does not yet protect format
+  Known caveat: `App/scripts/translate_po.py` does not yet protect format
   placeholders (`{role}`, `%(station_id)s` etc.) — they get translated
   along with surrounding words and break `.format()` / `%`-substitution
   if not manually restored after a re-translation. See
