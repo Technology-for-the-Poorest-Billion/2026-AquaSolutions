@@ -1,6 +1,6 @@
 # Data
 
-All datasets are in the `Datasets/` subfolder. Machine learning work is in the `ML/` subfolder.
+All datasets are in the `Datasets/` subfolder. Machine learning work is in the `ML/` subfolder. Report based labelling logic and code is in the `Labelling/` subfolder.
 
 ## Datasets
 

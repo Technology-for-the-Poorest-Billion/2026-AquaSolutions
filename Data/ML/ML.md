@@ -7,6 +7,8 @@ ML Full dataset — primary analysis. Runs XGBoost and Logistic Regression on ..
 
 ML water potability — secondary analysis on ../Datasets/water_potability.csv, a Kaggle dataset with nine chemistry features and a binary potability label. Used to test whether more features lift performance above the ceiling seen on the full dataset.
 
+Compressed Bootstrap — a complete XGBoost pipeline ready to train on real field data once illness-report labels accumulate. Currently runs on 500 synthetic sensor readings (pH, turbidity, chlorine residual, UV, ORP) labelled by threshold rules with confidence weights, which will be replaced by real data when available. Trains XGBoost with confidence scores as sample weights, evaluates with confusion matrix, ROC/AUC and SHAP feature importance. Then exports the trained model to C via m2cgen for edge deployment on a microcontroller.
+
 
 Key findings
 
