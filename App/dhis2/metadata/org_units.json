@@ -1,4 +1,26 @@
 {
+  "organisationUnitLevels": [
+    {
+      "id": "NKBd9YWncfR",
+      "name": "National",
+      "level": 1
+    },
+    {
+      "id": "IORP7WxzsWm",
+      "name": "District",
+      "level": 2
+    },
+    {
+      "id": "nICP4WKRSNA",
+      "name": "Neighbourhood",
+      "level": 3
+    },
+    {
+      "id": "XX3lInKp9QO",
+      "name": "Borehole",
+      "level": 4
+    }
+  ],
   "organisationUnits": [
     {
       "id": "xgFjHQGaG5E",

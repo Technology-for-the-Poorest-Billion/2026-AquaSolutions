@@ -11,6 +11,15 @@ def test_total_unit_count():
     assert len(units) == 38
 
 
+def test_org_unit_levels_defined():
+    levels = build_org_units()["organisationUnitLevels"]
+    assert [l["level"] for l in levels] == [1, 2, 3, 4]
+    assert {l["name"] for l in levels} == {
+        "National", "District", "Neighbourhood", "Borehole",
+    }
+    assert all(len(l["id"]) == 11 for l in levels)
+
+
 def test_levels_are_assigned():
     units = build_org_units()["organisationUnits"]
     levels = sorted({u["level"] for u in units})

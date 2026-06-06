@@ -19,6 +19,15 @@ OPENING_DATE = "2020-01-01T00:00:00.000"
 COUNTRY_NAME = "Zimbabwe"
 DISTRICT_NAME = "Harare"
 
+# Named hierarchy levels. Without these, DHIS2 apps (e.g. Maps' org-unit-level
+# selector) have no level names to resolve and behave poorly.
+ORG_UNIT_LEVELS = [
+    (1, "National"),
+    (2, "District"),
+    (3, "Neighbourhood"),
+    (4, "Borehole"),
+]
+
 OUT_PATH = Path(__file__).resolve().parent / "org_units.json"
 
 
@@ -74,13 +83,21 @@ def build_org_units() -> dict:
             "geometry": {"type": "Point", "coordinates": [lon, lat]},
         })
 
-    return {"organisationUnits": units}
+    levels = [
+        {"id": dhis2_uid(f"oulevel-{lvl}"), "name": name, "level": lvl}
+        for lvl, name in ORG_UNIT_LEVELS
+    ]
+
+    return {"organisationUnitLevels": levels, "organisationUnits": units}
 
 
 def main() -> None:
     payload = build_org_units()
     OUT_PATH.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n")
-    print(f"wrote {len(payload['organisationUnits'])} org units to {OUT_PATH}")
+    print(
+        f"wrote {len(payload['organisationUnitLevels'])} levels + "
+        f"{len(payload['organisationUnits'])} org units to {OUT_PATH}"
+    )
 
 
 if __name__ == "__main__":
