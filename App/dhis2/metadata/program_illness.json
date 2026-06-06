@@ -3,7 +3,7 @@
     "id": "2eb9cd0e-6803-4d07-ab57-3f12b4140da5",
     "rev": "9fc9c1d",
     "version": "2.42.5",
-    "date": "2026-06-06T18:55:26.028+0000"
+    "date": "2026-06-06T19:01:22.041+0000"
   },
   "programStages": [
     {
@@ -928,7 +928,7 @@
       "code": "CASE COUNT",
       "name": "Illness - Case Count",
       "created": "2026-06-05T14:37:21.173",
-      "lastUpdated": "2026-06-05T14:55:48.274",
+      "lastUpdated": "2026-06-06T19:00:56.658",
       "translations": [],
       "createdBy": {
         "id": "M5zQapPyTZI",
@@ -954,7 +954,7 @@
       "shortName": "Case Count",
       "description": "The number of suspected cases for a given illness.",
       "legendSets": [],
-      "aggregationType": "NONE",
+      "aggregationType": "SUM",
       "valueType": "INTEGER_POSITIVE",
       "domainType": "TRACKER",
       "aggregationLevels": [],
