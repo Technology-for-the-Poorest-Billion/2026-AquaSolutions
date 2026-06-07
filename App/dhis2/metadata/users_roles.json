@@ -1,0 +1,34 @@
+{
+  "userRoles": [
+    {
+      "name": "Village Health Worker",
+      "created": "2026-06-06T12:40:54.614",
+      "lastUpdated": "2026-06-06T12:40:54.851",
+      "translations": [],
+      "createdBy": {
+        "id": "M5zQapPyTZI",
+        "code": "admin",
+        "name": "admin admin",
+        "displayName": "admin admin",
+        "username": "admin"
+      },
+      "lastUpdatedBy": {
+        "id": "M5zQapPyTZI",
+        "code": "admin",
+        "name": "admin admin",
+        "displayName": "admin admin",
+        "username": "admin"
+      },
+      "sharing": {
+        "owner": "M5zQapPyTZI",
+        "external": false,
+        "users": {},
+        "userGroups": {},
+        "public": "rw------"
+      },
+      "authorities": [],
+      "restrictions": [],
+      "id": "I2yOJ609qC6"
+    }
+  ]
+}

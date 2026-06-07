@@ -1,0 +1,45 @@
+# Local dev only — DO NOT use in production.
+# Pinned to dhis2/core:42.5.0 (stable, 2026-05-26 build).
+# Empty instance: no demo-database seeding (DHIS2_DB_DUMP_URL removed).
+# DB credentials: dhis/dhis (set via environment defaults below).
+
+services:
+  web:
+    image: dhis2/core:42.5.0
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - ./config/dhis.conf:/opt/dhis2/dhis.conf:ro
+    environment:
+      DB_HOSTNAME: db
+      DB_NAME: dhis2
+      DB_USERNAME: dhis
+      DB_PASSWORD: dhis
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: ghcr.io/baosystems/postgis:16-3.5
+    environment:
+      POSTGRES_USER: dhis
+      POSTGRES_DB: dhis2
+      POSTGRES_PASSWORD: dhis
+      PGPASSWORD: dhis
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'psql --no-password --quiet --username $$POSTGRES_USER postgres://127.0.0.1/$$POSTGRES_DB -p 5432 --command "SELECT ''ok''" > /dev/null',
+        ]
+      start_period: 120s
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+volumes:
+  db-data: {}
