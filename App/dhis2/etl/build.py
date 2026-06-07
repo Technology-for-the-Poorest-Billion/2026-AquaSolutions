@@ -6,7 +6,7 @@ Linked by station_id (+ the partner's 7-day window).
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
 
 from etl import reports as R
@@ -25,7 +25,8 @@ def _parse_ts(s):
 def main():
     de_by_id, ou_by_id, symptom_names = R.load_maps()
     events = R.fetch_report_events()
-    rows = [R.report_event_to_row(e, de_by_id, ou_by_id, symptom_names) for e in events]
+    rows = [row for row in (R.report_event_to_row(e, de_by_id, ou_by_id, symptom_names) for e in events)
+            if row is not None]
 
     report_fields = ["event_id", "timestamp", "onset_date", "station_id", "borehole",
                      "neighbourhood", "case_count"] + [s.lower().replace(" ", "_") for s in symptom_names]
@@ -41,7 +42,6 @@ def main():
         dates = sorted(_parse_ts(r["timestamp"]).date() for r in rows)
         start, end = dates[0], dates[-1]
     else:
-        from datetime import date
         start = end = date.today()
     station_ids = sorted({r["station_id"] for r in rows if r["station_id"] is not None})
     readings = simulate_readings(station_ids, start, end, per_day=PER_DAY, seed=SEED)

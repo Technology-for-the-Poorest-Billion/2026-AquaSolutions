@@ -40,7 +40,9 @@ def report_event_to_row(event, de_by_id, ou_by_id, symptom_names):
     values = {dv["dataElement"]: dv["value"] for dv in event.get("dataValues", [])}
     name_to_value = {de_by_id.get(de_id, de_id): val for de_id, val in values.items()}
 
-    ou = ou_by_id[event["orgUnit"]]
+    ou = ou_by_id.get(event["orgUnit"])
+    if ou is None:
+        return None  # event at an org unit not in the committed metadata; skip it
     parent = ou_by_id.get(ou["parent"], {})
     station_id = int(ou["code"].split("-")[1]) if ou.get("code") else None
 

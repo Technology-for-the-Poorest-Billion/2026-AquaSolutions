@@ -41,3 +41,9 @@ def test_symptom_columns_are_0_or_1():
     row = report_event_to_row(_event(), DE, OU, SYMPTOMS)
     assert row["diarrhoea"] == 1   # ticked
     assert row["vomiting"] == 0    # absent
+
+
+def test_unknown_org_unit_returns_none():
+    event = {"event": "evtX", "occurredAt": "2026-06-05T00:00:00.000",
+             "orgUnit": "NOT_IN_MAP", "dataValues": []}
+    assert report_event_to_row(event, DE, OU, SYMPTOMS) is None
