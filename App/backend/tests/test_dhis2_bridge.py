@@ -75,3 +75,42 @@ def test_create_event_round_trip():
     finally:
         _b._post("/api/tracker?async=false&importStrategy=DELETE",
                  {"events": [{"event": event_id}]})
+
+
+import json as _json
+
+
+def test_sms_completion_calls_bridge(client, monkeypatch):
+    calls = []
+    monkeypatch.setattr(dhis2_bridge, "enabled", lambda: True)
+    monkeypatch.setattr(dhis2_bridge, "create_event_from_report",
+                        lambda **kw: calls.append(kw) or "evtTEST")
+
+    def sms(body):
+        return client.post("/sms", data={"From": "+15550001111", "Body": body})
+
+    sms("1")          # station -> awaiting_case_count
+    sms("5")          # case count -> awaiting_symptoms
+    sms("1,3")        # diarrhoea, fever -> awaiting_onset
+    r = sms("today")  # onset -> complete (bridge fires)
+    assert b"Report complete" in r.data
+
+    assert len(calls) == 1
+    kw = calls[0]
+    assert kw["station_id"] == 1
+    assert kw["case_count"] == 5
+    assert set(kw["symptoms"]) == {"diarrhoea", "fever"}
+    assert kw["onset"]  # ISO onset string present
+
+
+def test_sms_completion_no_bridge_when_disabled(client, monkeypatch):
+    calls = []
+    monkeypatch.setattr(dhis2_bridge, "enabled", lambda: False)
+    monkeypatch.setattr(dhis2_bridge, "create_event_from_report",
+                        lambda **kw: calls.append(kw))
+
+    def sms(body):
+        return client.post("/sms", data={"From": "+15550002222", "Body": body})
+
+    sms("1"); sms("5"); sms("1,3"); sms("today")
+    assert calls == []  # disabled -> bridge never called

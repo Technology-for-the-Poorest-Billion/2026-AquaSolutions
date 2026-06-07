@@ -38,6 +38,7 @@ from sqlalchemy import text
 
 from database import connection, init_db
 from labels import label_readings_for_report
+import dhis2_bridge
 from sensor_ingest import sensor_bp
 from language import init_babel, adopt_cookie_preference
 
@@ -614,6 +615,21 @@ def sms_webhook():
                     {"od": onset.isoformat(), "rid": report_id},
                 )
                 reply.message("Report complete. Stay safe. Reply STOP to opt out.")
+                if dhis2_bridge.enabled():
+                    rpt = conn.execute(
+                        text("SELECT station_id, case_count, symptoms, onset_date "
+                             "FROM illness_reports WHERE report_id = :rid"),
+                        {"rid": report_id},
+                    ).mappings().first()
+                    try:
+                        dhis2_bridge.create_event_from_report(
+                            station_id=rpt["station_id"],
+                            case_count=rpt["case_count"],
+                            symptoms=json.loads(rpt["symptoms"] or "[]"),
+                            onset=rpt["onset_date"],
+                        )
+                    except Exception as exc:  # bridge must never break the SMS reply
+                        app.logger.warning("DHIS2 bridge failed for report %s: %s", report_id, exc)
                 return str(reply)
 
             reply.message(
