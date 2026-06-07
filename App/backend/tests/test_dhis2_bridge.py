@@ -38,3 +38,40 @@ def test_build_event_payload_omits_unmapped_or_absent_symptoms():
     dv = {d["dataElement"]: d["value"] for d in payload["events"][0]["dataValues"]}
     assert dv.get("deDIAR") == "true"
     assert "vomiting" not in dv and None not in dv  # unmapped symptom dropped
+
+
+import urllib.request as _u
+import urllib.error as _ue
+
+import dhis2_bridge as _b
+
+
+def _dhis2_up():
+    try:
+        req = _u.Request(_b.base_url() + "/api/system/info.json")
+        req.add_header("Authorization", _b._auth_header())
+        with _u.urlopen(req, timeout=5) as r:
+            return r.status == 200
+    except (_ue.URLError, OSError):
+        return False
+
+
+import pytest
+
+dhis2 = pytest.mark.skipif(not _dhis2_up(), reason="DHIS2 not reachable")
+
+
+@dhis2
+def test_create_event_round_trip():
+    # station 1 == DHIS2 org unit code STATION-1 (Avenues — central clinic)
+    event_id = dhis2_bridge.create_event_from_report(
+        station_id=1, case_count=3, symptoms=["diarrhoea", "vomiting"], onset="2026-06-03",
+    )
+    assert event_id, "expected a created event id"
+    try:
+        got = _b._get(f"/api/tracker/events/{event_id}.json?fields=event,dataValues[dataElement,value]")
+        assert got["event"] == event_id
+        assert any(d["value"] == "3" for d in got["dataValues"])
+    finally:
+        _b._post("/api/tracker?async=false&importStrategy=DELETE",
+                 {"events": [{"event": event_id}]})
