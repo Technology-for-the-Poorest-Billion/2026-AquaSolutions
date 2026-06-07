@@ -89,7 +89,10 @@ def _resolve_refs(force=False):
     )["programs"]
     if not progs:
         raise RuntimeError(f"DHIS2 program not found: {PROGRAM_NAME}")
-    stage_uid = progs[0]["programStages"][0]["id"]
+    stages = progs[0].get("programStages", [])
+    if not stages:
+        raise RuntimeError(f"DHIS2 program '{PROGRAM_NAME}' has no stages")
+    stage_uid = stages[0]["id"]
     stage = _get(
         f"/api/programStages/{stage_uid}.json"
         "?fields=programStageDataElements[dataElement[id,name]]"
@@ -115,6 +118,9 @@ def create_event_from_report(station_id, case_count, symptoms, onset):
     `onset` is an ISO date string. Returns the created event UID."""
     refs = _resolve_refs()
     de = refs["de_by_name"]
+    for required in ("Illness - Case Count", "Illness - Onset Date"):
+        if required not in de:
+            raise RuntimeError(f"DHIS2 data element not found: {required!r}")
     symptom_de_by_key = {k: de.get(f"Symptom: {k.capitalize()}") for k in symptoms}
     payload = build_event_payload(
         program_uid=refs["program"], stage_uid=refs["stage"],

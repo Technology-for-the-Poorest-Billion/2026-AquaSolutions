@@ -615,6 +615,10 @@ def sms_webhook():
                     {"od": onset.isoformat(), "rid": report_id},
                 )
                 reply.message("Report complete. Stay safe. Reply STOP to opt out.")
+                # NOTE: runs inside the open DB transaction and does a network POST.
+                # Fine for a local/fast DHIS2; for a slow remote instance, move this
+                # after commit so Twilio's ~15s webhook timeout can't retry and create
+                # duplicate events.
                 if dhis2_bridge.enabled():
                     rpt = conn.execute(
                         text("SELECT station_id, case_count, symptoms, onset_date "

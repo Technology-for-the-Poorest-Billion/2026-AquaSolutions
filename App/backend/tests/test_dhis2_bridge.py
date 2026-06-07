@@ -114,3 +114,19 @@ def test_sms_completion_no_bridge_when_disabled(client, monkeypatch):
 
     sms("1"); sms("5"); sms("1,3"); sms("today")
     assert calls == []  # disabled -> bridge never called
+
+
+def test_sms_completion_survives_bridge_failure(client, monkeypatch):
+    monkeypatch.setattr(dhis2_bridge, "enabled", lambda: True)
+
+    def boom(**kw):
+        raise RuntimeError("DHIS2 down")
+
+    monkeypatch.setattr(dhis2_bridge, "create_event_from_report", boom)
+
+    def sms(body):
+        return client.post("/sms", data={"From": "+15550003333", "Body": body})
+
+    sms("1"); sms("5"); sms("1,3")
+    r = sms("today")
+    assert b"Report complete" in r.data  # reply still lands despite bridge failure
