@@ -10,7 +10,8 @@ This repository was created by Aidan O'Donnell (ao565) and Tristan Martin (tjfm4
 - App: 
 - Data:
   - Datasets: Four publicly available water quality datasets.
-  - ML: All machine learning work. Includes XGBoost and logistic regression analyses on existing datasets and a complete XGBoost pipeline (Compressed Bootstrap) ready to train on real sensor and illness-report data once it is collected which currently running on synthetic data as a placeholder.
+  - ML: All machine learning work. Includes XGBoost and logistic regression analyses on existing datasets and a complete XGBoost pipeline, (Compressed Bootstrap) ready to train on real sensor and illness-report data once it is collected, with a synthetic data placeholder.
+  - Labelling: Logic and code for converting illness reports into confidence-weighted training labels. 
   - plan.md: Decisions on which datasets to analyse and why.
 - Research: Documents, papers, and case studies used to understand current ML techniques for water quality tasks and the digital healthcare systems in place in Zimbabwe. 
 
@@ -27,6 +28,6 @@ https://reports.raeng.org.uk/africa-prize-2023-interactive-showcase/allen-chafa.
 Over the four weeks the students worked on this project, they used a variety of software approaches. Therefore, there was very little risk involved, unlike for other groups which were using machining equipment. While it is the hope that future students will work on the microcontroller that forms the physical device for data collection, this was outside of the scope of the four weeks dedicated to this project. Nonetheless, a risk assessment was submitted through the CUED Power App for soldering.
 
 ## AI Declaration
-
+AI-assisted development was used to accelerate code iteration given the four-week project timeline. This included parts of the initial XGBoost analysis on existing datasets, Flask web application scaffolding and converting documented labelling logic into python. All design decisions, problem scoping and technical judgements were made by the student team. AI-generated code was reviewed and tested, with the student team taking responsibility for its correctness and integration. The core deliverables of the final handover, the compressed XGBoost bootstrap pipeline and the DHIS2 reporting interface integration, were done manually by the student team.
 
 

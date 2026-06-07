@@ -8,11 +8,13 @@ Pipeline:
    where t = fractional days between report and sensor reading
 3. Reports older than 7 days contribute 0 (prevents score inflation over time)
 4. Decayed scores are summed across all reports
-5. Summed score is binned into confidence tiers:
-       < 0.5  → unlabelled (insufficient signal)
-     0.5–1.5  → 0.3 (single fresh report, or a few old ones)
-     1.5–2.5  → 0.6 (multiple reports or strong recent signal)
-       2.5+   → 0.9 (sustained or clustered reporting)
+5. Summed score is labelled via score tiers with a confidence reading:
+       < 0.5  → safe  → 0.1 (absence of reports doesn't mean confirmed safe; low weight reflects uncertainty)
+     0.5–1.5  → risky → 0.3 (single fresh report, or a few old ones)
+     1.5–2.5  → risky → 0.6 (multiple reports or strong recent signal)
+       2.5+   → risky → 0.9 (sustained or clustered reporting)
+    Note that these thresholds have been arbitrarily chosen and should be calibrated as the data comes in. Specifically, the 0.5 safe threshold is designed to filter out background illness reports that occur even when water is uncontaminated.
+6. The previous 7-day window represents the period during which the water was likely contaminated. These are the sensor readings that should be labelled unsafe.
 
 Justification for 7-day window:
     WHO cholera incubation: 12 hours to 5 days.
