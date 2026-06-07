@@ -1,4 +1,4 @@
-.PHONY: orgunits metadata test
+.PHONY: orgunits metadata test datasets
 
 orgunits:
 	PYTHONPATH=. python -m metadata.generate_org_units
@@ -13,3 +13,6 @@ metadata:
 
 test:
 	python -m pytest -v
+
+datasets:
+	PYTHONPATH=. python -m etl.build

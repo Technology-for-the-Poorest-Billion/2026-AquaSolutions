@@ -60,12 +60,16 @@ def report_event_to_row(event, de_by_id, ou_by_id, symptom_names):
 
 
 def fetch_report_events(program_uid="eWh8gc8ubdW"):
-    """Fetch all illness-report events from DHIS2 (requires a running instance)."""
-    root = json.loads(ORG_UNITS_FILE.read_text())["organisationUnits"]
-    root_uid = next(o["id"] for o in root if o["level"] == 1)
+    """Fetch all illness-report events from DHIS2 (requires a running instance).
+
+    Uses ouMode=ALL because DHIS2 2.42 tracker events API does not honour
+    ouMode=DESCENDANTS from a root node when the program is registered only on
+    leaf org units.  ouMode=ALL returns events across the full hierarchy for
+    superusers, which is the correct behaviour for this ETL.
+    """
     r = requests.get(
         f"{im.base_url()}/api/tracker/events.json",
-        params={"program": program_uid, "orgUnit": root_uid, "ouMode": "DESCENDANTS",
+        params={"program": program_uid, "ouMode": "ALL",
                 "fields": "event,occurredAt,orgUnit,dataValues[dataElement,value]",
                 "pageSize": 10000, "skipPaging": "true"},
         auth=im.auth(), timeout=60,
