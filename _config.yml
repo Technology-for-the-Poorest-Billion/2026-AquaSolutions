@@ -5,3 +5,4 @@ exclude:
   - Research/
   - README.md
   - CLAUDE.md
+  - index.md
