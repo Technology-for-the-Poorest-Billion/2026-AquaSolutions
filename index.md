@@ -46,15 +46,18 @@ Design Justification
 ### ML pipeline
 XGBoost pipeline trained on synthetic data, ready to retrain when field data accumulates​. Easily understandable performance evaluation metrics are built in, including a Classification report, Confusion matrix, ROC Curve, AUC Score and SHAP Feature analysis. Each has a non-technical user friendly explanation attached. Note that the classifier carries out near perfect classification on the synthetic test set but this does not completely reflect its ability to cope with real data, except for validating that XGBoost is capable of detecting non-linear trends.
 
-![Confusion Matrix](www/Confusion.png)
+<div style="display:flex; gap:20px">
+  <img src="www/Confusion.png" width="45%">
+  <img src="www/SHAP.png" width="45%">
+</div>
 
-The confusion matrix shows the model's predictions against the true labels for each reading in the test set. The most important cell is bottom left. A missed risk means contaminated water goes unflagged without triggering an alert. The goal is to minimise this number as much as possible.
-
-![SHAP](www/SHAP.png)
+The confusion matrix (left) shows the model's predictions against the true labels for each reading in the test set. The most important cell is bottom left. A missed risk means contaminated water goes unflagged without triggering an alert. The goal is to minimise this number as much as possible. The SHAP feature analysis (right) indicates how much each metric influenced the prediction of risk (positive indicates pushed towards).
 
 Model exported to C via m2cgen for offline inference on the sensor node. Below is one tree (of 100), it can be easily followed through a simple if not else structure:
 
-![C tree](www/C tree.png)
+<div style="text-align:center">
+  <img src="www/C tree.png" width="500">
+</div>
 
 ### Dashboard
 
@@ -75,6 +78,8 @@ The medical dashboard illustrates a map of Harare and all of the simulated boreh
 
 After some further research into the digital healthcare situation in Zimbabwe and feedback from both GM2 supervisors and Mr.Chafa, we developed a second version of the UI. We focused on improving the visibility. How can we use the space more efficiently to communicate key health and water quality metrics? 
 >>>>>>> 975d51449f829a2727bdebd7dc9bf04d5d5e7e6d
+
+
 
 # SDG and UNICEF Digital Design Principles Reflection
 This project addresses the fundamental issue of access to safe water faced in many developing countries, and therefore looks to tackle **SDG 6**; Clean Water and Sanitation. The target location was Harare, Zimbabwe but the principles and methods in this project are directly applicable to many places that rely on unreliable borehole-sourced water. While odour, taste and sufficient quantities of water are a concern, the primary issue is water-borne diseases. Reliable, fast and robust detection of water safety is essential to preventing the spread of illness and preserving the health of the people that rely on these boreholes (**SDG 3** - Good Health and Well-Being). In developing countries, illness has a wider impact than in wealthier economies as civilians lack the same medical infrastructure and financial support, resulting in the devastation of livelihoods and increasing existing inequalities (**SDG 10** - Reduced Inequality).
