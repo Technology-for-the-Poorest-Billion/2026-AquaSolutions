@@ -4,12 +4,6 @@
 >
 > The current plan lives in "PLAN.md_v1". The pivot rationale lives in "App/cholera_sensor_ml_approach.md"
 >
-> Material still load-bearing from this document:
-> - The four-dataset audit (§0 table) and the honest-framing block — both folded into "Claude.md" - "Key facts" and "Non-negotiable framing."
-> - The validation protocol (grouped + temporal split by `site_id` and date) — carried into "issues_v3.md".
-> - The ML pipeline discipline (imbalance-aware metrics, no PCA for the shipped model, abstain state on OOD inputs) — carried into "Claude.md" - "ML pipeline discipline."
->
-> Everything specifically about on-device TinyML deployment (Day 7 toolchain choice, int8 quantisation, Cortex-M0+ budgets) no longer applies — the sensor is now a data-collection node, not an inference node. However, this document could still prove to be very useful if Aqua Solutions returns to an ML approach after appropriate data collection. 
 
 ---
 

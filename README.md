@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-# Project Template
-Fork this for a basic structure for each project
-=======
 # Technology for the Poorest Billion (GM2): Aqua Solutions
 
 This repository was created by Aidan O'Donnell (ao565) and Tristan Martin (tjfm4) in conjunction with Allen Chafa, founder of Aqua Solutions, as a part of the four-week GM2 IIA CUED project. This was the first year students from GM2 collaborated with Aqua Solutions. 
@@ -23,13 +19,12 @@ This repository was created by Aidan O'Donnell (ao565) and Tristan Martin (tjfm4
 https://reports.raeng.org.uk/africa-prize-2023-interactive-showcase/allen-chafa.html
 
 ## Deliverables: 
-- [Final Pre-Recorded Video Presentation](Final Presentation.mp4)
+- [Final Pre-Recorded Video Presentation](Final_Presentation.mp4)
+- [Final Presentation Slideshow](/Admin/Presentations/Final_Presentation.pdf)
+- Individual Reports, SDG Document, Project Management Document, and Project Summary Documents are under the Wiki section.
 
 ## Risk Assessment: 
 Over the four weeks the students worked on this project, they used a variety of software approaches. Therefore, there was very little risk involved, unlike for other groups which were using machining equipment. While it is the hope that future students will work on the microcontroller that forms the physical device for data collection, this was outside of the scope of the four weeks dedicated to this project. Nonetheless, a risk assessment was submitted through the CUED Power App for soldering.
 
 ## AI Declaration
 AI-assisted development was used to accelerate code iteration, given the four-week project timeline, to avoid spending the majority of the project on syntax rather than design decisions. This included parts of the initial XGBoost analysis on existing datasets, Flask web application scaffolding and general code debugging. All design decisions, problem scoping and technical judgements were made by the student team. AI-generated code was reviewed and tested, with the student team taking responsibility for its correctness and integration. The core deliverables of the final handover, the compressed XGBoost bootstrap pipeline and the DHIS2 reporting interface integration, were done manually by the student team.
-
-
->>>>>>> GM2_Aqua_Solutions/main
