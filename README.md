@@ -21,6 +21,7 @@ https://reports.raeng.org.uk/africa-prize-2023-interactive-showcase/allen-chafa.
 ## Deliverables: 
 - [Final Pre-Recorded Video Presentation](Final_Presentation.mp4)
 - [Final Presentation Slideshow](/Admin/Presentations/Final_Presentation.pdf)
+- Individual Reports, SDG Document, Project Management Document, and Project Summary Documents are under the Wiki section.
 
 ## Risk Assessment: 
 Over the four weeks the students worked on this project, they used a variety of software approaches. Therefore, there was very little risk involved, unlike for other groups which were using machining equipment. While it is the hope that future students will work on the microcontroller that forms the physical device for data collection, this was outside of the scope of the four weeks dedicated to this project. Nonetheless, a risk assessment was submitted through the CUED Power App for soldering.
