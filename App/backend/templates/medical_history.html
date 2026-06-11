@@ -1,0 +1,105 @@
+{% extends "_base.html" %}
+
+{% block title %}{{ _("Medical history") }} — {{ _("Water-safety pipeline") }}{% endblock %}
+
+{% block head_extra %}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossorigin=""/>
+{% endblock %}
+
+{% block extra_style %}
+    #harare-map { height: 300px; width: 100%; }
+{% endblock %}
+
+{% block content %}
+<div class="crumb"><a href="{{ url_for('medical_report_form') }}">← {{ _("File a report") }}</a></div>
+
+<section class="panel">
+    <h4>{{ _("Stations with medical reports") }}</h4>
+    <div id="harare-map"></div>
+</section>
+
+<section class="panel">
+    <h4>{{ _("Reports filed via medical portal") }} ({{ reports|length }})</h4>
+    {% if reports %}
+    <table class="reading-table">
+        <thead>
+            <tr>
+                <th>{{ _("Submitted") }}</th>
+                <th>{{ _("Submitter") }}</th>
+                <th>{{ _("Station") }}</th>
+                <th>{{ _("Cases") }}</th>
+                <th>{{ _("Symptoms") }}</th>
+                <th>{{ _("Risk tier") }}</th>
+                <th>{{ _("Onset") }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for rep in reports %}
+            <tr class="clickable" onclick="window.location='/medical/reports/{{ rep['report_id'] }}'">
+                <td>{{ rep['received_at'][:19] if rep['received_at'] else '—' }}</td>
+                <td>{{ rep['submitter'] or '—' }}</td>
+                <td>{% if rep['station_id'] %}#{{ rep['station_id'] }} {{ rep['station_name'] or '' }}{% else %}—{% endif %}</td>
+                <td>{{ rep['case_count'] or '—' }}</td>
+                <td>{{ rep['symptoms_display'] }}</td>
+                <td>
+                    {% set tier_labels = {
+                        'low': _("LOW"),
+                        'medium': _("MEDIUM"),
+                        'high': _("HIGH"),
+                        'severe': _("SEVERE")
+                    } %}
+                    {% if rep['tier_source'] == 'reporter' %}
+                        <span class="pill pill-{{ rep['tier'] }}">{{ tier_labels.get(rep['tier'], rep['tier']|upper) }}</span>
+                    {% elif rep['tier_source'] == 'estimated' %}
+                        <span class="pill pill-{{ rep['tier'] }} dim">{{ tier_labels.get(rep['tier'], rep['tier']|upper) }}</span>
+                    {% else %}
+                        <span class="note sm">—</span>
+                    {% endif %}
+                </td>
+                <td>{{ rep['onset_date'] or '—' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="note">{{ _('No medical-portal reports yet. File one via "File a report" above.') }}</p>
+    {% endif %}
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""></script>
+<script>
+    const HARARE = [-17.8292, 31.0522];
+    const map = L.map('harare-map').setView(HARARE, 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 18,
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    const stations = {{ stations_json|safe }};
+    stations.forEach(s => {
+        if (s.latitude && s.longitude) {
+            const radius = 6 + Math.min(s.report_count, 10) * 2;
+            // Brand cyan (--accent: #3eb1e8 — same blue as the SOLUTIONS
+            // wordmark). Opacity carries the "has medical-portal reports"
+            // signal so quieter stations stay visible but recede.
+            L.circleMarker([s.latitude, s.longitude], {
+                radius: radius,
+                fillColor: '#3eb1e8',
+                color: '#3eb1e8',
+                fillOpacity: s.report_count > 0 ? 0.75 : 0.35,
+                weight: 1,
+            }).addTo(map).bindPopup(
+                `<strong>${s.name}</strong><br>` +
+                `${s.report_count} medical-portal report(s)` +
+                (s.last_report ? `<br>Last: ${s.last_report.slice(0, 19)}` : '')
+            );
+        }
+    });
+</script>
+{% endblock %}

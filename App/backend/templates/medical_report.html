@@ -1,0 +1,110 @@
+{% extends "_base.html" %}
+
+{% block title %}{{ _("File a report") }} — {{ _("Water-safety pipeline") }}{% endblock %}
+
+{% block content %}
+<section class="panel">
+    <h4>{{ _("File a community illness report") }}</h4>
+
+    {% if success_message %}<div class="flash flash-ok">{{ success_message }}</div>{% endif %}
+    {% if error_message %}<div class="flash flash-err">{{ error_message }}</div>{% endif %}
+
+    <form method="POST" action="{{ url_for('medical_report_submit') }}" id="report-form">
+
+        <div class="form-grid-3">
+            <div class="field">
+                <label for="station_id">{{ _("Station") }}</label>
+                <select id="station_id" name="station_id" required>
+                    <option value="">— {{ _("select") }} —</option>
+                    {% for s in stations %}
+                        <option value="{{ s['station_id'] }}">{{ s['station_id'] }} · {{ s['name'] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="field">
+                <label for="case_count">{{ _("Cases") }}</label>
+                <input id="case_count" type="number" name="case_count" min="1" max="200" required>
+            </div>
+            <div class="field">
+                <label for="onset_date">{{ _("Onset date") }}</label>
+                <input id="onset_date" type="date" name="onset_date">
+            </div>
+        </div>
+
+        <div class="field-row">
+            <label>{{ _("Symptoms") }}</label>
+            <div class="inline-row" id="symptom-chips">
+                {% for key, label_text in symptoms %}
+                    <span class="chip" data-symptom="{{ key }}" onclick="toggleChip(this)">
+                        <span class="check">✓</span> {{ label_text }}
+                    </span>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="field-row">
+            <label>{{ _("Risk tier") }} <span class="opt">({{ _("clinical assessment, optional") }})</span></label>
+            <div class="segmented" id="risk-tier">
+                <span class="seg on" data-tier="" onclick="pickTier(this)">{{ _("Not assessed") }}</span>
+                <span class="seg" data-tier="low" onclick="pickTier(this)">{{ _("LOW") }}</span>
+                <span class="seg" data-tier="medium" onclick="pickTier(this)">{{ _("MEDIUM") }}</span>
+                <span class="seg" data-tier="high" onclick="pickTier(this)">{{ _("HIGH") }}</span>
+                <span class="seg" data-tier="severe" onclick="pickTier(this)">{{ _("SEVERE") }}</span>
+            </div>
+        </div>
+
+        <div class="field">
+            <label for="notes">{{ _("Notes") }} <span class="opt">({{ _("optional") }})</span></label>
+            <textarea id="notes" name="notes" rows="2"></textarea>
+        </div>
+
+        {# Hidden input the JS keeps in sync with the segmented control. #}
+        <input type="hidden" id="risk-tier-hidden" name="risk_tier" value="">
+
+        <div class="meta-row">
+            <span class="note sm">{{ _("Reviewed by the government dashboard within ~30s of submission.") }}</span>
+            <div class="btn-row">
+                <button type="reset" class="btn btn-light" onclick="resetForm()">{{ _("Reset") }}</button>
+                <button type="submit" class="btn">{{ _("Submit report") }}</button>
+            </div>
+        </div>
+    </form>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Symptoms — append hidden inputs per toggled chip so the form submits
+  // multi-value (request.form.getlist('symptoms')) style, matching what
+  // the submit handler expects at line 300 of app.py.
+  function toggleChip(el) {
+    el.classList.toggle('on');
+    syncSymptomsMulti();
+  }
+  function syncSymptomsMulti() {
+    // Remove any existing dynamic symptom hidden inputs.
+    document.querySelectorAll('input[name="symptoms"].dyn').forEach(n => n.remove());
+    const form = document.getElementById('report-form');
+    document.querySelectorAll('#symptom-chips .chip.on').forEach(c => {
+      const inp = document.createElement('input');
+      inp.type = 'hidden';
+      inp.name = 'symptoms';
+      inp.className = 'dyn';
+      inp.value = c.dataset.symptom;
+      form.appendChild(inp);
+    });
+  }
+  function pickTier(el) {
+    document.querySelectorAll('#risk-tier .seg').forEach(s => s.classList.remove('on'));
+    el.classList.add('on');
+    document.getElementById('risk-tier-hidden').value = el.dataset.tier;
+  }
+  function resetForm() {
+    document.querySelectorAll('#symptom-chips .chip').forEach(c => c.classList.remove('on'));
+    syncSymptomsMulti();
+    document.querySelectorAll('#risk-tier .seg').forEach(s => s.classList.remove('on'));
+    const firstSeg = document.querySelector('#risk-tier .seg');
+    if (firstSeg) { firstSeg.classList.add('on'); document.getElementById('risk-tier-hidden').value = ''; }
+  }
+</script>
+{% endblock %}

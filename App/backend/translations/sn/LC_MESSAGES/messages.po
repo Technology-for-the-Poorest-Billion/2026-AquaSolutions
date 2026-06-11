@@ -1,0 +1,773 @@
+# Shona translations for PROJECT.
+# Copyright (C) 2026 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2026-06-01 13:37+0100\n"
+"PO-Revision-Date: 2026-05-31 11:09+0100\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: sn\n"
+"Language-Team: sn <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: app.py:132
+#, fuzzy, python-brace-format
+msgid "forbidden — this page requires the '{role}' role"
+msgstr "zvakarambidzwa — peji ino inoda basa re'{role}'"
+
+#: app.py:198
+#, fuzzy
+msgid "pending — awaiting reporter follow-up"
+msgstr "yakamirira - yakamirira kuteverwa nemutori wenhau"
+
+#: app.py:200
+#, fuzzy
+msgid "incomplete — no structured data available"
+msgstr "isina kukwana - hapana data yakarongeka iripo"
+
+#: app.py:253
+#, fuzzy
+msgid "Unknown username or wrong password."
+msgstr "Unknown username kana password isiriyo."
+
+#: app.py:321
+#, fuzzy
+msgid "Please select a valid station."
+msgstr "Ndapota sarudza chiteshi chiri kushanda."
+
+#: app.py:328
+#, fuzzy
+msgid "Case count must be a positive integer."
+msgstr "Nyaya dzinofanira kuva nhamba yakanaka."
+
+#: app.py:338
+#, fuzzy
+msgid "Onset date must be YYYY-MM-DD."
+msgstr "Zuva rekutanga rinofanira kunge riri YYYY-MM-DD."
+
+#: app.py:341
+#, fuzzy
+msgid "Invalid risk tier value."
+msgstr "Hukoshi hwechikamu chenjodzi haikodzeri."
+
+#: app.py:360
+#, fuzzy, python-format
+msgid "Station %(station_id)s is not in the system."
+msgstr "Chiteshi %(station_id)s haisi muhurongwa."
+
+#: app.py:392
+#, fuzzy, python-format
+msgid ""
+"Report received for %(name)s (station %(sid)s). %(n)d reading(s) in the "
+"trailing-window were flagged. Anchor: %(anchor)s."
+msgstr ""
+"Chirevo chakagamuchirwa che %(name)s (chiteshi %(sid)s). %(n)d "
+"kuverenga(s) mufafitera rekutevera zvakaiswa mireza. Anchor: %(anchor)s."
+
+#: app.py:399
+#, fuzzy
+msgid "now"
+msgstr "ikozvino"
+
+#: app.py:752
+#, fuzzy
+msgid "invalid action_type"
+msgstr "chimiro_chisina basa"
+
+#: app.py:757
+#, fuzzy
+msgid "invalid station_id"
+msgstr "station_id isiriyo"
+
+#: app.py:764
+#, fuzzy
+msgid "invalid related_report_id"
+msgstr "invalid related_report_id"
+
+#: app.py:773
+#, fuzzy, python-format
+msgid "unknown station_id %(station_id)s"
+msgstr "isingazivikanwe chiteshi_id %(station_id)s"
+
+#: app.py:776
+#, fuzzy, python-format
+msgid "station %(station_id)s is already closed"
+msgstr "chiteshi %(station_id)s chakatovharwa"
+
+#: app.py:778
+#, fuzzy, python-format
+msgid "station %(station_id)s is already open"
+msgstr "chiteshi %(station_id)s chatovhurwa"
+
+#: app.py:817
+#, fuzzy, python-format
+msgid ""
+"This page is for government officials. Medical staff can view this report"
+" at /medical/reports/%(report_id)s"
+msgstr ""
+"Peji rino nderevakuru vakuru vehurumende. Vashandi vekurapa vanogona "
+"kuona iyi report pa /medical/reports/%(report_id)s"
+
+#: estimator.py:61
+#, fuzzy
+msgid ""
+"textbook severe-cholera pattern (diarrhoea + dehydration + recent onset +"
+" multiple cases)"
+msgstr ""
+"bhuku rezvinyorwa zvakakomba-cholera pateni (manyoka + kupera mvura "
+"mumuviri + ichangotanga + nyaya dzakawanda)"
+
+#: estimator.py:66
+#, fuzzy
+msgid "3+ symptoms reported"
+msgstr "3+ zviratidzo zvakashumwa"
+
+#: estimator.py:68
+#, fuzzy
+msgid "outbreak-scale case count (≥5) with multiple symptoms"
+msgstr "kubuda-scale kesi count (≥5) ine zviratidzo zvakawanda"
+
+#: estimator.py:70
+#, fuzzy
+msgid "recent-onset diarrhoea"
+msgstr "manyoka achangotanga"
+
+#: estimator.py:75
+#, fuzzy, python-format
+msgid "%(num)d non-specific symptom reported"
+msgid_plural "%(num)d non-specific symptoms reported"
+msgstr[0] "%(num)d isiri-chaiyo chiratidzo chataurwa"
+msgstr[1] "%(num)d zviratidzo zvisiri-chaiyo zvakashumwa"
+
+#: estimator.py:79
+#, fuzzy
+msgid "no symptoms reported — request clinical assessment regardless"
+msgstr "hapana zviratidzo zvinoshumwa - kumbira kuongororwa kwekiriniki zvisinei"
+
+#: language.py:178
+#, fuzzy
+msgid "Invalid language code."
+msgstr "Kodhi yemutauro isiriyo."
+
+#: templates/_base.html:6 templates/dashboard.html:3 templates/login.html:3
+#: templates/login.html:21 templates/medical_history.html:3
+#: templates/medical_report.html:3 templates/medical_report_detail.html:3
+#, fuzzy
+msgid "Water-safety pipeline"
+msgstr "Mvura-yakachengeteka pombi"
+
+#: templates/_base.html:20
+#, fuzzy
+msgid "History"
+msgstr "Nhoroondo"
+
+#: templates/_base.html:22 templates/medical_history.html:16
+#: templates/medical_report.html:3
+#, fuzzy
+msgid "File a report"
+msgstr "Isa report"
+
+#: templates/_base.html:25 templates/dashboard.html:3
+#: templates/dashboard_report_detail.html:3
+#: templates/dashboard_report_detail.html:7
+#, fuzzy
+msgid "Dashboard"
+msgstr "Dashboard"
+
+#: templates/_base.html:34
+#, fuzzy
+msgid "Sign out"
+msgstr "Buda"
+
+#. shown on every page when the active locale's                    catalog
+#. still has unverified (fuzzy) machine-translated entries.
+#: templates/_base.html:43
+msgid ""
+"Machine-translated draft — awaiting native review. Translations of "
+"medical terms may be inaccurate; for clinical decisions, switch to "
+"English."
+msgstr ""
+
+#: templates/_base.html:50
+#, fuzzy
+msgid "NOT a cholera detector — measures contamination indicators only."
+msgstr "HASI mucherechedzo wekorera - inoyera zviratidzo zvekutapukira chete."
+
+#: templates/_lang_picker.html:4
+#, fuzzy
+msgid "Language"
+msgstr "Mutauro"
+
+#: templates/dashboard.html:14
+#, fuzzy
+msgid "Station status"
+msgstr "Chiteshi chimiro"
+
+#: templates/dashboard.html:14
+#, fuzzy
+msgid "stations"
+msgstr "zviteshi"
+
+#: templates/dashboard.html:14
+#, fuzzy
+msgid "day window"
+msgstr "zuva hwindo"
+
+#: templates/dashboard.html:18
+#, fuzzy
+msgid "All neighborhoods"
+msgstr "Nharaunda dzese"
+
+#: templates/dashboard.html:43
+#, fuzzy
+msgid "no readings yet"
+msgstr "hapana kuverenga parizvino"
+
+#: templates/dashboard.html:48
+#, fuzzy
+msgid "UNSAFE"
+msgstr "KUSINA KUCHENGETEKA"
+
+#: templates/dashboard.html:50
+#, fuzzy
+msgid "CLEAR"
+msgstr "ZVAKANAKA"
+
+#: templates/dashboard.html:54
+#, fuzzy
+msgid "Reopen station"
+msgstr "Vhura chiteshi"
+
+#: templates/dashboard.html:57
+#, fuzzy
+msgid "Reopen"
+msgstr "Vhura zvakare"
+
+#: templates/dashboard.html:61
+#, fuzzy
+msgid "Close station"
+msgstr "Vhara chiteshi"
+
+#: templates/dashboard.html:64
+#, fuzzy
+msgid "Close"
+msgstr "Close"
+
+#: templates/dashboard.html:68
+#, fuzzy
+msgid "Dispatch sample team to station"
+msgstr "Tumira timu yekuenzanisira kuchiteshi"
+
+#: templates/dashboard.html:71
+#, fuzzy
+msgid "Sample"
+msgstr "Muenzaniso"
+
+#: templates/dashboard.html:74
+#, fuzzy
+msgid "Dispatch medical team to station"
+msgstr "Tumira timu yekurapa kuchiteshi"
+
+#: templates/dashboard.html:77
+#, fuzzy
+msgid "Medical"
+msgstr "Medical"
+
+#: templates/dashboard.html:86
+#, fuzzy
+msgid "New station name"
+msgstr "Zita rechiteshi chitsva"
+
+#: templates/dashboard.html:90
+#, fuzzy
+msgid "Latitude"
+msgstr "Latitude"
+
+#: templates/dashboard.html:94
+#, fuzzy
+msgid "Longitude"
+msgstr "Longitude"
+
+#: templates/dashboard.html:98
+#, fuzzy
+msgid "Add"
+msgstr "Wedzera"
+
+#: templates/dashboard.html:104
+#, fuzzy
+msgid "Please enter a valid station name and lat/lon values."
+msgstr "Ndokumbira uise zita rechiteshi rinoshanda uye nhamba dzelat/lon."
+
+#: templates/dashboard.html:106
+#, fuzzy
+msgid "Unknown neighborhood."
+msgstr "Nzvimbo isingazivikanwe."
+
+#: templates/dashboard.html:108
+#, fuzzy
+msgid "Could not add the station."
+msgstr "Hatina kukwanisa kuwedzera chiteshi."
+
+#: templates/dashboard.html:113
+#, fuzzy
+msgid "Select a neighborhood to add a station."
+msgstr "Sarudza nharaunda yekuwedzera chiteshi."
+
+#: templates/dashboard.html:118
+#, fuzzy
+msgid "Recent illness reports"
+msgstr "Mishumo yechirwere chazvino uno"
+
+#: templates/dashboard.html:118 templates/dashboard_report_detail.html:57
+#: templates/medical_history.html:34 templates/medical_report.html:46
+#: templates/medical_report_detail.html:40
+#, fuzzy
+msgid "Risk tier"
+msgstr "Risk tier"
+
+#: templates/dashboard.html:131
+#, fuzzy
+msgid "UNPARSED"
+msgstr "KUSVIRWA"
+
+#: templates/dashboard.html:141 templates/dashboard_report_detail.html:59
+#: templates/medical_history.html:48 templates/medical_report.html:49
+#: templates/medical_report_detail.html:43
+#, fuzzy
+msgid "LOW"
+msgstr "LOW"
+
+#: templates/dashboard.html:142 templates/dashboard_report_detail.html:60
+#: templates/medical_history.html:49 templates/medical_report.html:50
+#: templates/medical_report_detail.html:44
+#, fuzzy
+msgid "MEDIUM"
+msgstr "MEDIUM"
+
+#: templates/dashboard.html:143 templates/dashboard_report_detail.html:61
+#: templates/medical_history.html:50 templates/medical_report.html:51
+#: templates/medical_report_detail.html:45
+#, fuzzy
+msgid "HIGH"
+msgstr "HIGH"
+
+#: templates/dashboard.html:144 templates/dashboard_report_detail.html:62
+#: templates/medical_history.html:51 templates/medical_report.html:52
+#: templates/medical_report_detail.html:46
+#, fuzzy
+msgid "SEVERE"
+msgstr "ZVAKANYANYA"
+
+#: templates/dashboard.html:154
+#, fuzzy
+msgid "labelled"
+msgstr "yakanyorwa"
+
+#: templates/dashboard.html:160
+#, fuzzy
+msgid "No illness reports yet. Text the Twilio number to generate one."
+msgstr "Hapasati pari kutaurwa nezvehurwere. Nyora iyo Twilio nhamba kuti uite imwe."
+"Hapasati pari kutaurwa nezvehurwere. Nyora iyo Twilio nhamba kuti uite "
+"imwe.Hapasati pari kutaurwa nezvehurwere. Nyora iyo Twilio nhamba kuti "
+"uite imwe."
+
+#: templates/dashboard_report_detail.html:3
+#: templates/dashboard_report_detail.html:9
+#: templates/medical_report_detail.html:3
+#: templates/medical_report_detail.html:9
+#: templates/medical_report_detail.html:13
+#, fuzzy
+msgid "Report"
+msgstr "Report"
+
+#: templates/dashboard_report_detail.html:16
+#, fuzzy
+msgid "Report metadata"
+msgstr "Report metadata"
+
+#: templates/dashboard_report_detail.html:18
+#: templates/medical_report_detail.html:15
+#, fuzzy
+msgid "Source"
+msgstr "Source"
+
+#: templates/dashboard_report_detail.html:20
+#: templates/medical_report_detail.html:17
+#, fuzzy
+msgid "SMS"
+msgstr "SMS"
+
+#: templates/dashboard_report_detail.html:21
+#: templates/medical_report_detail.html:18
+#, fuzzy
+msgid "MEDICAL PORTAL"
+msgstr "MEDICAL PORTAL"
+
+#: templates/dashboard_report_detail.html:25
+#: templates/medical_report_detail.html:25
+#, fuzzy
+msgid "Received"
+msgstr "Received"
+
+#: templates/dashboard_report_detail.html:28 templates/medical_history.html:30
+#: templates/medical_report_detail.html:22
+#, fuzzy
+msgid "Submitter"
+msgstr "Submitter"
+
+#: templates/dashboard_report_detail.html:31
+#, fuzzy
+msgid "Parser version"
+msgstr "Parser shanduro"
+
+#: templates/dashboard_report_detail.html:37
+#, fuzzy
+msgid "Structured fields"
+msgstr "Minda yakarongeka"
+
+#: templates/dashboard_report_detail.html:39 templates/medical_history.html:31
+#: templates/medical_report.html:16 templates/medical_report_detail.html:28
+#, fuzzy
+msgid "Station"
+msgstr "Chiteshi"
+
+#: templates/dashboard_report_detail.html:42
+#: templates/medical_report_detail.html:31
+#, fuzzy
+msgid "Case count"
+msgstr "Case count"
+
+#: templates/dashboard_report_detail.html:45 templates/medical_history.html:33
+#: templates/medical_report.html:35 templates/medical_report_detail.html:34
+#, fuzzy
+msgid "Symptoms"
+msgstr "Zviratidzo"
+
+#: templates/dashboard_report_detail.html:48 templates/medical_report.html:29
+#, fuzzy
+msgid "Onset date"
+msgstr "Zuva rekutanga"
+
+#: templates/dashboard_report_detail.html:51
+#, fuzzy
+msgid "Notes / raw"
+msgstr "Notes / mbishi"
+
+#: templates/dashboard_report_detail.html:66
+#: templates/medical_report_detail.html:50
+#, fuzzy
+msgid "Reporter's clinical assessment"
+msgstr "Reporter's Clinical Assessment"
+
+#: templates/dashboard_report_detail.html:69
+#, fuzzy
+msgid "Estimated by automated heuristic — not medical advice."
+msgstr "Zvinofungidzirwa ne automated heuristic - kwete zano rekurapa."
+
+#: templates/dashboard_report_detail.html:70
+#, fuzzy
+msgid "See rationale below. Pattern-based; clinical assessment overrides."
+msgstr "Ona chikonzero chiri pasi apa. Pattern-based; kuongororwa kwekliniki kunodarika."
+"Ona chikonzero chiri pasi apa. Pattern-based; kuongororwa kwekliniki "
+"kunodarika.Ona chikonzero chiri pasi apa. Pattern-based; kuongororwa "
+"kwekliniki kunodarika."
+
+#: templates/dashboard_report_detail.html:73
+#: templates/medical_report_detail.html:53
+#, fuzzy
+msgid "Estimated risk tier"
+msgstr "Estimate risk tier"
+
+#: templates/dashboard_report_detail.html:83
+#: templates/medical_report_detail.html:65
+#, fuzzy
+msgid "Labelled readings"
+msgstr "Kuverengwa kwakanyorwa"
+
+#: templates/dashboard_report_detail.html:86
+#: templates/medical_report_detail.html:68
+#, fuzzy
+msgid "Earliest"
+msgstr "Earliest"
+
+#: templates/dashboard_report_detail.html:88
+#: templates/medical_report_detail.html:70
+#, fuzzy
+msgid "Latest"
+msgstr "Latest"
+
+#: templates/dashboard_report_detail.html:90
+#: templates/medical_report_detail.html:72
+#, fuzzy
+msgid "Columns"
+msgstr "Columns"
+
+#: templates/dashboard_report_detail.html:95
+#: templates/medical_report_detail.html:77
+#, fuzzy
+msgid "Download labelled readings (CSV)"
+msgstr "Dhaunirodha zvinyorwa zvine mazita (CSV)"
+
+#: templates/dashboard_report_detail.html:99
+#: templates/medical_report_detail.html:81
+#, fuzzy
+msgid "No readings labelled by this report."
+msgstr "Hapana kuverenga kwakanyorwa nerepoti iyi."
+
+#: templates/dashboard_report_detail.html:106
+#, fuzzy
+msgid "Actions"
+msgstr "Zviito"
+
+#: templates/dashboard_report_detail.html:112
+#, fuzzy
+msgid "Close borehole"
+msgstr "Vhara chibhorani"
+
+#: templates/dashboard_report_detail.html:119
+#, fuzzy
+msgid "Send sample team"
+msgstr "Tumira timu yemuenzaniso"
+
+#: templates/dashboard_report_detail.html:126
+#, fuzzy
+msgid "Send medical team"
+msgstr "Tumira boka rezvokurapa"
+
+#: templates/dashboard_report_detail.html:132
+#: templates/dashboard_report_detail.html:156
+#, fuzzy
+msgid "Interventions linked to this report"
+msgstr "Kupindira kwakabatana neshumo iyi"
+
+#: templates/dashboard_report_detail.html:136
+#, fuzzy
+msgid "When"
+msgstr "Rini"
+
+#: templates/dashboard_report_detail.html:137
+#, fuzzy
+msgid "Action"
+msgstr "Chiito"
+
+#: templates/dashboard_report_detail.html:138
+#, fuzzy
+msgid "Triggered by"
+msgstr "Yakakonzerwa ne"
+
+#: templates/dashboard_report_detail.html:139 templates/medical_report.html:57
+#, fuzzy
+msgid "Notes"
+msgstr "Notes"
+
+#: templates/dashboard_report_detail.html:157
+#, fuzzy
+msgid "No interventions yet."
+msgstr "Hapana kupindira parizvino."
+
+#: templates/login.html:3 templates/login.html:37
+#, fuzzy
+msgid "Sign in"
+msgstr "Nyorera mu"
+
+#. tagline under the sign-in title, from the brand.
+#: templates/login.html:23
+#, fuzzy
+msgid "clean water for Africa"
+msgstr "mvura yakachena yeAfrica"
+
+#: templates/login.html:29
+#, fuzzy
+msgid "Username"
+msgstr "Username"
+
+#: templates/login.html:33
+#, fuzzy
+msgid "Password"
+msgstr "Pasiwedhi"
+
+#: templates/login.html:41
+#, fuzzy
+msgid ""
+"Sign in as a government official to view the station-status dashboard, or"
+" as a medical professional to file an illness report."
+msgstr ""
+"Saina semukuru wehurumende kuti utarise station-status dashboard, kana "
+"senyanzvi yekurapa kuti unyore repoti yehurwere."
+
+#: templates/medical_history.html:3 templates/medical_report_detail.html:7
+#, fuzzy
+msgid "Medical history"
+msgstr "Nhoroondo yezvokurapa"
+
+#: templates/medical_history.html:19
+#, fuzzy
+msgid "Stations with medical reports"
+msgstr "Zviteshi zvine mishumo yekurapa"
+
+#: templates/medical_history.html:24
+#, fuzzy
+msgid "Reports filed via medical portal"
+msgstr "Mishumo inotumirwa kuburikidza nechipatara portal"
+
+#: templates/medical_history.html:29
+#, fuzzy
+msgid "Submitted"
+msgstr "Submitted"
+
+#: templates/medical_history.html:32 templates/medical_report.html:25
+#, fuzzy
+msgid "Cases"
+msgstr "Cases"
+
+#: templates/medical_history.html:35 templates/medical_report_detail.html:37
+#, fuzzy
+msgid "Onset"
+msgstr "Kutanga"
+
+#: templates/medical_history.html:67
+#, fuzzy
+msgid "No medical-portal reports yet. File one via \"File a report\" above."
+msgstr "Hapana mishumo yekurapa-portal parizvino. Faera imwe uchishandisa \\"Fayira report\\" pamusoro."
+"Hapana mishumo yekurapa-portal parizvino. Faera imwe uchishandisa "
+"\\\"Fayira report\\\" pamusoro.Hapana mishumo yekurapa-portal parizvino. "
+"Faera imwe uchishandisa \\\"Fayira report\\\" pamusoro."
+
+#: templates/medical_report.html:7
+#, fuzzy
+msgid "File a community illness report"
+msgstr "Isa gwaro rechirwere chenharaunda"
+
+#: templates/medical_report.html:18
+#, fuzzy
+msgid "select"
+msgstr "sarudza"
+
+#: templates/medical_report.html:46
+#, fuzzy
+msgid "clinical assessment, optional"
+msgstr "kuongororwa kwekiriniki, sarudzo"
+
+#: templates/medical_report.html:48
+#, fuzzy
+msgid "Not assessed"
+msgstr "Haina kuongororwa"
+
+#: templates/medical_report.html:57
+#, fuzzy
+msgid "optional"
+msgstr "optional"
+
+#: templates/medical_report.html:65
+#, fuzzy
+msgid "Reviewed by the government dashboard within ~30s of submission."
+msgstr "Yakaongororwa nehurumende dashboard mukati me ~ 30s yekutumira."
+
+#: templates/medical_report.html:67
+#, fuzzy
+msgid "Reset"
+msgstr "Reset"
+
+#: templates/medical_report.html:68
+#, fuzzy
+msgid "Submit report"
+msgstr "Tumira mushumo"
+
+#~ msgid "government dashboard"
+#~ msgstr "dashboard yehurumende"
+
+#~ msgid "Generated"
+#~ msgstr "Yakagadzirwa"
+
+#~ msgid "auto-refresh 30s"
+#~ msgstr "auto-refresh 30s"
+
+#~ msgid "Signed in as"
+#~ msgstr "Sainirwa se"
+
+#~ msgid "Faecal-contamination risk + community illness signal."
+#~ msgstr "Njodzi yekusvibiswa nefevha + chiratidzo chechirwere chenharaunda."
+
+#~ msgid "NOT a cholera detector."
+#~ msgstr "KWETE mucherechedzo wekorera."
+
+#~ msgid "pH"
+#~ msgstr "pH"
+
+#~ msgid "Turb (NTU)"
+#~ msgstr "Turbo (NTU)"
+
+#~ msgid "Temp (°C)"
+#~ msgstr "Kupisa (°C)"
+
+#~ msgid "Rain (mm)"
+#~ msgstr "Mvura (mm)"
+
+#~ msgid "Status"
+#~ msgstr "Status"
+
+#~ msgid "government detail"
+#~ msgstr "ruzivo rwehurumende"
+
+#~ msgid "Received at"
+#~ msgstr "Yakagamuchirwa pa"
+
+#~ msgid "Reading"
+#~ msgstr "Kuverenga"
+
+#~ msgid "Recorded at"
+#~ msgstr "Yakarekodhwa pa"
+
+#~ msgid "Rule"
+#~ msgstr "Rule"
+
+#~ msgid "New report"
+#~ msgstr "New report"
+
+#~ msgid "required"
+#~ msgstr "zvinodiwa"
+
+#~ msgid "Number of suspected cases"
+#~ msgstr "Nhamba yemhosva dzinofungidzirwa"
+
+#~ msgid "Not yet assessed — estimate on review"
+#~ msgstr "Haisati yaongororwa - fungidziro pakuongorora"
+
+#~ msgid "LOW — non-specific symptoms"
+#~ msgstr "PASI - zviratidzo zvisiri izvo"
+
+#~ msgid "MEDIUM — possible waterborne illness"
+#~ msgstr "ZVIRI MUKATI - zvinogona kukonzerwa nemvura"
+
+#~ msgid "HIGH — likely waterborne illness, clinical workup recommended"
+#~ msgstr "HIGH - ingangove chirwere chemvura, kliniki workup inokurudzirwa"
+
+#~ msgid "SEVERE — suspected severe cholera, urgent action"
+#~ msgstr "YAKAKANYA — inofungirwa kuti korera yakaipisisa, danho rekukasika"
+
+#~ msgid "Symptoms observed"
+#~ msgstr "Zviratidzo zvakaonekwa"
+
+#~ msgid "tick all that apply"
+#~ msgstr "nyora zvese zvinoshanda"
+
+#~ msgid "Symptom onset date"
+#~ msgstr "Chiratidzo chekutanga zuva"
+
+#~ msgid "optional — anchors the labelling window"
+#~ msgstr "sarudzo - inomisa hwindo rekunyora"
+
+#~ msgid "Anything else worth flagging…"
+#~ msgstr "Chero chimwe chinhu chakakosha kucherechedzwa ..."
+
+#~ msgid "medical detail"
+#~ msgstr "tsanangudzo yezvokurapa"
+

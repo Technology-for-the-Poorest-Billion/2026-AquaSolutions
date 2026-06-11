@@ -1,0 +1,944 @@
+{
+  "system": {
+    "id": "2eb9cd0e-6803-4d07-ab57-3f12b4140da5",
+    "rev": "9fc9c1d",
+    "version": "2.42.5",
+    "date": "2026-06-06T12:34:55.308+0000"
+  },
+  "programStages": [
+    {
+      "name": "Water Quality Summary",
+      "created": "2026-06-06T12:28:59.405",
+      "lastUpdated": "2026-06-06T12:31:21.778",
+      "translations": [],
+      "createdBy": {
+        "id": "M5zQapPyTZI",
+        "code": "admin",
+        "name": "admin admin",
+        "displayName": "admin admin",
+        "username": "admin"
+      },
+      "lastUpdatedBy": {
+        "id": "M5zQapPyTZI",
+        "code": "admin",
+        "name": "admin admin",
+        "displayName": "admin admin",
+        "username": "admin"
+      },
+      "sharing": {
+        "owner": "M5zQapPyTZI",
+        "external": false,
+        "users": {},
+        "userGroups": {},
+        "public": "r-rw----"
+      },
+      "minDaysFromStart": 0,
+      "program": {
+        "id": "yb1sWVWFtHZ"
+      },
+      "programStageDataElements": [
+        {
+          "created": "2026-06-06T12:29:23.583",
+          "lastUpdated": "2026-06-06T12:31:21.779",
+          "translations": [],
+          "favorites": [],
+          "sharing": {
+            "external": false,
+            "users": {},
+            "userGroups": {}
+          },
+          "programStage": {
+            "id": "nNzwJNHT6Vy"
+          },
+          "dataElement": {
+            "id": "WjtzTZa2XoM"
+          },
+          "compulsory": false,
+          "allowProvidedElsewhere": false,
+          "sortOrder": 1,
+          "displayInReports": false,
+          "allowFutureDate": false,
+          "renderOptionsAsRadio": false,
+          "skipSynchronization": false,
+          "skipAnalytics": false,
+          "access": {
+            "manage": true,
+            "externalize": true,
+            "write": true,
+            "read": true,
+            "update": true,
+            "delete": true
+          },
+          "favorite": false,
+          "id": "qtrNHT9ks3F",
+          "attributeValues": []
+        },
+        {
+          "created": "2026-06-06T12:29:23.584",
+          "lastUpdated": "2026-06-06T12:31:21.779",
+          "translations": [],
+          "favorites": [],
+          "sharing": {
+            "external": false,
+            "users": {},
+            "userGroups": {}
+          },
+          "programStage": {
+            "id": "nNzwJNHT6Vy"
+          },
+          "dataElement": {
+            "id": "U8s5z94Ipx6"
+          },
+          "compulsory": false,
+          "allowProvidedElsewhere": false,
+          "sortOrder": 2,
+          "displayInReports": false,
+          "allowFutureDate": false,
+          "renderOptionsAsRadio": false,
+          "skipSynchronization": false,
+          "skipAnalytics": false,
+          "access": {
+            "manage": true,
+            "externalize": true,
+            "write": true,
+            "read": true,
+            "update": true,
+            "delete": true
+          },
+          "favorite": false,
+          "id": "zjTZoNsi00s",
+          "attributeValues": []
+        },
+        {
+          "created": "2026-06-06T12:29:23.583",
+          "lastUpdated": "2026-06-06T12:31:21.779",
+          "translations": [],
+          "favorites": [],
+          "sharing": {
+            "external": false,
+            "users": {},
+            "userGroups": {}
+          },
+          "programStage": {
+            "id": "nNzwJNHT6Vy"
+          },
+          "dataElement": {
+            "id": "l5uPlE20TdG"
+          },
+          "compulsory": false,
+          "allowProvidedElsewhere": false,
+          "sortOrder": 3,
+          "displayInReports": false,
+          "allowFutureDate": false,
+          "renderOptionsAsRadio": false,
+          "skipSynchronization": false,
+          "skipAnalytics": false,
+          "access": {
+            "manage": true,
+            "externalize": true,
+            "write": true,
+            "read": true,
+            "update": true,
+            "delete": true
+          },
+          "favorite": false,
+          "id": "xoBrpp0VYyb",
+          "attributeValues": []
+        },
+        {
+          "created": "2026-06-06T12:29:23.583",
+          "lastUpdated": "2026-06-06T12:31:21.779",
+          "translations": [],
+          "favorites": [],
+          "sharing": {
+            "external": false,
+            "users": {},
+            "userGroups": {}
+          },
+          "programStage": {
+            "id": "nNzwJNHT6Vy"
+          },
+          "dataElement": {
+            "id": "KhVq19GxDLz"
+          },
+          "compulsory": false,
+          "allowProvidedElsewhere": false,
+          "sortOrder": 4,
+          "displayInReports": false,
+          "allowFutureDate": false,
+          "renderOptionsAsRadio": false,
+          "skipSynchronization": false,
+          "skipAnalytics": false,
+          "access": {
+            "manage": true,
+            "externalize": true,
+            "write": true,
+            "read": true,
+            "update": true,
+            "delete": true
+          },
+          "favorite": false,
+          "id": "Rfgm7TznnKT",
+          "attributeValues": []
+        },
+        {
+          "created": "2026-06-06T12:29:23.583",
+          "lastUpdated": "2026-06-06T12:31:21.779",
+          "translations": [],
+          "favorites": [],
+          "sharing": {
+            "external": false,
+            "users": {},
+            "userGroups": {}
+          },
+          "programStage": {
+            "id": "nNzwJNHT6Vy"
+          },
+          "dataElement": {
+            "id": "s3XU1DPHQEz"
+          },
+          "compulsory": false,
+          "allowProvidedElsewhere": false,
+          "sortOrder": 5,
+          "displayInReports": false,
+          "allowFutureDate": false,
+          "renderOptionsAsRadio": false,
+          "skipSynchronization": false,
+          "skipAnalytics": false,
+          "access": {
+            "manage": true,
+            "externalize": true,
+            "write": true,
+            "read": true,
+            "update": true,
+            "delete": true
+          },
+          "favorite": false,
+          "id": "C6kcaNfiLJi",
+          "attributeValues": []
+        },
+        {
+          "created": "2026-06-06T12:29:23.583",
+          "lastUpdated": "2026-06-06T12:31:21.779",
+          "translations": [],
+          "favorites": [],
+          "sharing": {
+            "external": false,
+            "users": {},
+            "userGroups": {}
+          },
+          "programStage": {
+            "id": "nNzwJNHT6Vy"
+          },
+          "dataElement": {
+            "id": "GHVZNvqgaMD"
+          },
+          "compulsory": false,
+          "allowProvidedElsewhere": false,
+          "sortOrder": 6,
+          "displayInReports": false,
+          "allowFutureDate": false,
+          "renderOptionsAsRadio": false,
+          "skipSynchronization": false,
+          "skipAnalytics": false,
+          "access": {
+            "manage": true,
+            "externalize": true,
+            "write": true,
+            "read": true,
+            "update": true,
+            "delete": true
+          },
+          "favorite": false,
+          "id": "Oo8X2GmFFmF",
+          "attributeValues": []
+        },
+        {
+          "created": "2026-06-06T12:29:23.583",
+          "lastUpdated": "2026-06-06T12:31:21.779",
+          "translations": [],
+          "favorites": [],
+          "sharing": {
+            "external": false,
+            "users": {},
+            "userGroups": {}
+          },
+          "programStage": {
+            "id": "nNzwJNHT6Vy"
+          },
+          "dataElement": {
+            "id": "jzcLSwCId5h"
+          },
+          "compulsory": false,
+          "allowProvidedElsewhere": false,
+          "sortOrder": 7,
+          "displayInReports": false,
+          "allowFutureDate": false,
+          "renderOptionsAsRadio": false,
+          "skipSynchronization": false,
+          "skipAnalytics": false,
+          "access": {
+            "manage": true,
+            "externalize": true,
+            "write": true,
+            "read": true,
+            "update": true,
+            "delete": true
+          },
+          "favorite": false,
+          "id": "xO2Euv6JT8u",
+          "attributeValues": []
+        },
+        {
+          "created": "2026-06-06T12:29:23.583",
+          "lastUpdated": "2026-06-06T12:31:21.779",
+          "translations": [],
+          "favorites": [],
+          "sharing": {
+            "external": false,
+            "users": {},
+            "userGroups": {}
+          },
+          "programStage": {
+            "id": "nNzwJNHT6Vy"
+          },
+          "dataElement": {
+            "id": "Ap9cIZCtDDz"
+          },
+          "compulsory": false,
+          "allowProvidedElsewhere": false,
+          "sortOrder": 8,
+          "displayInReports": false,
+          "allowFutureDate": false,
+          "renderOptionsAsRadio": false,
+          "skipSynchronization": false,
+          "skipAnalytics": false,
+          "access": {
+            "manage": true,
+            "externalize": true,
+            "write": true,
+            "read": true,
+            "update": true,
+            "delete": true
+          },
+          "favorite": false,
+          "id": "tSGloSBgW20",
+          "attributeValues": []
+        }
+      ],
+      "autoGenerateEvent": true,
+      "validationStrategy": "ON_UPDATE_AND_INSERT",
+      "displayGenerateEventBox": true,
+      "blockEntryForm": false,
+      "preGenerateUID": false,
+      "remindCompleted": false,
+      "generatedByEnrollmentDate": false,
+      "allowGenerateNextVisit": false,
+      "openAfterEnrollment": false,
+      "hideDueDate": false,
+      "enableUserAssignment": false,
+      "referral": false,
+      "id": "nNzwJNHT6Vy",
+      "attributeValues": [],
+      "repeatable": false,
+      "programStageSections": [],
+      "notificationTemplates": []
+    }
+  ],
+  "categories": [
+    {
+      "code": "default",
+      "name": "default",
+      "created": "2026-06-03T19:42:06.857",
+      "lastUpdated": "2026-06-05T13:41:01.362",
+      "translations": [],
+      "sharing": {
+        "owner": "XXXXXSystem",
+        "external": false,
+        "users": {},
+        "userGroups": {},
+        "public": "rw------"
+      },
+      "shortName": "default",
+      "dataDimensionType": "DISAGGREGATION",
+      "dataDimension": false,
+      "categoryOptions": [
+        {
+          "id": "xYerKDKCefk"
+        }
+      ],
+      "id": "GLevLNI9wkl",
+      "attributeValues": []
+    }
+  ],
+  "dataElements": [
+    {
+      "code": "RAIN_TOTAL",
+      "name": "Water - Rainfall Total (mm)",
+      "created": "2026-06-06T12:23:18.816",
+      "lastUpdated": "2026-06-06T12:23:18.816",
+      "translations": [],
+      "createdBy": {
+        "id": "M5zQapPyTZI",
+        "code": "admin",
+        "name": "admin admin",
+        "displayName": "admin admin",
+        "username": "admin"
+      },
+      "lastUpdatedBy": {
+        "id": "M5zQapPyTZI",
+        "code": "admin",
+        "name": "admin admin",
+        "displayName": "admin admin",
+        "username": "admin"
+      },
+      "sharing": {
+        "owner": "M5zQapPyTZI",
+        "external": false,
+        "users": {},
+        "userGroups": {},
+        "public": "rw------"
+      },
+      "shortName": "Rainfall Total (mm)",
+      "legendSets": [],
+      "aggregationType": "SUM",
+      "valueType": "NUMBER",
+      "domainType": "TRACKER",
+      "aggregationLevels": [],
+      "zeroIsSignificant": false,
+      "style": {
+        "color": "#00b0ff"
+      },
+      "id": "KhVq19GxDLz",
+      "attributeValues": [],
+      "categoryCombo": {
+        "id": "bjDvmb4bfuf"
+      }
+    },
+    {
+      "code": "PROVENANCE",
+      "name": "Water - Provenance",
+      "created": "2026-06-06T12:27:47.754",
+      "lastUpdated": "2026-06-06T12:27:47.754",
+      "translations": [],
+      "createdBy": {
+        "id": "M5zQapPyTZI",
+        "code": "admin",
+        "name": "admin admin",
+        "displayName": "admin admin",
+        "username": "admin"
+      },
+      "lastUpdatedBy": {
+        "id": "M5zQapPyTZI",
+        "code": "admin",
+        "name": "admin admin",
+        "displayName": "admin admin",
+        "username": "admin"
+      },
+      "sharing": {
+        "owner": "M5zQapPyTZI",
+        "external": false,
+        "users": {},
+        "userGroups": {},
+        "public": "rw------"
+      },
+      "shortName": "Provenance",
+      "legendSets": [],
+      "aggregationType": "NONE",
+      "valueType": "TEXT",
+      "domainType": "TRACKER",
+      "aggregationLevels": [],
+      "zeroIsSignificant": false,
+      "style": {
+        "color": "#607d8b"
+      },
+      "id": "l5uPlE20TdG",
+      "attributeValues": [],
+      "categoryCombo": {
+        "id": "bjDvmb4bfuf"
+      }
+    },
+    {
+      "code": "TURB_MEAN",
+      "name": "Water - Turbidity Mean (NTU)",
+      "created": "2026-06-06T12:21:20.110",
+      "lastUpdated": "2026-06-06T12:21:20.110",
+      "translations": [],
+      "createdBy": {
+        "id": "M5zQapPyTZI",
+        "code": "admin",
+        "name": "admin admin",
+        "displayName": "admin admin",
+        "username": "admin"
+      },
+      "lastUpdatedBy": {
+        "id": "M5zQapPyTZI",
+        "code": "admin",
+        "name": "admin admin",
+        "displayName": "admin admin",
+        "username": "admin"
+      },
+      "sharing": {
+        "owner": "M5zQapPyTZI",
+        "external": false,
+        "users": {},
+        "userGroups": {},
+        "public": "rw------"
+      },
+      "shortName": "Turbidity Mean (NTU)",
+      "legendSets": [],
+      "aggregationType": "AVERAGE",
+      "valueType": "NUMBER",
+      "domainType": "TRACKER",
+      "aggregationLevels": [],
+      "zeroIsSignificant": false,
+      "style": {
+        "color": "#bcaaa4"
+      },
+      "id": "jzcLSwCId5h",
+      "attributeValues": [],
+      "categoryCombo": {
+        "id": "bjDvmb4bfuf"
+      }
+    },
+    {
+      "code": "CHLOR_MEAN",
+      "name": "Water - Chlorine Mean (mg/L)",
+      "created": "2026-06-06T12:24:57.482",
+      "lastUpdated": "2026-06-06T12:24:57.482",
+      "translations": [],
+      "createdBy": {
+        "id": "M5zQapPyTZI",
+        "code": "admin",
+        "name": "admin admin",
+        "displayName": "admin admin",
+        "username": "admin"
+      },
+      "lastUpdatedBy": {
+        "id": "M5zQapPyTZI",
+        "code": "admin",
+        "name": "admin admin",
+        "displayName": "admin admin",
+        "username": "admin"
+      },
+      "sharing": {
+        "owner": "M5zQapPyTZI",
+        "external": false,
+        "users": {},
+        "userGroups": {},
+        "public": "rw------"
+      },
+      "shortName": "Chlorine Mean (mg/L)",
+      "legendSets": [],
+      "aggregationType": "AVERAGE",
+      "valueType": "NUMBER",
+      "domainType": "TRACKER",
+      "aggregationLevels": [],
+      "zeroIsSignificant": false,
+      "style": {
+        "color": "#fff9c4"
+      },
+      "id": "WjtzTZa2XoM",
+      "attributeValues": [],
+      "categoryCombo": {
+        "id": "bjDvmb4bfuf"
+      }
+    },
+    {
+      "code": "pH_MEAN",
+      "name": "Water - pH Mean",
+      "created": "2026-06-06T12:24:09.092",
+      "lastUpdated": "2026-06-06T12:24:09.092",
+      "translations": [],
+      "createdBy": {
+        "id": "M5zQapPyTZI",
+        "code": "admin",
+        "name": "admin admin",
+        "displayName": "admin admin",
+        "username": "admin"
+      },
+      "lastUpdatedBy": {
+        "id": "M5zQapPyTZI",
+        "code": "admin",
+        "name": "admin admin",
+        "displayName": "admin admin",
+        "username": "admin"
+      },
+      "sharing": {
+        "owner": "M5zQapPyTZI",
+        "external": false,
+        "users": {},
+        "userGroups": {},
+        "public": "rw------"
+      },
+      "shortName": "pH Mean",
+      "legendSets": [],
+      "aggregationType": "AVERAGE",
+      "valueType": "NUMBER",
+      "domainType": "TRACKER",
+      "aggregationLevels": [],
+      "zeroIsSignificant": false,
+      "style": {
+        "color": "#aed581"
+      },
+      "id": "U8s5z94Ipx6",
+      "attributeValues": [],
+      "categoryCombo": {
+        "id": "bjDvmb4bfuf"
+      }
+    },
+    {
+      "code": "TEMP_MEAN",
+      "name": "Water - Temperature Mean (C)",
+      "created": "2026-06-06T12:22:30.160",
+      "lastUpdated": "2026-06-06T12:22:30.160",
+      "translations": [],
+      "createdBy": {
+        "id": "M5zQapPyTZI",
+        "code": "admin",
+        "name": "admin admin",
+        "displayName": "admin admin",
+        "username": "admin"
+      },
+      "lastUpdatedBy": {
+        "id": "M5zQapPyTZI",
+        "code": "admin",
+        "name": "admin admin",
+        "displayName": "admin admin",
+        "username": "admin"
+      },
+      "sharing": {
+        "owner": "M5zQapPyTZI",
+        "external": false,
+        "users": {},
+        "userGroups": {},
+        "public": "rw------"
+      },
+      "shortName": "Temperature Mean (C)",
+      "legendSets": [],
+      "aggregationType": "AVERAGE",
+      "valueType": "NUMBER",
+      "domainType": "TRACKER",
+      "aggregationLevels": [],
+      "zeroIsSignificant": false,
+      "style": {
+        "color": "#64b5f6"
+      },
+      "id": "GHVZNvqgaMD",
+      "attributeValues": [],
+      "categoryCombo": {
+        "id": "bjDvmb4bfuf"
+      }
+    },
+    {
+      "code": "TURB_PEAK",
+      "name": "Water - Turbidity Peak (NTU)",
+      "created": "2026-06-06T12:21:56.797",
+      "lastUpdated": "2026-06-06T12:21:56.797",
+      "translations": [],
+      "createdBy": {
+        "id": "M5zQapPyTZI",
+        "code": "admin",
+        "name": "admin admin",
+        "displayName": "admin admin",
+        "username": "admin"
+      },
+      "lastUpdatedBy": {
+        "id": "M5zQapPyTZI",
+        "code": "admin",
+        "name": "admin admin",
+        "displayName": "admin admin",
+        "username": "admin"
+      },
+      "sharing": {
+        "owner": "M5zQapPyTZI",
+        "external": false,
+        "users": {},
+        "userGroups": {},
+        "public": "rw------"
+      },
+      "shortName": "Turbidity Peak (NTU)",
+      "legendSets": [],
+      "aggregationType": "AVERAGE",
+      "valueType": "NUMBER",
+      "domainType": "TRACKER",
+      "aggregationLevels": [],
+      "zeroIsSignificant": false,
+      "style": {
+        "color": "#8d6e63"
+      },
+      "id": "Ap9cIZCtDDz",
+      "attributeValues": [],
+      "categoryCombo": {
+        "id": "bjDvmb4bfuf"
+      }
+    },
+    {
+      "code": "READ_COUNT",
+      "name": "Water - Reading Count",
+      "created": "2026-06-06T12:25:41.226",
+      "lastUpdated": "2026-06-06T12:25:41.226",
+      "translations": [],
+      "createdBy": {
+        "id": "M5zQapPyTZI",
+        "code": "admin",
+        "name": "admin admin",
+        "displayName": "admin admin",
+        "username": "admin"
+      },
+      "lastUpdatedBy": {
+        "id": "M5zQapPyTZI",
+        "code": "admin",
+        "name": "admin admin",
+        "displayName": "admin admin",
+        "username": "admin"
+      },
+      "sharing": {
+        "owner": "M5zQapPyTZI",
+        "external": false,
+        "users": {},
+        "userGroups": {},
+        "public": "rw------"
+      },
+      "shortName": "Reading Count",
+      "legendSets": [],
+      "aggregationType": "SUM",
+      "valueType": "INTEGER_POSITIVE",
+      "domainType": "TRACKER",
+      "aggregationLevels": [],
+      "zeroIsSignificant": false,
+      "style": {
+        "color": "#37474f"
+      },
+      "id": "s3XU1DPHQEz",
+      "attributeValues": [],
+      "categoryCombo": {
+        "id": "bjDvmb4bfuf"
+      }
+    }
+  ],
+  "categoryOptions": [
+    {
+      "code": "default",
+      "name": "default",
+      "created": "2026-06-03T19:42:06.856",
+      "lastUpdated": "2026-06-03T19:42:06.859",
+      "translations": [],
+      "sharing": {
+        "owner": "XXXXXSystem",
+        "external": false,
+        "users": {},
+        "userGroups": {},
+        "public": "rwrw----"
+      },
+      "shortName": "default",
+      "organisationUnits": [],
+      "id": "xYerKDKCefk",
+      "attributeValues": []
+    }
+  ],
+  "categoryOptionCombos": [
+    {
+      "code": "default",
+      "name": "default",
+      "created": "2026-06-03T19:42:06.858",
+      "lastUpdated": "2026-06-03T19:42:06.859",
+      "translations": [],
+      "categoryCombo": {
+        "id": "bjDvmb4bfuf"
+      },
+      "categoryOptions": [
+        {
+          "id": "xYerKDKCefk"
+        }
+      ],
+      "ignoreApproval": false,
+      "id": "HllvX50cXC0",
+      "attributeValues": []
+    }
+  ],
+  "categoryCombos": [
+    {
+      "code": "default",
+      "name": "default",
+      "created": "2026-06-03T19:42:06.857",
+      "lastUpdated": "2026-06-03T19:42:06.859",
+      "translations": [],
+      "sharing": {
+        "external": false,
+        "users": {},
+        "userGroups": {},
+        "public": "rw------"
+      },
+      "categories": [
+        {
+          "id": "GLevLNI9wkl"
+        }
+      ],
+      "dataDimensionType": "DISAGGREGATION",
+      "skipTotal": false,
+      "id": "bjDvmb4bfuf"
+    }
+  ],
+  "programs": [
+    {
+      "name": "Water Quality Summary",
+      "created": "2026-06-06T12:28:59.421",
+      "lastUpdated": "2026-06-06T12:30:24.336",
+      "translations": [],
+      "createdBy": {
+        "id": "M5zQapPyTZI",
+        "code": "admin",
+        "name": "admin admin",
+        "displayName": "admin admin",
+        "username": "admin"
+      },
+      "lastUpdatedBy": {
+        "id": "M5zQapPyTZI",
+        "code": "admin",
+        "name": "admin admin",
+        "displayName": "admin admin",
+        "username": "admin"
+      },
+      "sharing": {
+        "owner": "M5zQapPyTZI",
+        "external": false,
+        "users": {},
+        "userGroups": {},
+        "public": "rw------"
+      },
+      "shortName": "Water Summary",
+      "version": 1,
+      "programType": "WITHOUT_REGISTRATION",
+      "displayIncidentDate": true,
+      "ignoreOverdueEvents": false,
+      "onlyEnrollOnce": false,
+      "notificationTemplates": [],
+      "selectEnrollmentDatesInFuture": false,
+      "selectIncidentDatesInFuture": false,
+      "style": {
+        "color": "#e0f2f1"
+      },
+      "categoryCombo": {
+        "id": "bjDvmb4bfuf"
+      },
+      "skipOffline": false,
+      "displayFrontPageList": false,
+      "useFirstStageDuringRegistration": false,
+      "expiryDays": 0,
+      "completeEventsExpiryDays": 0,
+      "openDaysAfterCoEndDate": 0,
+      "minAttributesRequiredToSearch": 1,
+      "maxTeiCountToReturn": 0,
+      "accessLevel": "OPEN",
+      "id": "yb1sWVWFtHZ",
+      "attributeValues": [],
+      "organisationUnits": [
+        {
+          "id": "krOPfUiHGqu"
+        },
+        {
+          "id": "LylYzzHtk4o"
+        },
+        {
+          "id": "Duu72uCMPbB"
+        },
+        {
+          "id": "mFk4hsaRqdr"
+        },
+        {
+          "id": "if1Gmtc2GA7"
+        },
+        {
+          "id": "HXBrrdCwuXm"
+        },
+        {
+          "id": "fWrZS33PyYT"
+        },
+        {
+          "id": "TEarpj9oFER"
+        },
+        {
+          "id": "L9QCYaoXlTM"
+        },
+        {
+          "id": "u7VthgxyXVw"
+        },
+        {
+          "id": "JBx2UFcnXfH"
+        },
+        {
+          "id": "LhnxGHlvvcC"
+        },
+        {
+          "id": "tatiTUoWaRQ"
+        },
+        {
+          "id": "dCE68Bfvnaq"
+        },
+        {
+          "id": "T6mlsoUYnLz"
+        },
+        {
+          "id": "Srmxjh47yiG"
+        },
+        {
+          "id": "aYb6fw0Yhjp"
+        },
+        {
+          "id": "RbVmzaWSi5b"
+        },
+        {
+          "id": "vFlT6CjiPow"
+        },
+        {
+          "id": "czQ2MWK27f5"
+        },
+        {
+          "id": "uXEBjWTMLzY"
+        },
+        {
+          "id": "QqOXUQnmSXv"
+        },
+        {
+          "id": "sFinMpKciN2"
+        },
+        {
+          "id": "Xnky6QVw0nJ"
+        },
+        {
+          "id": "SqceadH3mzb"
+        },
+        {
+          "id": "X0vAphZLHud"
+        },
+        {
+          "id": "ELrQsdMGG6q"
+        },
+        {
+          "id": "shPmvIMOaZq"
+        },
+        {
+          "id": "ZgwiF3x26QE"
+        },
+        {
+          "id": "ePmXiIjScb2"
+        },
+        {
+          "id": "JVLhcdz8Bgl"
+        },
+        {
+          "id": "LDGrRqNM1dP"
+        }
+      ],
+      "programStages": [
+        {
+          "id": "nNzwJNHT6Vy"
+        }
+      ],
+      "programSections": [],
+      "programTrackedEntityAttributes": [],
+      "categoryMappings": []
+    }
+  ]
+}

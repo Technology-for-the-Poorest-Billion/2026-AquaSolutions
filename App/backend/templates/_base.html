@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="{{ current_lang() }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}{{ _("Water-safety pipeline") }}{% endblock %}</title>
+    {% block head_extra %}{% endblock %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='app.css', v=asset_v) }}">
+    <style>{% block extra_style %}{% endblock %}</style>
+</head>
+<body class="app {% block body_class %}{% endblock %}">
+    <header class="topbar">
+        <span class="brand-mark">
+            <img class="drop" src="{{ url_for('static', filename='aqua_solutions_drop.png') }}" alt="">
+            <span class="wordmark"><span class="aqua">AQUA</span> <span class="solutions">SOLUTIONS</span></span>
+        </span>
+        <nav class="topnav">
+            {% if session.get('role') == 'medical' %}
+                <a href="{{ url_for('medical_history') }}"
+                   class="{% if request.endpoint == 'medical_history' %}active{% endif %}">{{ _("History") }}</a>
+                <a href="{{ url_for('medical_report_form') }}"
+                   class="{% if request.endpoint == 'medical_report_form' %}active{% endif %}">{{ _("File a report") }}</a>
+            {% elif session.get('role') == 'government' %}
+                <a href="{{ url_for('dashboard') }}"
+                   class="{% if request.endpoint == 'dashboard' %}active{% endif %}">{{ _("Dashboard") }}</a>
+            {% endif %}
+        </nav>
+        <div class="right">
+            {% if session.get('username') %}
+                <span class="user-meta">{{ session['display_name'] }} · {{ session['role'] }}</span>
+            {% endif %}
+            {% include "_lang_picker.html" %}
+            {% if session.get('username') %}
+                <a href="{{ url_for('logout') }}">{{ _("Sign out") }}</a>
+            {% endif %}
+        </div>
+    </header>
+    {% block unverified_banner %}
+        {% if unverified_locale() %}
+            <div class="unverified-banner">
+                {# TRANSLATORS: shown on every page when the active locale's
+                   catalog still has unverified (fuzzy) machine-translated entries. #}
+                {{ _("Machine-translated draft — awaiting native review. "
+                     "Translations of medical terms may be inaccurate; "
+                     "for clinical decisions, switch to English.") }}
+            </div>
+        {% endif %}
+    {% endblock %}
+    {% block disclaimer %}
+        <div class="disclaim">⚠ {{ _("NOT a cholera detector — measures contamination indicators only.") }}</div>
+    {% endblock %}
+    <main class="app-main">
+        {% block content %}{% endblock %}
+    </main>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

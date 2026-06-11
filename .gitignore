@@ -1,0 +1,33 @@
+# The gitignore document contains the files in the repo which Github should ignore when pushing/pulling/syncing. 
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Secrets / local config
+.env
+.env.local
+
+# Local SQLite databases (App/backend/)
+*.db
+*.db-journal
+App/backend/data/
+
+# Runtime / log files — never commit; on a Railway deploy these can contain
+# request headers and form fields (e.g. DEVICE_SECRET, Twilio From numbers)
+*.log
+
+# IDE / tooling
+.vscode/
+.claude/
+.superpowers/

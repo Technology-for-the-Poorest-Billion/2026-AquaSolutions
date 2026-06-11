@@ -1,0 +1,1056 @@
+"""Flask app for the Gen-1 water-safety pipeline.
+
+Routes
+------
+GET  /                — landing redirect (login or role default)
+GET  /health          — liveness probe
+GET  /login           — sign-in form
+POST /login           — sign-in submit
+GET  /logout          — clear session
+GET  /dashboard       — station status (government role)
+GET  /medical/report  — medical report form (medical role)
+POST /medical/report  — medical report submit (medical role)
+POST /sms             — Twilio webhook for inbound illness reports
+POST /ingest          — sensor reading ingest (via sensor_ingest blueprint)
+"""
+
+from __future__ import annotations
+
+import csv
+import hmac
+import io
+import json
+import os
+import re
+import secrets
+from datetime import date as date_cls, datetime, timedelta, timezone
+from functools import wraps
+
+from dotenv import load_dotenv
+from flask import (
+    Flask, Response, abort, redirect, render_template, request, session, url_for,
+)
+from flask_babel import gettext as _, ngettext
+from twilio.request_validator import RequestValidator
+from twilio.twiml.messaging_response import MessagingResponse
+
+from sqlalchemy import text
+
+from database import connection, init_db
+from labels import label_readings_for_report
+import dhis2_bridge
+from sensor_ingest import sensor_bp
+from language import init_babel, adopt_cookie_preference
+
+load_dotenv()
+
+app = Flask(__name__)
+app.secret_key = os.environ.get("SECRET_KEY") or secrets.token_hex(32)
+app.register_blueprint(sensor_bp)
+init_babel(app)
+init_db()
+
+
+# Cache-bust app.css with a query string keyed to its mtime. The stylesheet
+# is otherwise cached by the browser, so edits (and redeploys) would keep
+# serving the stale CSS until a manual hard-refresh. Recomputed at startup,
+# which on Railway means once per deploy.
+try:
+    _ASSET_V = str(int(os.path.getmtime(os.path.join(app.static_folder, "app.css"))))
+except OSError:
+    _ASSET_V = "0"
+
+
+@app.context_processor
+def inject_asset_version():
+    return {"asset_v": _ASSET_V}
+
+
+STATION_PARSER_VERSION = "lenient_first_int_v1"
+STATION_RE = re.compile(r"\b(\d{1,4})\b")
+# Strict station RE: requires an explicit "station" keyword before the number.
+# Used mid-conversation to distinguish "station 7" (switch) from "3" (case count).
+STATION_EXPLICIT_RE = re.compile(r"\bstation\s+(\d{1,4})\b", re.IGNORECASE)
+
+
+def _parse_explicit_station_id(message: str) -> int | None:
+    """Strict parser: requires the word 'station' before the number."""
+    match = STATION_EXPLICIT_RE.search(message or "")
+    if match is None:
+        return None
+    return int(match.group(1))
+
+
+# ---------------------------------------------------------------------------
+# Auth — hardcoded users with passwords from env (see issues_v3.md §D4 for
+# the consent + storage caveats; this is demo-grade, not production).
+# ---------------------------------------------------------------------------
+
+DEMO_USERS: dict[str, dict[str, str]] = {
+    "dr.smith": {
+        "password": os.environ.get("MEDICAL_PASSWORD", "demo-medical-2026"),
+        "role": "medical",
+        "display_name": "Dr. Smith",
+    },
+    "official.jones": {
+        "password": os.environ.get("GOV_PASSWORD", "demo-gov-2026"),
+        "role": "government",
+        "display_name": "Official Jones",
+    },
+}
+
+ROLE_HOME = {
+    "medical": "medical_history",
+    "government": "dashboard",
+}
+
+SYMPTOMS = [
+    ("diarrhoea",   "Diarrhoea"),
+    ("vomiting",    "Vomiting"),
+    ("fever",       "Fever"),
+    ("dehydration", "Dehydration"),
+]
+
+ACTION_TYPES = {
+    "close_borehole",
+    "reopen_borehole",
+    "dispatch_sample_team",
+    "dispatch_medical_team",
+}
+
+
+def _authenticate(username: str, password: str) -> dict | None:
+    user = DEMO_USERS.get(username)
+    if user is None:
+        return None
+    # constant-time compare so login latency does not leak which usernames exist
+    if not hmac.compare_digest(user["password"], password):
+        return None
+    return user
+
+
+def login_required(view):
+    @wraps(view)
+    def wrapped(*args, **kwargs):
+        if "username" not in session:
+            return redirect(url_for("login"))
+        return view(*args, **kwargs)
+    return wrapped
+
+
+def role_required(role: str):
+    def decorator(view):
+        @wraps(view)
+        def wrapped(*args, **kwargs):
+            if "username" not in session:
+                return redirect(url_for("login"))
+            if session.get("role") != role:
+                return (_("forbidden — this page requires the "
+                          "'{role}' role").format(role=role), 403)
+            return view(*args, **kwargs)
+        return wrapped
+    return decorator
+
+
+def _parse_station_id(message: str) -> int | None:
+    """Lenient parser: first 1–4 digit integer in the message.
+
+    See ``issues_v3.md`` §C5 for the strictness trade-off. Rejected
+    messages are still stored in ``illness_reports`` so a human can
+    review them later.
+    """
+    match = STATION_RE.search(message or "")
+    if match is None:
+        return None
+    return int(match.group(1))
+
+
+def _resolve_tier(report) -> dict:
+    """Decide which tier to render and how. See spec §5 'Where the output is displayed'.
+
+    Caller must pass a dict (use dict(row) for sqlite3.Row inputs)
+    so .get() is available for the optional dialog_state field.
+    """
+    from estimator import estimate_risk_tier
+    if report["risk_tier"] is not None:
+        return {
+            "tier_source": "reporter",
+            "tier": report["risk_tier"],
+            "tier_rationale": "",
+            "tier_pending_text": "",
+        }
+    # No reporter tier — decide whether to estimate or show pending/incomplete.
+    if report["report_source"] == "medical_portal":
+        run_estimator = True
+    else:  # sms
+        run_estimator = (report.get("dialog_state") == "complete")
+
+    if run_estimator:
+        try:
+            symptoms = json.loads(report["symptoms"] or "[]")
+        except (json.JSONDecodeError, TypeError):
+            symptoms = []
+        onset = None
+        if report["onset_date"]:
+            try:
+                onset = date_cls.fromisoformat(report["onset_date"])
+            except ValueError:
+                onset = None
+        tier, rationale = estimate_risk_tier(
+            symptoms=symptoms,
+            onset_date=onset,
+            case_count=report["case_count"] or 1,
+        )
+        return {
+            "tier_source": "estimated",
+            "tier": tier,
+            "tier_rationale": rationale,
+            "tier_pending_text": "",
+        }
+
+    # SMS, not complete
+    state = report.get("dialog_state")
+    if state in ("awaiting_case_count", "awaiting_symptoms", "awaiting_onset"):
+        pending = _("pending — awaiting reporter follow-up")
+    else:
+        pending = _("incomplete — no structured data available")
+    return {
+        "tier_source": "pending",
+        "tier": None,
+        "tier_rationale": "",
+        "tier_pending_text": pending,
+    }
+
+
+def _verify_twilio_signature(req) -> bool:
+    if os.environ.get("TWILIO_VALIDATE_SIGNATURES", "false").lower() != "true":
+        return True
+
+    auth_token = os.environ.get("TWILIO_AUTH_TOKEN", "")
+    if not auth_token:
+        return False
+
+    public_base = os.environ.get("PUBLIC_BASE_URL", "").rstrip("/")
+    if not public_base:
+        return False
+
+    url = f"{public_base}{req.path}"
+    signature = req.headers.get("X-Twilio-Signature", "")
+    validator = RequestValidator(auth_token)
+    return validator.validate(url, req.form, signature)
+
+
+@app.get("/health")
+def health():
+    return {
+        "status": "ok",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    }
+
+
+@app.get("/")
+def index():
+    if "role" in session:
+        return redirect(url_for(ROLE_HOME[session["role"]]))
+    return redirect(url_for("login"))
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "GET":
+        return render_template("login.html", error=None)
+
+    username = (request.form.get("username") or "").strip().lower()
+    password = request.form.get("password") or ""
+    user = _authenticate(username, password)
+    if user is None:
+        return render_template(
+            "login.html",
+            error=_("Unknown username or wrong password."),
+        ), 401
+
+    session.clear()
+    session["username"] = username
+    session["display_name"] = user["display_name"]
+    session["role"] = user["role"]
+
+    # If the user chose a language anonymously on /login, promote that
+    # choice to user_preferences so DB-first precedence reflects it after
+    # sign-in. Otherwise the existing saved pref (or NULL) would win.
+    adopt_cookie_preference(username)
+
+    next_path = request.args.get("next") or request.form.get("next") or ""
+    # only allow internal redirects
+    if next_path.startswith("/") and not next_path.startswith("//"):
+        return redirect(next_path)
+    return redirect(url_for(ROLE_HOME[user["role"]]))
+
+
+@app.get("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("login"))
+
+
+@app.get("/medical/report")
+@role_required("medical")
+def medical_report_form():
+    with connection() as conn:
+        stations = conn.execute(
+            text("SELECT station_id, name FROM stations ORDER BY station_id")
+        ).mappings().all()
+    return render_template(
+        "medical_report.html",
+        stations=stations,
+        symptoms=SYMPTOMS,
+        success_message=None,
+        error_message=None,
+    )
+
+
+@app.post("/medical/report")
+@role_required("medical")
+def medical_report_submit():
+    raw_station = request.form.get("station_id", "")
+    case_count_raw = request.form.get("case_count", "")
+    onset_date_raw = (request.form.get("onset_date", "") or "").strip()
+    notes = (request.form.get("notes", "") or "").strip()
+    symptoms_selected = request.form.getlist("symptoms")
+    risk_tier_raw = (request.form.get("risk_tier", "") or "").strip().lower()
+
+    def render(success=None, error=None):
+        with connection() as conn:
+            stations = conn.execute(
+                text("SELECT station_id, name FROM stations ORDER BY station_id")
+            ).mappings().all()
+        return render_template(
+            "medical_report.html",
+            stations=stations,
+            symptoms=SYMPTOMS,
+            success_message=success,
+            error_message=error,
+        )
+
+    try:
+        station_id = int(raw_station)
+    except (TypeError, ValueError):
+        return render(error=_("Please select a valid station."))
+
+    try:
+        case_count = int(case_count_raw) if case_count_raw else 1
+        if case_count < 1:
+            raise ValueError
+    except ValueError:
+        return render(error=_("Case count must be a positive integer."))
+
+    report_time = datetime.now(timezone.utc)
+    if onset_date_raw:
+        try:
+            onset_dt = datetime.fromisoformat(onset_date_raw).replace(
+                tzinfo=timezone.utc
+            )
+            report_time = onset_dt + timedelta(days=1) - timedelta(seconds=1)
+        except ValueError:
+            return render(error=_("Onset date must be YYYY-MM-DD."))
+
+    if risk_tier_raw not in ("", "low", "medium", "high", "severe"):
+        return render(error=_("Invalid risk tier value."))
+    risk_tier_value = risk_tier_raw or None
+
+    valid_keys = {key for key, _label in SYMPTOMS}
+    symptoms_selected = [s for s in symptoms_selected if s in valid_keys]
+
+    raw_message = (
+        f"medical_portal | cases={case_count} | "
+        f"symptoms={','.join(symptoms_selected) or 'none'} | "
+        f"onset={onset_date_raw or 'n/a'} | notes={notes[:200]}"
+    )
+
+    with connection() as conn:
+        with conn.begin():
+            station = conn.execute(
+                text("SELECT name FROM stations WHERE station_id = :sid"),
+                {"sid": station_id},
+            ).mappings().first()
+            if station is None:
+                return render(error=_("Station %(station_id)s is not in the system.", station_id=station_id))
+
+            report_id = conn.execute(
+                text(
+                    "INSERT INTO illness_reports "
+                    "(station_id, reporter_phone, raw_message, parser_version, "
+                    " report_source, submitter, case_count, onset_date, symptoms, "
+                    " risk_tier) "
+                    "VALUES (:sid, NULL, :msg, :ver, 'medical_portal', :sub, "
+                    " :cc, :od, :sym, :rt) "
+                    "RETURNING report_id"
+                ),
+                {
+                    "sid": station_id,
+                    "msg": raw_message,
+                    "ver": STATION_PARSER_VERSION,
+                    "sub": session.get("username"),
+                    "cc": case_count,
+                    "od": onset_date_raw or None,
+                    "sym": json.dumps(symptoms_selected),
+                    "rt": risk_tier_value,
+                },
+            ).scalar_one()
+
+            labelled = label_readings_for_report(
+                conn,
+                report_id=report_id,
+                station_id=station_id,
+                report_time=report_time,
+            )
+
+    success = _(
+        "Report received for %(name)s (station %(sid)s). "
+        "%(n)d reading(s) in the trailing-window were flagged. "
+        "Anchor: %(anchor)s."
+    ) % {
+        "name": station["name"],
+        "sid": station_id,
+        "n": labelled,
+        "anchor": onset_date_raw or _("now"),
+    }
+    return render(success=success)
+
+
+SMS_WINDOW_MINUTES = 30
+
+
+def _find_open_conversation(conn, phone: str):
+    if not phone:
+        return None
+    cutoff_dt = datetime.now(timezone.utc) - timedelta(minutes=SMS_WINDOW_MINUTES)
+    cutoff = cutoff_dt.strftime("%Y-%m-%d %H:%M:%S")
+    return conn.execute(
+        text("""
+            SELECT * FROM illness_reports
+            WHERE reporter_phone = :phone
+              AND received_at >= :cutoff
+              AND dialog_state IN
+                  ('awaiting_case_count','awaiting_symptoms','awaiting_onset')
+            ORDER BY report_id DESC LIMIT 1
+        """),
+        {"phone": phone, "cutoff": cutoff},
+    ).mappings().first()
+
+
+def _mark_abandoned(conn, report_id):
+    conn.execute(
+        text(
+            "UPDATE illness_reports SET dialog_state = 'abandoned' "
+            "WHERE report_id = :rid"
+        ),
+        {"rid": report_id},
+    )
+
+
+@app.post("/sms")
+def sms_webhook():
+    if not _verify_twilio_signature(request):
+        return ("forbidden", 403)
+
+    from sms_dialog import parse_case_count, parse_symptoms, parse_onset
+
+    raw_message = request.form.get("Body", "") or ""
+    reporter_phone = request.form.get("From", "") or ""
+    now = datetime.now(timezone.utc)
+    reply = MessagingResponse()
+
+    is_stop = re.search(r"\bstop\b", raw_message, re.IGNORECASE) is not None
+    station_id = _parse_station_id(raw_message)
+    explicit_station_id = _parse_explicit_station_id(raw_message)
+
+    with connection() as conn:
+        with conn.begin():
+            open_conv = _find_open_conversation(conn, reporter_phone)
+
+            if is_stop:
+                if open_conv is None:
+                    reply.message("No active conversation to opt out of. Thank you.")
+                    return str(reply)
+                _mark_abandoned(conn, open_conv["report_id"])
+                reply.message("Opted out. We will no longer reply. Thank you.")
+                return str(reply)
+
+            if (explicit_station_id is not None
+                    and open_conv is not None
+                    and explicit_station_id != open_conv["station_id"]):
+                _mark_abandoned(conn, open_conv["report_id"])
+                open_conv = None
+                station_id = explicit_station_id
+
+            if open_conv is None:
+                if station_id is None:
+                    conn.execute(
+                        text(
+                            "INSERT INTO illness_reports "
+                            "(station_id, reporter_phone, raw_message, parser_version, "
+                            " report_source, dialog_state) "
+                            "VALUES (NULL, :phone, :msg, :ver, 'sms', NULL)"
+                        ),
+                        {
+                            "phone": reporter_phone,
+                            "msg": raw_message,
+                            "ver": STATION_PARSER_VERSION,
+                        },
+                    )
+                    reply.message(
+                        "We received your message but could not identify a station "
+                        "number. Reply with the station number (e.g. '4'). Thank you."
+                    )
+                    return str(reply)
+
+                station = conn.execute(
+                    text("SELECT station_id, name FROM stations WHERE station_id = :sid"),
+                    {"sid": station_id},
+                ).mappings().first()
+                if station is None:
+                    conn.execute(
+                        text(
+                            "INSERT INTO illness_reports "
+                            "(station_id, reporter_phone, raw_message, parser_version, "
+                            " report_source, dialog_state) "
+                            "VALUES (NULL, :phone, :msg, :ver, 'sms', NULL)"
+                        ),
+                        {
+                            "phone": reporter_phone,
+                            "msg": raw_message,
+                            "ver": STATION_PARSER_VERSION,
+                        },
+                    )
+                    reply.message(
+                        f"Station {station_id} is not in our system. Please check "
+                        "the number and try again. Thank you."
+                    )
+                    return str(reply)
+
+                report_id = conn.execute(
+                    text(
+                        "INSERT INTO illness_reports "
+                        "(station_id, reporter_phone, raw_message, parser_version, "
+                        " report_source, dialog_state) "
+                        "VALUES (:sid, :phone, :msg, :ver, 'sms', 'awaiting_case_count') "
+                        "RETURNING report_id"
+                    ),
+                    {
+                        "sid": station_id,
+                        "phone": reporter_phone,
+                        "msg": raw_message,
+                        "ver": STATION_PARSER_VERSION,
+                    },
+                ).scalar_one()
+                labelled = label_readings_for_report(
+                    conn, report_id=report_id, station_id=station_id, report_time=now,
+                )
+                reply.message(
+                    f"Report received for {station['name']} (station {station_id}). "
+                    f"{labelled} reading(s) flagged. How many people are sick? "
+                    "Reply with a number."
+                )
+                return str(reply)
+
+            report_id = open_conv["report_id"]
+            state = open_conv["dialog_state"]
+
+            if state == "awaiting_case_count":
+                n = parse_case_count(raw_message)
+                if n is None:
+                    reply.message(
+                        "I didn't understand. How many people are sick? Reply with a number."
+                    )
+                    return str(reply)
+                conn.execute(
+                    text(
+                        "UPDATE illness_reports "
+                        "SET case_count = :n, dialog_state = 'awaiting_symptoms' "
+                        "WHERE report_id = :rid"
+                    ),
+                    {"n": n, "rid": report_id},
+                )
+                reply.message(
+                    f"Noted, {n} cases. Which symptoms? Reply with numbers, e.g. '1,3'. "
+                    "1=diarrhoea 2=vomiting 3=fever 4=dehydration."
+                )
+                return str(reply)
+
+            if state == "awaiting_symptoms":
+                syms = parse_symptoms(raw_message)
+                if syms is None:
+                    reply.message(
+                        "I didn't understand. Reply with numbers, e.g. '1,3'. "
+                        "1=diarrhoea 2=vomiting 3=fever 4=dehydration."
+                    )
+                    return str(reply)
+                conn.execute(
+                    text(
+                        "UPDATE illness_reports "
+                        "SET symptoms = :s, dialog_state = 'awaiting_onset' "
+                        "WHERE report_id = :rid"
+                    ),
+                    {"s": json.dumps(syms), "rid": report_id},
+                )
+                reply.message(
+                    f"Noted: {', '.join(syms)}. When did symptoms start? "
+                    "Reply 'today', 'yesterday', or DD/MM."
+                )
+                return str(reply)
+
+            if state == "awaiting_onset":
+                onset = parse_onset(raw_message)
+                if onset is None:
+                    reply.message(
+                        "I didn't understand. Reply 'today', 'yesterday', or DD/MM."
+                    )
+                    return str(reply)
+                conn.execute(
+                    text(
+                        "UPDATE illness_reports "
+                        "SET onset_date = :od, dialog_state = 'complete' "
+                        "WHERE report_id = :rid"
+                    ),
+                    {"od": onset.isoformat(), "rid": report_id},
+                )
+                reply.message("Report complete. Stay safe. Reply STOP to opt out.")
+                # NOTE: runs inside the open DB transaction and does a network POST.
+                # Fine for a local/fast DHIS2; for a slow remote instance, move this
+                # after commit so Twilio's ~15s webhook timeout can't retry and create
+                # duplicate events.
+                if dhis2_bridge.enabled():
+                    rpt = conn.execute(
+                        text("SELECT station_id, case_count, symptoms, onset_date "
+                             "FROM illness_reports WHERE report_id = :rid"),
+                        {"rid": report_id},
+                    ).mappings().first()
+                    try:
+                        dhis2_bridge.create_event_from_report(
+                            station_id=rpt["station_id"],
+                            case_count=rpt["case_count"],
+                            symptoms=json.loads(rpt["symptoms"] or "[]"),
+                            onset=rpt["onset_date"],
+                        )
+                    except Exception as exc:  # bridge must never break the SMS reply
+                        app.logger.warning("DHIS2 bridge failed for report %s: %s", report_id, exc)
+                return str(reply)
+
+            reply.message(
+                "Unexpected state. Reply STOP to opt out, or text a station number to start over."
+            )
+            return str(reply)
+
+
+STATION_STATUS_WINDOW_DAYS = 7
+
+
+@app.get("/dashboard")
+@role_required("government")
+def dashboard():
+    status_cutoff = (
+        datetime.now(timezone.utc) - timedelta(days=STATION_STATUS_WINDOW_DAYS)
+    ).isoformat()
+
+    nid_raw = request.args.get("neighborhood", "")
+    selected_neighborhood_id = int(nid_raw) if nid_raw.isdigit() else None
+
+    with connection() as conn:
+        neighborhoods = conn.execute(
+            text("SELECT neighborhood_id, name FROM neighborhoods ORDER BY neighborhood_id")
+        ).mappings().all()
+
+        # Build the stations query — neighborhood filter is optional.
+        where_clause = "WHERE s.neighborhood_id = :nid" if selected_neighborhood_id else ""
+        stations_params = {"cutoff": status_cutoff}
+        if selected_neighborhood_id is not None:
+            stations_params["nid"] = selected_neighborhood_id
+
+        stations = conn.execute(
+            text(f"""
+                WITH latest AS (
+                    SELECT station_id, MAX(recorded_at) AS latest_at
+                    FROM sensor_readings
+                    GROUP BY station_id
+                )
+                SELECT s.station_id,
+                       s.name,
+                       s.is_closed,
+                       s.neighborhood_id,
+                       r.recorded_at,
+                       r.ph,
+                       r.turbidity_ntu,
+                       r.temperature_c,
+                       r.rainfall_mm,
+                       r.chlorine_mg_l,
+                       r.orp_mv,
+                       r.uv_absorbance,
+                       EXISTS (
+                           SELECT 1 FROM illness_reports ir
+                           WHERE ir.station_id = s.station_id
+                             AND ir.received_at >= :cutoff
+                       ) AS is_unsafe
+                FROM stations s
+                LEFT JOIN latest l ON l.station_id = s.station_id
+                LEFT JOIN sensor_readings r
+                    ON r.station_id = s.station_id
+                   AND r.recorded_at = l.latest_at
+                {where_clause}
+                ORDER BY s.station_id
+            """),
+            stations_params,
+        ).mappings().all()
+
+        reports = conn.execute(
+            text("""
+                SELECT ir.report_id, ir.station_id, s.name AS station_name,
+                       ir.reporter_phone, ir.raw_message, ir.received_at,
+                       ir.risk_tier, ir.report_source,
+                       ir.case_count, ir.symptoms, ir.onset_date,
+                       (SELECT COUNT(*) FROM reading_labels
+                         WHERE report_id = ir.report_id) AS readings_labelled
+                FROM illness_reports ir
+                LEFT JOIN stations s ON s.station_id = ir.station_id
+                ORDER BY ir.received_at DESC
+                LIMIT 50
+            """),
+        ).mappings().all()
+
+        reports_with_tier = [
+            {**dict(rep), "tier_block": _resolve_tier(dict(rep))}
+            for rep in reports
+        ]
+
+    return render_template(
+        "dashboard.html",
+        stations=stations,
+        reports=reports_with_tier,
+        status_window_days=STATION_STATUS_WINDOW_DAYS,
+        neighborhoods=neighborhoods,
+        selected_neighborhood_id=selected_neighborhood_id,
+        add_station_error=request.args.get("station_error"),
+        generated_at=datetime.now(timezone.utc).isoformat(timespec="seconds"),
+    )
+
+
+@app.post("/dashboard/stations")
+@role_required("government")
+def add_station():
+    name = (request.form.get("name") or "").strip()
+    lat_raw = request.form.get("latitude") or ""
+    lon_raw = request.form.get("longitude") or ""
+    nid_raw = request.form.get("neighborhood_id") or ""
+
+    try:
+        nid = int(nid_raw)
+    except ValueError:
+        return redirect(url_for("dashboard", station_error="invalid_field"))
+
+    try:
+        lat = float(lat_raw)
+        lon = float(lon_raw)
+    except ValueError:
+        return redirect(url_for("dashboard", neighborhood=nid, station_error="invalid_field"))
+
+    if not name or not (-90 <= lat <= 90) or not (-180 <= lon <= 180):
+        return redirect(url_for("dashboard", neighborhood=nid, station_error="invalid_field"))
+
+    with connection() as conn:
+        with conn.begin():
+            exists = conn.execute(
+                text("SELECT 1 FROM neighborhoods WHERE neighborhood_id = :nid"),
+                {"nid": nid},
+            ).first()
+            if exists is None:
+                return redirect(url_for("dashboard", neighborhood=nid, station_error="bad_neighborhood"))
+
+            conn.execute(
+                text(
+                    "INSERT INTO stations (name, latitude, longitude, neighborhood_id) "
+                    "VALUES (:name, :lat, :lon, :nid)"
+                ),
+                {"name": name, "lat": lat, "lon": lon, "nid": nid},
+            )
+
+    return redirect(url_for("dashboard", neighborhood=nid))
+
+
+@app.post("/actions")
+@role_required("government")
+def post_action():
+    action_type = (request.form.get("action_type", "") or "").strip()
+    station_raw = (request.form.get("station_id", "") or "").strip()
+    related_raw = (request.form.get("related_report_id", "") or "").strip()
+    notes = (request.form.get("notes", "") or "").strip()[:500] or None
+
+    if action_type not in ACTION_TYPES:
+        return (_("invalid action_type"), 400)
+
+    try:
+        station_id = int(station_raw)
+    except (TypeError, ValueError):
+        return (_("invalid station_id"), 400)
+
+    related_id = None
+    if related_raw:
+        try:
+            related_id = int(related_raw)
+        except (TypeError, ValueError):
+            return (_("invalid related_report_id"), 400)
+
+    with connection() as conn:
+        with conn.begin():
+            station = conn.execute(
+                text("SELECT is_closed FROM stations WHERE station_id = :sid"),
+                {"sid": station_id},
+            ).mappings().first()
+            if station is None:
+                return (_("unknown station_id %(station_id)s", station_id=station_id), 400)
+
+            if action_type == "close_borehole" and station["is_closed"]:
+                return (_("station %(station_id)s is already closed", station_id=station_id), 400)
+            if action_type == "reopen_borehole" and not station["is_closed"]:
+                return (_("station %(station_id)s is already open", station_id=station_id), 400)
+
+            conn.execute(
+                text(
+                    "INSERT INTO interventions "
+                    "(station_id, action_type, triggered_by, related_report_id, notes) "
+                    "VALUES (:sid, :at, :tb, :rid, :notes)"
+                ),
+                {
+                    "sid": station_id,
+                    "at": action_type,
+                    "tb": session["username"],
+                    "rid": related_id,
+                    "notes": notes,
+                },
+            )
+            if action_type == "close_borehole":
+                conn.execute(
+                    text("UPDATE stations SET is_closed = 1 WHERE station_id = :sid"),
+                    {"sid": station_id},
+                )
+            elif action_type == "reopen_borehole":
+                conn.execute(
+                    text("UPDATE stations SET is_closed = 0 WHERE station_id = :sid"),
+                    {"sid": station_id},
+                )
+
+    referrer = request.referrer or ""
+    if referrer.startswith("/") or referrer.startswith(request.host_url):
+        return redirect(referrer)
+    return redirect(url_for("dashboard"))
+
+
+@app.get("/dashboard/reports/<int:report_id>")
+def dashboard_report_detail(report_id: int):
+    if "username" not in session:
+        return redirect(url_for("login"))
+    if session.get("role") != "government":
+        return (
+            _("This page is for government officials. "
+              "Medical staff can view this report at /medical/reports/%(report_id)s",
+              report_id=report_id),
+            403,
+        )
+
+    with connection() as conn:
+        row = conn.execute(
+            text("""
+                SELECT ir.*, s.name AS station_name
+                FROM illness_reports ir
+                LEFT JOIN stations s ON s.station_id = ir.station_id
+                WHERE ir.report_id = :rid
+            """),
+            {"rid": report_id},
+        ).mappings().first()
+        if row is None:
+            abort(404)
+        labelled_summary = _labelled_readings_summary(conn, report_id)
+        interventions_rows = conn.execute(
+            text("""
+                SELECT intervention_id, action_type, triggered_by, triggered_at, notes
+                FROM interventions
+                WHERE related_report_id = :rid
+                ORDER BY triggered_at ASC
+            """),
+            {"rid": report_id},
+        ).mappings().all()
+
+    tier_block = _resolve_tier(dict(row))
+    try:
+        symptoms_list = json.loads(row["symptoms"] or "[]")
+    except (json.JSONDecodeError, TypeError):
+        symptoms_list = []
+    symptoms_display = ", ".join(symptoms_list) if symptoms_list else "—"
+
+    return render_template(
+        "dashboard_report_detail.html",
+        report=row,
+        symptoms_display=symptoms_display,
+        labelled_summary=labelled_summary,
+        interventions=interventions_rows,
+        **tier_block,
+    )
+
+
+@app.get("/medical/history")
+@role_required("medical")
+def medical_history():
+    with connection() as conn:
+        report_rows = conn.execute(
+            text("""
+                SELECT ir.*, s.name AS station_name
+                FROM illness_reports ir
+                LEFT JOIN stations s ON s.station_id = ir.station_id
+                WHERE ir.report_source = 'medical_portal'
+                ORDER BY ir.received_at DESC
+                LIMIT 50
+            """),
+        ).mappings().all()
+        stations = conn.execute(
+            text("""
+                SELECT s.station_id, s.name, s.latitude, s.longitude,
+                       (SELECT COUNT(*) FROM illness_reports
+                          WHERE station_id = s.station_id
+                            AND report_source = 'medical_portal') AS report_count,
+                       (SELECT MAX(received_at) FROM illness_reports
+                          WHERE station_id = s.station_id
+                            AND report_source = 'medical_portal') AS last_report
+                FROM stations s
+                ORDER BY s.station_id
+            """),
+        ).mappings().all()
+
+    reports_view = []
+    for rep in report_rows:
+        tier_block = _resolve_tier(dict(rep))
+        try:
+            symptoms_list = json.loads(rep["symptoms"] or "[]")
+        except (json.JSONDecodeError, TypeError):
+            symptoms_list = []
+        reports_view.append({
+            **dict(rep),
+            **tier_block,
+            "symptoms_display": ", ".join(symptoms_list) if symptoms_list else "—",
+        })
+
+    stations_json = json.dumps([dict(s) for s in stations])
+    return render_template(
+        "medical_history.html",
+        reports=reports_view,
+        stations_json=stations_json,
+    )
+
+
+def _labelled_readings_summary(conn, report_id: int) -> dict:
+    """Count + earliest/latest recorded_at for the readings a report
+    labelled. Lets the detail page show a compact summary; the actual
+    rows are served separately via the CSV endpoint below."""
+    row = conn.execute(
+        text("""
+            SELECT COUNT(*) AS n,
+                   MIN(sr.recorded_at) AS earliest,
+                   MAX(sr.recorded_at) AS latest
+            FROM reading_labels rl
+            JOIN sensor_readings sr ON sr.reading_id = rl.reading_id
+            WHERE rl.report_id = :rid
+        """),
+        {"rid": report_id},
+    ).mappings().first()
+    return dict(row) if row else {"n": 0, "earliest": None, "latest": None}
+
+
+def _labelled_readings_csv(report_id: int) -> Response:
+    """Stream the full set of readings labelled by one report as CSV."""
+    with connection() as conn:
+        rows = conn.execute(
+            text("""
+                SELECT rl.reading_id, sr.station_id, sr.recorded_at,
+                       sr.ph, sr.turbidity_ntu, sr.temperature_c, sr.rainfall_mm,
+                       sr.chlorine_mg_l, sr.orp_mv, sr.uv_absorbance,
+                       rl.label, rl.rule_description
+                FROM reading_labels rl
+                JOIN sensor_readings sr ON sr.reading_id = rl.reading_id
+                WHERE rl.report_id = :rid
+                ORDER BY sr.recorded_at ASC
+            """),
+            {"rid": report_id},
+        ).mappings().all()
+
+    buf = io.StringIO()
+    writer = csv.writer(buf)
+    writer.writerow([
+        "reading_id", "station_id", "recorded_at",
+        "ph", "turbidity_ntu", "temperature_c", "rainfall_mm",
+        "chlorine_mg_l", "orp_mv", "uv_absorbance",
+        "label", "rule_description",
+    ])
+    for r in rows:
+        writer.writerow([
+            r["reading_id"], r["station_id"], r["recorded_at"],
+            r["ph"], r["turbidity_ntu"], r["temperature_c"], r["rainfall_mm"],
+            r["chlorine_mg_l"], r["orp_mv"], r["uv_absorbance"],
+            r["label"], r["rule_description"],
+        ])
+
+    return Response(
+        buf.getvalue(),
+        mimetype="text/csv",
+        headers={
+            "Content-Disposition": (
+                f'attachment; filename="report-{report_id}-labelled-readings.csv"'
+            ),
+        },
+    )
+
+
+@app.get("/medical/reports/<int:report_id>/labelled-readings.csv")
+@role_required("medical")
+def medical_labelled_readings_csv(report_id: int):
+    return _labelled_readings_csv(report_id)
+
+
+@app.get("/dashboard/reports/<int:report_id>/labelled-readings.csv")
+@role_required("government")
+def dashboard_labelled_readings_csv(report_id: int):
+    return _labelled_readings_csv(report_id)
+
+
+@app.get("/medical/reports/<int:report_id>")
+@role_required("medical")
+def medical_report_detail(report_id: int):
+    with connection() as conn:
+        row = conn.execute(
+            text("""
+                SELECT ir.*, s.name AS station_name
+                FROM illness_reports ir
+                LEFT JOIN stations s ON s.station_id = ir.station_id
+                WHERE ir.report_id = :rid
+            """),
+            {"rid": report_id},
+        ).mappings().first()
+        if row is None:
+            abort(404)
+        labelled_summary = _labelled_readings_summary(conn, report_id)
+    tier_block = _resolve_tier(dict(row))
+    try:
+        symptoms_list = json.loads(row["symptoms"] or "[]")
+    except (json.JSONDecodeError, TypeError):
+        symptoms_list = []
+    symptoms_display = ", ".join(symptoms_list) if symptoms_list else "—"
+    return render_template(
+        "medical_report_detail.html",
+        report=row,
+        symptoms_display=symptoms_display,
+        labelled_summary=labelled_summary,
+        **tier_block,
+    )
+
+
+if __name__ == "__main__":
+    host = os.environ.get("FLASK_HOST", "0.0.0.0")
+    port = int(os.environ.get("FLASK_PORT", "5000"))
+    debug = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
+    app.run(host=host, port=port, debug=debug)

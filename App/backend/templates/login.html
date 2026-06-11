@@ -1,0 +1,45 @@
+{% extends "_base.html" %}
+
+{% block title %}{{ _("Sign in") }} — {{ _("Water-safety pipeline") }}{% endblock %}
+
+{% block body_class %}app-login{% endblock %}
+
+{# Front page intentionally skips the machine-translated draft banner —
+   no clinical content here, so the warning is irrelevant. #}
+{% block unverified_banner %}{% endblock %}
+
+{# Login also skips the cholera disclaimer — it's a public sign-in page. #}
+{% block disclaimer %}{% endblock %}
+
+{% block content %}
+<div class="login-body">
+    <div class="login-card">
+        <span class="brand-mark">
+            <img class="drop" src="{{ url_for('static', filename='aqua_solutions_drop.png') }}" alt="">
+            <span class="wordmark"><span class="aqua">AQUA</span> <span class="solutions">SOLUTIONS</span></span>
+        </span>
+        <h3>{{ _("Water-safety pipeline") }}</h3>
+        {# TRANSLATORS: tagline under the sign-in title, from the brand. #}
+        <p class="sub">{{ _("clean water for Africa") }}</p>
+
+        {% if error %}<div class="error">{{ error }}</div>{% endif %}
+
+        <form method="POST" action="{{ url_for('login') }}">
+            <div class="field">
+                <label for="username">{{ _("Username") }}</label>
+                <input type="text" id="username" name="username" autocomplete="username" autofocus required>
+            </div>
+            <div class="field">
+                <label for="password">{{ _("Password") }}</label>
+                <input type="password" id="password" name="password" autocomplete="current-password" required>
+            </div>
+            <input type="hidden" name="next" value="{{ request.args.get('next', '') }}">
+            <button type="submit" class="btn btn-block">{{ _("Sign in") }}</button>
+        </form>
+
+        <div class="footer">
+            {{ _("Sign in as a government official to view the station-status dashboard, or as a medical professional to file an illness report.") }}
+        </div>
+    </div>
+</div>
+{% endblock %}
