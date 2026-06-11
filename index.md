@@ -92,7 +92,7 @@ After some further research into the digital healthcare situation in Zimbabwe an
 
 To access the webpage, you need to have an application called Docker installed. Once this is open on your computer, follow these steps to access and edit the webpage. The relationship between different applications and data elements may require some research beforehand to understand the DHIS2 software. 
 
-1. 1. Get the repo. In your terminal, run the following: 
+1. Get the repo. In your terminal, run the following: 
 
 git clone git@github.com:tristanjfmartin/GM2_Aqua_Solutions.git
 
