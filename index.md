@@ -76,13 +76,23 @@ The medical dashboard illustrates a map of Harare and all of the simulated boreh
 
 ### DHIS2 Webpage
 
-After some further research into the digital healthcare situation in Zimbabwe and feedback from both GM2 supervisors and Mr.Chafa, we developed a second version of the UI. We focused on improving the visibility. How can we use the space more efficiently to communicate key health and water quality metrics? 
->>>>>>> 975d51449f829a2727bdebd7dc9bf04d5d5e7e6d
+After some further research into the digital healthcare situation in Zimbabwe and feedback from both GM2 supervisors and Mr.Chafa, we developed a second version of the UI. We focused on improving the visibility and usability. How can we use the space more efficiently to communicate key health and water quality metrics? Can we route VHWs directly to the medical form to reduce friction in the UX? How can we make the UI more engaging?
+
+**Government Dashboard:**
+<img width="880" height="326" alt="image" src="https://github.com/user-attachments/assets/ba2532a8-0a59-43ed-acf8-705e2a3d5392" />
+**Medical Dashboard:**
+<img width="880" height="338" alt="image" src="https://github.com/user-attachments/assets/a9dbdf0b-e96f-472a-80e9-17c227d891ef" />
+
 
 
 
 # SDG and UNICEF Digital Design Principles Reflection
 This project addresses the fundamental issue of access to safe water faced in many developing countries, and therefore looks to tackle **SDG 6**; Clean Water and Sanitation. The target location was Harare, Zimbabwe but the principles and methods in this project are directly applicable to many places that rely on unreliable borehole-sourced water. While odour, taste and sufficient quantities of water are a concern, the primary issue is water-borne diseases. Reliable, fast and robust detection of water safety is essential to preventing the spread of illness and preserving the health of the people that rely on these boreholes (**SDG 3** - Good Health and Well-Being). In developing countries, illness has a wider impact than in wealthier economies as civilians lack the same medical infrastructure and financial support, resulting in the devastation of livelihoods and increasing existing inequalities (**SDG 10** - Reduced Inequality).
+
+<img width="220" height="220" alt="image" src="https://github.com/user-attachments/assets/f075b068-3604-4ae2-9341-64faed109752" />
+<img width="220" height="220" alt="image" src="https://github.com/user-attachments/assets/497b2c63-0f8d-4047-8e37-fc4b1917609c" />
+<img width="220" height="220" alt="image" src="https://github.com/user-attachments/assets/783760bf-01f3-4eea-ad90-c201f6b6e62d" />
+<img width="220" height="220" alt="image" src="https://github.com/user-attachments/assets/ce9bfa27-f7ec-4e1f-81fe-bd9a1cba5314" />
 
 Our solution involved developing a sensor-based approach data collection and labelling system through community-illness reports to train an edge-ML algorithm for potability prediction (**SDG 9** - Industry, Innovation and Infrastructure). Given the digital nature of the solution, UNICEF's principles for **Digital Development** were central to our approach. In order to **understand the ecosystem**, we had regular meetings with Allen (**Design with people**) to discuss the setbacks and weaknesses of his initial design and to receive feedback on our proposed solutions. He informed us of the current water situation in Harare and we adjusted our solutions appropriately. We adapted to the infrastructure realities and explored system architecture options, particularly whether our device would function at the house or village level, and reporting mechanism alternatives, settling for a combination of SMS and a web interface. We explored the health and medical procedures currently used in Zimbabwe and were able to integrate our interface with DHIS2, a leading medical data management system in Zimbabwe. Our proposal requires participation from Village Health Workers with whom we will look to form future partnerships to enable a solution and acquire further feedback during field implementation (**SDG 17** - Partnerships for the goals).
 
