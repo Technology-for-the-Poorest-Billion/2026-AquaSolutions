@@ -1,3 +1,3 @@
 # Admin
 
-This folder contains planning, handover, and Git documents. 
+This folder contains our presentations, planning, handover, and Git documents. 
