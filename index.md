@@ -52,4 +52,20 @@ Model exported to C via m2cgen for offline inference on the sensor node
 
 ![C tree](www/C tree.png)
 
-### Dashboard
+### Dashboard (Version 1)
+
+The UI, composed of two dashboards for each of the governance and medical side of the healthcare system, went through two iterations. The first was developed using HTML. Screenshots of the dashboard are presented below, but it can also be accessed [here](gm2aquasolutions-production-aff9.up.railway.app). 
+
+**Government Dashboard:**
+<img width="880" height="380" alt="image" src="https://github.com/user-attachments/assets/4158ff1c-a6cd-4e46-bff4-1bfdf820b0dd" />
+
+The government dashboard provides users with the opportunity to see the live water quality data which was simulated using [simulation.py](App/dhis2/etl/simulate.py) at each borehole. Each of these, based on previous medical reports, is also labelled as safe or unsafe using the green or red status pill. There are a few fake buttons for sending teams to collect a lab sample or shut down the borehole. These buttons are not functional, but were used as demonstrations of what could be done if the system were integrated into a multi-departmental organisation. On the right hand side, the history of medical reports and SMS notifications at various boreholes are summarised. Each of these contains a mini dataset obtained at the time of the event, but which has not yet been through our proposed labelling pipeline. 
+
+**Medical Dashboard:**
+<img width="880" height="313" alt="image" src="https://github.com/user-attachments/assets/eec7f260-233c-484d-99c0-6f78ea510210" />
+
+The medical dashboard illustrates a map of Harare and all of the simulated boreholes we have placed throughout the city. Each one is weighted, both in size and opacity, by the number of illness reports at each of these locations. A tab offers the opportunity to fill out a health form, and a summary of the previous reports is located at the bottom of the dashboard. 
+
+### DHIS2 Webpage
+
+After some further research into the digital healthcare situation in Zimbabwe and feedback from both GM2 supervisors and Mr.Chafa, we developed a second version of the UI. We focused on improving the visibility. How can we use the space more efficiently to communicate key health and water quality metrics? 
