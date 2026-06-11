@@ -13,16 +13,13 @@ This repository was created by Aidan O'Donnell (ao565) and Tristan Martin (tjfm4
   - ML: All machine learning work. Includes XGBoost and logistic regression analyses on existing datasets and a complete XGBoost pipeline, (Compressed Bootstrap) ready to train on real sensor and illness-report data once it is collected, with a synthetic data placeholder.
   - Labelling: Logic for converting illness reports into confidence-weighted training labels. 
   - plan.md: Decisions on which datasets to analyse and why.
-- Research: Documents, papers, and case studies used to understand current ML techniques for water quality tasks and the digital healthcare systems in place in Zimbabwe. 
+- Research: Documents, papers, and case studies used to understand current ML techniques for water quality tasks and the digital healthcare systems in place in Zimbabwe.
 
 ## Allen Chafa: 
 https://reports.raeng.org.uk/africa-prize-2023-interactive-showcase/allen-chafa.html
 
-## GM2 Deadlines: 
-- Thursday, 21 May (11 AM, LR12): Project Proposal Presentation.
-- Thursday, 28 May - Friday, 29 May: One to one meetings with project leader to discuss teamwork.
-- Monday, 1 June (JDB Teaching Room): Interim Presentations.
-- Thursday, 11 June (4 PM): Project Output Submission.
+## Deliverables: 
+- [Final Pre-Recorded Video Presentation](Final Presentation.mp4)
 
 ## Risk Assessment: 
 Over the four weeks the students worked on this project, they used a variety of software approaches. Therefore, there was very little risk involved, unlike for other groups which were using machining equipment. While it is the hope that future students will work on the microcontroller that forms the physical device for data collection, this was outside of the scope of the four weeks dedicated to this project. Nonetheless, a risk assessment was submitted through the CUED Power App for soldering.
