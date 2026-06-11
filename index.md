@@ -84,7 +84,20 @@ After some further research into the digital healthcare situation in Zimbabwe an
 **Medical Dashboard:**
 <img width="880" height="338" alt="image" src="https://github.com/user-attachments/assets/a9dbdf0b-e96f-472a-80e9-17c227d891ef" />
 
-Tbe DHIS2 open-source software was chosen due to its documented case studies across developing countries. Many VHWs have already been trained to use it, making it very compatible with the local digital ecosystem in Harare. To configure the dashboard, we used the Maintenance, User, Data Visualisation, and Map Apps. The changes we made relative to Version 1 presented the data in a more space efficient, impactful manner in order to draw the attention of decision-makers towards certain key metrics. However, other features such as SMS compatability still need to be integrated into the new webpage. 
+Tbe DHIS2 open-source software was chosen due to its documented case studies across developing countries. Many VHWs have already been trained to use it, making it very compatible with the local digital ecosystem in Harare. To configure the dashboard, we used the Maintenance, User, Data Visualisation, and Map Apps. The changes we made relative to Version 1 presented the data in a more space efficient, impactful manner in order to draw the attention of decision-makers towards certain key metrics. However, other features such as SMS compatability still need to be integrated into the new webpage. To access the webpage, you need to have an application called Docker installed. Once this is open on your computer, follow these steps to access and edit the webpage. The relationship between different applications and data elements may require some research beforehand to understand the DHIS2 software. 
+
+1. 1. Get the repo. In your terminal, run the following: 
+
+git clone git@github.com:tristanjfmartin/GM2_Aqua_Solutions.git
+
+cd GM2_Aqua_Solutions/App/dhis2
+
+2. Start DHIS2. 
+
+docker compose up -d
+
+3. The demo may take a minute to load so be patient before troubleshooting. 
+4. Pull up the demo. Go to http://localhost:8080. Use the login admin, district. 
 
 # SDG and UNICEF Digital Design Principles Reflection
 This project addresses the fundamental issue of access to safe water faced in many developing countries, and therefore looks to tackle **SDG 6**; Clean Water and Sanitation. The target location was Harare, Zimbabwe but the principles and methods in this project are directly applicable to many places that rely on unreliable borehole-sourced water. While odour, taste and sufficient quantities of water are a concern, the primary issue is water-borne diseases. Reliable, fast and robust detection of water safety is essential to preventing the spread of illness and preserving the health of the people that rely on these boreholes (**SDG 3** - Good Health and Well-Being). In developing countries, illness has a wider impact than in wealthier economies as civilians lack the same medical infrastructure and financial support, resulting in the devastation of livelihoods and increasing existing inequalities (**SDG 10** - Reduced Inequality).
