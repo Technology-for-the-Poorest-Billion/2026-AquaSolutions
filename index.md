@@ -18,7 +18,7 @@ The issues he had with his initial trial included:
 
  Informed by a literature review, data analysis and Allen Chafa's challenges with his first trial, we designed and began implementing a system architecture.
 
-![System Architecture](image-2.png)
+![System Architecture](www/System Architecture.png)
 
 Decision Justification
 
@@ -34,7 +34,7 @@ Decision Justification
 
 ### Labelling logic
 
-![Labelling logic](image-1.png)
+![Labelling logic](www/Label Logic.png)
 
 Design Justification
 
@@ -48,6 +48,6 @@ Design Justification
 
 ### ML pipeline
 
-![alt text](image-3.png)
+![C tree](www/C tree.png)
 
 ### Dashboard
