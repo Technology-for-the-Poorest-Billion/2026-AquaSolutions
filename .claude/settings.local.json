@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(python -c ' *)"
+      "Bash(python -c ' *)",
+      "Bash(ls -la data/)",
+      "Bash(find /Users/tristanmartin/Desktop/GM2/GM2_Aqua_Solutions -type f \\\\\\( -name \"*.db\" -o -name \"*.sqlite\" -o -name \"*.sqlite3\" \\\\\\) -not -path \"*/.venv/*\")"
     ]
   }
 }
