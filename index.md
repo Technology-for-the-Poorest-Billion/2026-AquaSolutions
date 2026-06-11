@@ -53,7 +53,7 @@ XGBoost pipeline trained on synthetic data, ready to retrain when field data acc
 
 The confusion matrix (left) shows the model's predictions against the true labels for each reading in the test set. The most important cell is bottom left. A missed risk means contaminated water goes unflagged without triggering an alert. The goal is to minimise this number as much as possible. The SHAP feature analysis (right) indicates how much each metric influenced the prediction of risk (positive indicates pushed towards).
 
-Model exported to C via m2cgen for offline inference on the sensor node. Below is one tree (of 100), it can be easily followed through a simple if not else structure:
+Model exported to C via m2cgen for offline inference on the sensor node. Below is one tree (of 100), it can be easily followed through a simple if/else structure:
 
 <div style="text-align:center">
   <img src="www/C tree.png" width="500">
