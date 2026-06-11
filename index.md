@@ -1,8 +1,6 @@
-##Problem Specification: ​
+## Problem Specification: ​
 
-80% of water consumption in Harare, Zimbabwe is from unregulated boreholes.​ Faecal contamination leads to waterborne disease outbreaks.
-
-Allen's initial design involved a multi-sensor proxy based methods for detecting water contamination, a gap in the research space with lots of potential as ML methods rapidly improve.
+80% of water consumption in Harare, Zimbabwe is from unregulated boreholes.​ Faecal contamination leads to waterborne disease outbreaks Allen's initial design involved a multi-sensor proxy based methods for detecting water contamination, a gap in the research space with lots of potential as ML methods rapidly improve.
 
 The issues he had with his initial trial included:
 - The fuzzy logic algorithm used collapsed on single sensor failure.
@@ -16,24 +14,40 @@ The issues he had with his initial trial included:
 
 
 
-##Our Solution: A report-labelled water safety pipeline
+## Our Solution: A report-labelled water safety pipeline
 
  Informed by a literature review, data analysis and Allen Chafa's challenges with his first trial, we designed and began implementing a system architecture.
 
- ![System Architecture](image.png)
+![System Architecture](image-2.png)
 
 Decision Justification
 
-SMS - 
+- DHIS2 Dashboard - 
 
-XGBoost Classifier - Capable of detecting complex, non-linear relationships between readings and water potability while natively handling missing data and sensor drift. Importantly, it is also compressable to a file size within the memory capacities of simple microcontrollers, including an Arduino.
+- SMS - 
 
-##Technical summary
+- XGBoost Classifier - Capable of detecting complex, non-linear relationships between readings and water potability while natively handling missing data and sensor drift. Importantly, it is also compressable to a file size within the memory capacities of simple microcontrollers, including an Arduino.
 
-###Labelling logic
+
+
+## Technical summary
+
+### Labelling logic
 
 ![Labelling logic](image-1.png)
 
-###ML pipeline
+Design Justification
 
-###Dashboard
+- 7 day window - WHO Cholera incubation up to 5 days. Adding a 2 day reporting window, gives a 7 day rolling window.
+- Discrete confidence tiers (thresholds are arbitrary and need calibration as data comes in)
+    * Transparent and easy to update as understanding improves.
+    * Sustained reporting, increases contamination likelihood. ​
+    * No reports ≠ safe water. Low weighting used. ​
+    * The 0.5 safe threshold is designed to filter out background illness reports.
+- Logarithmic decay - Most cases present within 48 hours, so recent reports should carry more weight than older ones.
+
+### ML pipeline
+
+![alt text](image-3.png)
+
+### Dashboard
