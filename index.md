@@ -47,8 +47,8 @@ Design Justification
 XGBoost pipeline trained on synthetic data, ready to retrain when field data accumulates​. Easily understandable performance evaluation metrics are built in, including a Classification report, Confusion matrix, ROC Curve, AUC Score and SHAP Feature analysis. Each has a non-technical user friendly explanation attached. Note that the classifier carries out near perfect classification on the synthetic test set but this does not completely reflect its ability to cope with real data, except for validating that XGBoost is capable of detecting non-linear trends.
 
 <div style="display:flex; gap:20px">
-  <img src="www/Confusion.png" width="45%">
-  <img src="www/SHAP.png" width="45%">
+  <img src="www/Confusion.png" width="25%">
+  <img src="www/SHAP.png" width="65%">
 </div>
 
 The confusion matrix (left) shows the model's predictions against the true labels for each reading in the test set. The most important cell is bottom left. A missed risk means contaminated water goes unflagged without triggering an alert. The goal is to minimise this number as much as possible. The SHAP feature analysis (right) indicates how much each metric influenced the prediction of risk (positive indicates pushed towards).
