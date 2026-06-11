@@ -9,11 +9,6 @@ The issues he had with his initial trial included:
     * Too much is toxic.​
     * Too little is ineffective.​
 
-
-
-
-
-
 ## Our Solution: A report-labelled water safety pipeline
 
  Informed by a literature review, data analysis and Allen Chafa's challenges with his first trial, we designed and began implementing a system architecture.
@@ -23,11 +18,13 @@ The issues he had with his initial trial included:
 Decision Justification
 
 - DHIS2 Dashboard - 
+    * Widely used, tried and tested​
+    * Many VHWs already trained to use it​
+    * Incorporates SMS capabilities and offline use 
 
-- SMS - 
+- SMS - anyone can report without visiting a clinic or using a smartphone
 
 - XGBoost Classifier - Capable of detecting complex, non-linear relationships between readings and water potability while natively handling missing data and sensor drift. Importantly, it is also compressable to a file size within the memory capacities of simple microcontrollers, including an Arduino.
-
 
 
 ## Technical summary
@@ -47,6 +44,11 @@ Design Justification
 - Logarithmic decay - Most cases present within 48 hours, so recent reports should carry more weight than older ones.
 
 ### ML pipeline
+XGBoost pipeline trained on synthetic data, ready to retrain when field data accumulates​. Easilt understandable performance evaluation metrics built in.
+
+![C tree](www/C tree.png)
+
+Model exported to C via m2cgen for offline inference on the sensor node
 
 ![C tree](www/C tree.png)
 
