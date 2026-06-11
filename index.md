@@ -52,7 +52,7 @@ The confusion matrix shows the model's predictions against the true labels for e
 
 ![SHAP](www/SHAP.png)
 
-Model exported to C via m2cgen for offline inference on the sensor node. Below is one tree (of 100):
+Model exported to C via m2cgen for offline inference on the sensor node. Below is one tree (of 100), it can be easily followed through a simple if not else structure:
 
 ![C tree](www/C tree.png)
 
