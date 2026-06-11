@@ -5,11 +5,11 @@
 Allen's initial design involved a multi-sensor proxy based methods for detecting water contamination, a gap in the research space with lots of potential as ML methods rapidly improve.
 
 The issues he had with his initial trial included:
-The fuzzy logic algorithm used collapsed on single sensor failure.
-The chosen proxies were insufficient to predict contamination.​
-Chlorine dosing is a high stakes output:​
-    Too much is toxic.​
-    Too little is ineffective.​
+- The fuzzy logic algorithm used collapsed on single sensor failure.
+- The chosen proxies were insufficient to predict contamination.​
+- Chlorine dosing is a high stakes output:​
+    * Too much is toxic.​
+    * Too little is ineffective.​
 
 
 
@@ -29,3 +29,11 @@ SMS -
 XGBoost Classifier - Capable of detecting complex, non-linear relationships between readings and water potability while natively handling missing data and sensor drift. Importantly, it is also compressable to a file size within the memory capacities of simple microcontrollers, including an Arduino.
 
 ##Technical summary
+
+###Labelling logic
+
+![Labelling logic](image-1.png)
+
+###ML pipeline
+
+###Dashboard
