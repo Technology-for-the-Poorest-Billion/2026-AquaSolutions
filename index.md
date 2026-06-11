@@ -80,6 +80,7 @@ After some further research into the digital healthcare situation in Zimbabwe an
 
 **Government Dashboard:**
 <img width="880" height="326" alt="image" src="https://github.com/user-attachments/assets/ba2532a8-0a59-43ed-acf8-705e2a3d5392" />
+
 **Medical Dashboard:**
 <img width="880" height="338" alt="image" src="https://github.com/user-attachments/assets/a9dbdf0b-e96f-472a-80e9-17c227d891ef" />
 
